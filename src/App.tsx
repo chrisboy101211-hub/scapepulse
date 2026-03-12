@@ -4,6 +4,18 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
+import Login from "./pages/Login.tsx";
+import Register from "./pages/Register.tsx";
+import DashboardLayout from "./layouts/DashboardLayout.tsx";
+import Overview from "./pages/dashboard/Overview.tsx";
+import Servers from "./pages/dashboard/Servers.tsx";
+import Products from "./pages/dashboard/Products.tsx";
+import Categories from "./pages/dashboard/Categories.tsx";
+import Orders from "./pages/dashboard/Orders.tsx";
+import Votes from "./pages/dashboard/Votes.tsx";
+import ApiKeys from "./pages/dashboard/ApiKeys.tsx";
+import Settings from "./pages/dashboard/Settings.tsx";
+import StoreFront from "./pages/StoreFront.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -16,7 +28,19 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<Overview />} />
+            <Route path="servers" element={<Servers />} />
+            <Route path="products" element={<Products />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="votes" element={<Votes />} />
+            <Route path="api" element={<ApiKeys />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+          <Route path="/store/:slug" element={<StoreFront />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
