@@ -1,0 +1,200 @@
+import { useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { mockProducts, mockCategories, mockServers } from "@/lib/mock-data";
+import { ShoppingCart, Gamepad2, X, Plus, Minus } from "lucide-react";
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface CartItem {
+  product: typeof mockProducts[0];
+  quantity: number;
+}
+
+const StoreFront = () => {
+  const { slug } = useParams();
+  const server = mockServers.find((s) => s.slug === slug) ?? mockServers[0];
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cartOpen, setCartOpen] = useState(false);
+
+  const filteredProducts = selectedCategory
+    ? mockProducts.filter((p) => p.category_id === selectedCategory)
+    : mockProducts;
+
+  const addToCart = (product: typeof mockProducts[0]) => {
+    setCart((prev) => {
+      const existing = prev.find((i) => i.product.id === product.id);
+      if (existing) return prev.map((i) => i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i);
+      return [...prev, { product, quantity: 1 }];
+    });
+    toast.success(`${product.name} added to cart`);
+  };
+
+  const removeFromCart = (productId: string) => setCart((prev) => prev.filter((i) => i.product.id !== productId));
+  const updateQuantity = (productId: string, delta: number) => {
+    setCart((prev) => prev.map((i) => {
+      if (i.product.id !== productId) return i;
+      const newQty = i.quantity + delta;
+      return newQty <= 0 ? i : { ...i, quantity: newQty };
+    }));
+  };
+
+  const cartTotal = cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+  const cartCount = cart.reduce((sum, i) => sum + i.quantity, 0);
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Store Nav */}
+      <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
+        <div className="container mx-auto flex h-14 items-center justify-between px-6">
+          <div className="flex items-center gap-3">
+            <Gamepad2 className="h-5 w-5 text-primary" />
+            <span className="font-display font-bold">{server.name}</span>
+            <span className="rounded-md bg-secondary px-2 py-0.5 text-xs uppercase text-secondary-foreground">{server.game_type}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={() => setCartOpen(true)} className="relative gap-2">
+              <ShoppingCart className="h-4 w-4" />
+              Cart
+              {cartCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  {cartCount}
+                </span>
+              )}
+            </Button>
+          </div>
+        </div>
+      </nav>
+
+      <div className="container mx-auto px-6 py-8">
+        {/* Hero */}
+        <div className="mb-8 rounded-xl border border-border bg-card p-8 text-center">
+          <h1 className="font-display text-3xl font-bold">{server.name} Store</h1>
+          <p className="mt-2 text-muted-foreground">{server.description}</p>
+          <div className="mt-3 flex items-center justify-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-neon-green animate-pulse-glow" />
+            <span className="text-sm text-neon-green">{server.players_online} players online</span>
+          </div>
+        </div>
+
+        {/* Categories */}
+        <div className="mb-6 flex flex-wrap gap-2">
+          <Button
+            variant={selectedCategory === null ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectedCategory(null)}
+          >
+            All
+          </Button>
+          {mockCategories.map((cat) => (
+            <Button
+              key={cat.id}
+              variant={selectedCategory === cat.id ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedCategory(cat.id)}
+            >
+              {cat.name}
+            </Button>
+          ))}
+        </div>
+
+        {/* Products Grid */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredProducts.map((product) => (
+            <motion.div
+              key={product.id}
+              layout
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="group rounded-lg border border-border bg-card p-5 transition-all hover:border-primary/30 hover:shadow-[0_0_25px_hsl(var(--primary)/0.08)]"
+            >
+              <div className="mb-3 text-center text-4xl">{product.image}</div>
+              <h3 className="font-display font-semibold">{product.name}</h3>
+              <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{product.description}</p>
+              <div className="mt-4 flex items-center justify-between">
+                <span className="font-display text-xl font-bold text-primary">${product.price.toFixed(2)}</span>
+                <Button variant="hero" size="sm" onClick={() => addToCart(product)}>
+                  Add to Cart
+                </Button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Cart Drawer */}
+      <AnimatePresence>
+        {cartOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+              onClick={() => setCartOpen(false)}
+            />
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed right-0 top-0 z-50 h-full w-full max-w-md border-l border-border bg-card"
+            >
+              <div className="flex h-full flex-col">
+                <div className="flex items-center justify-between border-b border-border p-4">
+                  <h2 className="font-display text-lg font-bold">Cart ({cartCount})</h2>
+                  <Button variant="ghost" size="icon" onClick={() => setCartOpen(false)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="flex-1 overflow-auto p-4 space-y-3">
+                  {cart.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-12">Your cart is empty</p>
+                  ) : (
+                    cart.map((item) => (
+                      <div key={item.product.id} className="flex items-center gap-3 rounded-lg border border-border p-3">
+                        <span className="text-2xl">{item.product.image}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{item.product.name}</p>
+                          <p className="text-xs text-muted-foreground">${item.product.price.toFixed(2)}</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.product.id, -1)}>
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <span className="w-6 text-center text-sm">{item.quantity}</span>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.product.id, 1)}>
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeFromCart(item.product.id)}>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {cart.length > 0 && (
+                  <div className="border-t border-border p-4 space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="font-display font-bold">${cartTotal.toFixed(2)}</span>
+                    </div>
+                    <Button variant="hero" className="w-full" onClick={() => toast.success("Checkout coming soon!")}>
+                      Checkout — ${cartTotal.toFixed(2)}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default StoreFront;
