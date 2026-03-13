@@ -3,8 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Gamepad2, ArrowRight } from "lucide-react";
+import { Gamepad2, ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,18 +13,26 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) {
       toast.error("Please fill in all fields");
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
       toast.success("Welcome back!");
       navigate("/dashboard");
-    }, 800);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to sign in");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,7 +74,7 @@ const Login = () => {
             />
           </div>
           <Button type="submit" variant="hero" className="w-full gap-2" disabled={loading}>
-            {loading ? "Signing in..." : "Sign In"} <ArrowRight className="h-4 w-4" />
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign In"} <ArrowRight className="h-4 w-4" />
           </Button>
         </form>
 

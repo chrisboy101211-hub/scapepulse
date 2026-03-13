@@ -1,10 +1,53 @@
-import { DollarSign, ShoppingCart, Vote, Package } from "lucide-react";
+import { useEffect, useState } from "react";
+import { DollarSign, ShoppingCart, Vote, Package, Loader2 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import StatCard from "@/components/StatCard";
-import { mockDashboardStats, revenueChartData, mockOrders } from "@/lib/mock-data";
+import { dataService } from "@/lib/data";
+import type { DashboardStats, Order } from "@/lib/mock-data";
 
 const Overview = () => {
-  const stats = mockDashboardStats;
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [statsData, ordersData] = await Promise.all([
+        dataService.getDashboardStats(),
+        dataService.getOrders()
+      ]);
+      setStats(statsData);
+      setOrders(ordersData);
+    } catch (error) {
+      console.error("Failed to load dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const chartData = [
+    { name: "Mon", revenue: 120 },
+    { name: "Tue", revenue: 180 },
+    { name: "Wed", revenue: 95 },
+    { name: "Thu", revenue: 240 },
+    { name: "Fri", revenue: 310 },
+    { name: "Sat", revenue: 420 },
+    { name: "Sun", revenue: 280 },
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  const displayStats = stats || { total_revenue: 0, total_orders: 0, total_votes: 0, active_products: 0, revenue_change: 0, orders_change: 0 };
 
   return (
     <div className="space-y-6">
@@ -14,10 +57,10 @@ const Overview = () => {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard title="Total Revenue" value={`$${stats.total_revenue.toLocaleString()}`} change={stats.revenue_change} icon={DollarSign} />
-        <StatCard title="Total Orders" value={stats.total_orders.toString()} change={stats.orders_change} icon={ShoppingCart} />
-        <StatCard title="Total Votes" value={stats.total_votes.toString()} icon={Vote} />
-        <StatCard title="Active Products" value={stats.active_products.toString()} icon={Package} />
+        <StatCard title="Total Revenue" value={`$${displayStats.total_revenue.toLocaleString()}`} change={displayStats.revenue_change} icon={DollarSign} />
+        <StatCard title="Total Orders" value={displayStats.total_orders.toString()} change={displayStats.orders_change} icon={ShoppingCart} />
+        <StatCard title="Total Votes" value={displayStats.total_votes.toString()} icon={Vote} />
+        <StatCard title="Active Products" value={displayStats.active_products.toString()} icon={Package} />
       </div>
 
       {/* Revenue Chart */}
@@ -25,7 +68,7 @@ const Overview = () => {
         <h3 className="font-display text-lg font-semibold mb-4">Revenue This Week</h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={revenueChartData}>
+            <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="hsl(185 100% 50%)" stopOpacity={0.3} />
@@ -64,7 +107,7 @@ const Overview = () => {
               </tr>
             </thead>
             <tbody>
-              {mockOrders.slice(0, 5).map((order) => (
+              {orders.slice(0, 5).map((order) => (
                 <tr key={order.id} className="border-b border-border/50">
                   <td className="py-3 font-mono text-xs text-muted-foreground">{order.id}</td>
                   <td className="py-3">{order.username}</td>
@@ -78,7 +121,7 @@ const Overview = () => {
                       {order.status}
                     </span>
                   </td>
-                  <td className="py-3 text-right font-mono">${order.total.toFixed(2)}</td>
+                  <td className="py-3 text-right font-mono">${Number(order.total).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>

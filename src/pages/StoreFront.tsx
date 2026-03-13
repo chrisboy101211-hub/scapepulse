@@ -1,28 +1,73 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { mockProducts, mockCategories, mockServers } from "@/lib/mock-data";
-import { ShoppingCart, Gamepad2, X, Plus, Minus } from "lucide-react";
+import { dataService } from "@/lib/data";
+import { supabase } from "@/lib/supabase";
+import { ShoppingCart, Gamepad2, X, Plus, Minus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import type { Product, Category, Server } from "@/lib/mock-data";
 
 interface CartItem {
-  product: typeof mockProducts[0];
+  product: Product;
   quantity: number;
 }
 
 const StoreFront = () => {
   const { slug } = useParams();
-  const server = mockServers.find((s) => s.slug === slug) ?? mockServers[0];
+  const [server, setServer] = useState<Server | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
 
-  const filteredProducts = selectedCategory
-    ? mockProducts.filter((p) => p.category_id === selectedCategory)
-    : mockProducts;
+  useEffect(() => {
+    loadData();
+  }, [slug]);
 
-  const addToCart = (product: typeof mockProducts[0]) => {
+  const loadData = async () => {
+    try {
+      const [serverData, categoriesData, productsData] = await Promise.all([
+        slug ? dataService.getServerBySlug(slug!) : dataService.getServers().then(s => s[0] || null),
+        dataService.getCategories(),
+        dataService.getProducts()
+      ]);
+      setServer(serverData);
+      setCategories(categoriesData);
+      setProducts(productsData);
+    } catch (error) {
+      console.error("Failed to load store data:", error);
+    } finally {
+      setLoading(false)
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!server) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Server not found</h1>
+          <p className="text-muted-foreground mt-2">The server you're looking for doesn't exist.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const filteredProducts = selectedCategory
+    ? products.filter((p) => p.category_id === selectedCategory)
+    : products;
+
+  const addToCart = (product: Product) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.product.id === product.id);
       if (existing) return prev.map((i) => i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i);
@@ -40,7 +85,7 @@ const StoreFront = () => {
     }));
   };
 
-  const cartTotal = cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+  const cartTotal = cart.reduce((sum, i) => sum + Number(i.product.price) * i.quantity, 0);
   const cartCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
@@ -113,7 +158,7 @@ const StoreFront = () => {
               <h3 className="font-display font-semibold">{product.name}</h3>
               <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{product.description}</p>
               <div className="mt-4 flex items-center justify-between">
-                <span className="font-display text-xl font-bold text-primary">${product.price.toFixed(2)}</span>
+                <span className="font-display text-xl font-bold text-primary">${Number(product.price).toFixed(2)}</span>
                 <Button variant="hero" size="sm" onClick={() => addToCart(product)}>
                   Add to Cart
                 </Button>
@@ -158,7 +203,7 @@ const StoreFront = () => {
                         <span className="text-2xl">{item.product.image}</span>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm truncate">{item.product.name}</p>
-                          <p className="text-xs text-muted-foreground">${item.product.price.toFixed(2)}</p>
+                          <p className="text-xs text-muted-foreground">${Number(item.product.price).toFixed(2)}</p>
                         </div>
                         <div className="flex items-center gap-1">
                           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.product.id, -1)}>
@@ -183,7 +228,42 @@ const StoreFront = () => {
                       <span className="text-muted-foreground">Subtotal</span>
                       <span className="font-display font-bold">${cartTotal.toFixed(2)}</span>
                     </div>
-                    <Button variant="hero" className="w-full" onClick={() => toast.success("Checkout coming soon!")}>
+                    <Button 
+                      variant="hero" 
+                      className="w-full" 
+                      onClick={async () => {
+                        if (!server) return;
+                        const username = prompt("Enter your in-game username:");
+                        if (!username) return;
+                        
+                        try {
+                          const order = await dataService.createOrder({
+                            server_id: server.id,
+                            username,
+                            status: "pending",
+                            total: cartTotal,
+                          });
+                          
+                          for (const item of cart) {
+                            await supabase.from("order_items").insert({
+                              id: `oi-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+                              order_id: order.id,
+                              product_id: item.product.id,
+                              product_name: item.product.name,
+                              quantity: item.quantity,
+                              price: Number(item.product.price),
+                            });
+                          }
+                          
+                          toast.success(`Order #${order.id.slice(-8)} created!`);
+                          setCart([]);
+                          setCartOpen(false);
+                        } catch (error) {
+                          console.error("Order error:", error);
+                          toast.error("Failed to create order");
+                        }
+                      }}
+                    >
                       Checkout — ${cartTotal.toFixed(2)}
                     </Button>
                   </div>
