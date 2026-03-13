@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { dataService } from "@/lib/data"
 import { useAuth } from "@/lib/auth"
+import { useServers } from "@/lib/server-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -32,6 +33,7 @@ const generateSlug = (name: string) => {
 
 const Servers = () => {
   const { user } = useAuth()
+  const { setSelectedServer } = useServers()
   const [servers, setServers] = useState<Server[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -209,7 +211,10 @@ const Servers = () => {
                 <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate(`/store/${server.slug}`)}>
                   <ExternalLink className="h-3.5 w-3.5" /> View Store
                 </Button>
-                <Button variant="ghost" size="sm">Manage</Button>
+                <Button variant="hero" size="sm" onClick={() => {
+                  setSelectedServer(server)
+                  navigate("/dashboard/products")
+                }}>Manage</Button>
               </div>
             </div>
           ))}
