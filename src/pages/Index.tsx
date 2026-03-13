@@ -1,7 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Logo } from "@/components/Logo";
+import { dataService } from "@/lib/data";
 import {
   ShoppingCart,
   Vote,
@@ -69,6 +71,38 @@ const pricingPlans = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkSubdomain = async () => {
+      const hostname = window.location.hostname;
+      
+      // Skip if it's a vercel app or localhost
+      if (hostname.includes("vercel.app") || hostname === "localhost") {
+        return;
+      }
+      
+      const parts = hostname.split(".");
+      
+      // Check if this is a subdomain (not www, not the main domain itself)
+      if (parts.length >= 2) {
+        const mainDomain = parts.slice(-2).join(".");
+        
+        if (mainDomain === "scapepulse.com" && parts[0] !== "www" && parts[0] !== "scapepulse") {
+          const subdomain = parts[0];
+          
+          // Check if this server exists in our database
+          const server = await dataService.getServerBySlug(subdomain);
+          if (server) {
+            navigate(`/store/${subdomain}`);
+          }
+        }
+      }
+    };
+    
+    checkSubdomain();
+  }, [navigate]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}
