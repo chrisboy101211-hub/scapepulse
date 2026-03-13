@@ -24,7 +24,7 @@ import { toast } from "sonner"
 import type { Category } from "@/lib/mock-data"
 
 const Categories = () => {
-  const { selectedServer } = useServers()
+  const { selectedServer, servers } = useServers()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -32,6 +32,7 @@ const Categories = () => {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [formData, setFormData] = useState({
     name: "",
+    numeric_id: "",
     description: "",
     server_id: "",
     display_order: 0,
@@ -72,21 +73,21 @@ const Categories = () => {
     }
     setSubmitting(true)
     try {
+      const categoryData = {
+        name: formData.name,
+        numeric_id: formData.numeric_id ? parseInt(formData.numeric_id) : null,
+        description: formData.description,
+        display_order: formData.display_order,
+        enabled: formData.enabled,
+      }
+      
       if (editingCategory) {
-        await dataService.updateCategory(editingCategory.id, {
-          name: formData.name,
-          description: formData.description,
-          display_order: formData.display_order,
-          enabled: formData.enabled,
-        })
+        await dataService.updateCategory(editingCategory.id, categoryData)
         toast.success("Category updated!")
       } else {
         await dataService.createCategory({
-          name: formData.name,
-          description: formData.description,
+          ...categoryData,
           server_id: formData.server_id,
-          display_order: formData.display_order,
-          enabled: formData.enabled,
         })
         toast.success("Category created!")
       }
@@ -124,6 +125,7 @@ const Categories = () => {
     setEditingCategory(cat)
     setFormData({
       name: cat.name,
+      numeric_id: cat.numeric_id ? String(cat.numeric_id) : "",
       description: cat.description || "",
       server_id: cat.server_id,
       display_order: cat.display_order,
@@ -136,8 +138,9 @@ const Categories = () => {
     setEditingCategory(null)
     setFormData({
       name: "",
+      numeric_id: "",
       description: "",
-      server_id: servers[0]?.id || "",
+      server_id: selectedServer?.id || "",
       display_order: categories.length,
       enabled: true,
     })
@@ -164,14 +167,26 @@ const Categories = () => {
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Category Name *</Label>
-                <Input
-                  id="name"
-                  placeholder="e.g., Ranks, Items, Keys"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Category Name *</Label>
+                  <Input
+                    id="name"
+                    placeholder="e.g., Ranks, Items, Keys"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="numeric_id">Category ID</Label>
+                  <Input
+                    id="numeric_id"
+                    type="number"
+                    placeholder="1"
+                    value={formData.numeric_id}
+                    onChange={(e) => setFormData({ ...formData, numeric_id: e.target.value })}
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>

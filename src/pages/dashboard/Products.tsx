@@ -33,6 +33,7 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [formData, setFormData] = useState({
     name: "",
+    numeric_id: "",
     item_id: "",
     description: "",
     price: "",
@@ -85,6 +86,7 @@ const Products = () => {
       const commands = formData.commands.split("\n").filter(c => c.trim())
       const productData = {
         name: formData.name,
+        numeric_id: formData.numeric_id ? parseInt(formData.numeric_id) : null,
         item_id: formData.item_id ? parseInt(formData.item_id) : null,
         description: formData.description,
         price: parseFloat(formData.price),
@@ -137,6 +139,7 @@ const Products = () => {
     setEditingProduct(product)
     setFormData({
       name: product.name,
+      numeric_id: product.numeric_id ? String(product.numeric_id) : "",
       item_id: product.item_id ? String(product.item_id) : "",
       description: product.description || "",
       price: String(product.price),
@@ -153,6 +156,7 @@ const Products = () => {
     setEditingProduct(null)
     setFormData({
       name: "",
+      numeric_id: "",
       item_id: "",
       description: "",
       price: "",
@@ -193,11 +197,15 @@ const Products = () => {
                   <Input id="name" placeholder="VIP Rank" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="item_id">Item ID (optional)</Label>
-                  <Input id="item_id" type="number" placeholder="995" value={formData.item_id} onChange={(e) => setFormData({ ...formData, item_id: e.target.value })} />
+                  <Label htmlFor="numeric_id">Product ID *</Label>
+                  <Input id="numeric_id" type="number" placeholder="1" value={formData.numeric_id} onChange={(e) => setFormData({ ...formData, numeric_id: e.target.value })} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="item_id">Game Item ID</Label>
+                  <Input id="item_id" type="number" placeholder="995" value={formData.item_id} onChange={(e) => setFormData({ ...formData, item_id: e.target.value })} />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="price">Price *</Label>
                   <Input id="price" type="number" step="0.01" placeholder="9.99" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} />
@@ -262,6 +270,7 @@ const Products = () => {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-muted-foreground">
+                <th className="px-4 py-3 text-left font-medium">ID</th>
                 <th className="px-4 py-3 text-left font-medium">Product</th>
                 <th className="px-4 py-3 text-left font-medium">Category</th>
                 <th className="px-4 py-3 text-right font-medium">Price</th>
@@ -269,9 +278,12 @@ const Products = () => {
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
-            <tbody>
+              <tbody>
               {products.map((product) => (
                 <tr key={product.id} className="border-b border-border/50 hover:bg-secondary/30 transition-colors">
+                  <td className="px-4 py-3">
+                    <span className="font-mono text-xs bg-secondary px-2 py-1 rounded">{product.numeric_id || "-"}</span>
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">{product.image}</span>
