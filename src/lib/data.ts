@@ -316,18 +316,18 @@ export const dataService = {
 
   async seedHiscoresDefaults(serverId: string) {
     const defaultGameModes = [
-      { name: "REGULAR", display_name: "Regular", is_default: true },
-      { name: "IRONMAN", display_name: "Ironman", is_default: false },
-      { name: "ULTIMATE_IRONMAN", display_name: "Ultimate Ironman", is_default: false },
-      { name: "HCIM", display_name: "Hardcore Ironman", is_default: false },
+      { name: "REGULAR", display_name: "Regular", is_default: true, ordinal: 1 },
+      { name: "IRONMAN", display_name: "Ironman", is_default: false, ordinal: 2 },
+      { name: "ULTIMATE_IRONMAN", display_name: "Ultimate Ironman", is_default: false, ordinal: 3 },
+      { name: "HCIM", display_name: "Hardcore Ironman", is_default: false, ordinal: 4 },
     ];
 
     const defaultXpModes = [
-      { name: "NORMAL", display_name: "Normal", xp_multiplier: 1.0, is_default: true },
-      { name: "5X", display_name: "5x XP", xp_multiplier: 5.0, is_default: false },
-      { name: "10X", display_name: "10x XP", xp_multiplier: 10.0, is_default: false },
-      { name: "50X", display_name: "50x XP", xp_multiplier: 50.0, is_default: false },
-      { name: "100X", display_name: "100x XP", xp_multiplier: 100.0, is_default: false },
+      { name: "NORMAL", display_name: "Normal", xp_multiplier: 1.0, is_default: true, ordinal: 1 },
+      { name: "5X", display_name: "5x XP", xp_multiplier: 5.0, is_default: false, ordinal: 2 },
+      { name: "10X", display_name: "10x XP", xp_multiplier: 10.0, is_default: false, ordinal: 3 },
+      { name: "50X", display_name: "50x XP", xp_multiplier: 50.0, is_default: false, ordinal: 4 },
+      { name: "100X", display_name: "100x XP", xp_multiplier: 100.0, is_default: false, ordinal: 5 },
     ];
 
     const defaultSkills = [
@@ -363,6 +363,7 @@ export const dataService = {
       server_id: serverId,
       name: gm.name,
       display_name: gm.display_name,
+      ordinal: gm.ordinal,
       is_default: gm.is_default,
       enabled: true,
     }));
@@ -373,6 +374,7 @@ export const dataService = {
       name: xm.name,
       display_name: xm.display_name,
       xp_multiplier: xm.xp_multiplier,
+      ordinal: xm.ordinal,
       is_default: xm.is_default,
       enabled: true,
     }));
