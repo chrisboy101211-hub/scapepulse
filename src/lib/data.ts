@@ -226,8 +226,7 @@ export const dataService = {
       .from("hiscores_game_modes")
       .select("*")
       .eq("server_id", serverId)
-      .eq("enabled", true)
-      .order("ordinal");
+      .eq("enabled", true);
     if (error) throw error;
     return data || [];
   },
@@ -237,8 +236,7 @@ export const dataService = {
       .from("hiscores_xp_modes")
       .select("*")
       .eq("server_id", serverId)
-      .eq("enabled", true)
-      .order("ordinal");
+      .eq("enabled", true);
     if (error) throw error;
     return data || [];
   },
