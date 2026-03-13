@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
-import { Plus, ExternalLink, Globe, Users, Loader2, Eye, EyeOff, RefreshCw, Gamepad2 } from "lucide-react"
+import { Plus, ExternalLink, Globe, Users, Loader2, Eye, EyeOff, RefreshCw, Gamepad2, Trash2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import type { Server } from "@/lib/mock-data"
@@ -129,6 +129,19 @@ const Servers = () => {
       loadServers()
     } catch (error: any) {
       toast.error(error.message || "Failed to update server status")
+    }
+  }
+
+  const deleteServer = async (server: Server) => {
+    if (!confirm(`Are you sure you want to delete "${server.name}"? This action cannot be undone.`)) {
+      return
+    }
+    try {
+      await dataService.deleteServer(server.id)
+      toast.success("Server deleted")
+      loadServers()
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete server")
     }
   }
 
@@ -277,18 +290,24 @@ const Servers = () => {
                     </div>
                   </div>
                   
-                  <div className="w-32 border-l border-border flex flex-col items-center justify-center gap-4 bg-muted/30 p-4">
+                  <div className="w-32 border-l border-border flex flex-col items-center justify-center gap-3 bg-muted/30 p-4">
                     <div className="text-center">
                       <Users className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
                       <span className="text-2xl font-bold">{server.players_online}</span>
                       <p className="text-xs text-muted-foreground">Online</p>
                     </div>
-                    <Button variant="hero" size="sm" onClick={() => {
-                      setSelectedServer(server)
-                      navigate("/dashboard/products")
-                    }}>
-                      Manage
-                    </Button>
+                    <div className="flex flex-col gap-2 w-full">
+                      <Button variant="hero" size="sm" className="w-full" onClick={() => {
+                        setSelectedServer(server)
+                        navigate("/dashboard/products")
+                      }}>
+                        Manage
+                      </Button>
+                      <Button variant="destructive" size="sm" className="w-full" onClick={() => deleteServer(server)}>
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
