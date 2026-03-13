@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
       console.error("Failed to create pending transaction:", txnError);
     }
 
-    const baseUrl = Deno.env.get("BASE_URL") || "https://scapepulse.com";
+    const baseUrl = Deno.env.get("BASE_URL") || "https://server-loot-forge.vercel.app";
     const redirectUrl = `${baseUrl}/checkout/${transactionId}?username=${encodeURIComponent(username)}`;
 
     return new Response(

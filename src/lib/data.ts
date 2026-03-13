@@ -219,5 +219,98 @@ export const dataService = {
       .single();
     if (error) return null;
     return data;
+  },
+
+  async getHiscoresGameModes(serverId: string) {
+    const { data, error } = await supabase
+      .from("hiscores_game_modes")
+      .select("*")
+      .eq("server_id", serverId)
+      .eq("enabled", true)
+      .order("ordinal");
+    if (error) throw error;
+    return data || [];
+  },
+
+  async getHiscoresXpModes(serverId: string) {
+    const { data, error } = await supabase
+      .from("hiscores_xp_modes")
+      .select("*")
+      .eq("server_id", serverId)
+      .eq("enabled", true)
+      .order("ordinal");
+    if (error) throw error;
+    return data || [];
+  },
+
+  async getHiscoresSkills(serverId: string) {
+    const { data, error } = await supabase
+      .from("hiscores_skills")
+      .select("*")
+      .eq("server_id", serverId)
+      .eq("enabled", true)
+      .order("ordinal");
+    if (error) throw error;
+    return data || [];
+  },
+
+  async createHiscoresGameMode(mode: { server_id: string; name: string; display_name: string; is_default?: boolean }) {
+    const id = `gm-${Date.now()}`;
+    const { data, error } = await supabase.from("hiscores_game_modes").insert({ ...mode, id }).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateHiscoresGameMode(id: string, updates: { display_name?: string; is_default?: boolean; enabled?: boolean }) {
+    const { data, error } = await supabase.from("hiscores_game_modes").update(updates).eq("id", id).select();
+    if (error) throw error;
+    return data?.[0] || null;
+  },
+
+  async deleteHiscoresGameMode(id: string) {
+    const { error } = await supabase.from("hiscores_game_modes").delete().eq("id", id);
+    if (error) throw error;
+  },
+
+  async createHiscoresXpMode(mode: { server_id: string; name: string; display_name: string; xp_multiplier: number; is_default?: boolean }) {
+    const id = `xm-${Date.now()}`;
+    const { data, error } = await supabase.from("hiscores_xp_modes").insert({ ...mode, id }).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateHiscoresXpMode(id: string, updates: { display_name?: string; xp_multiplier?: number; is_default?: boolean; enabled?: boolean }) {
+    const { data, error } = await supabase.from("hiscores_xp_modes").update(updates).eq("id", id).select();
+    if (error) throw error;
+    return data?.[0] || null;
+  },
+
+  async deleteHiscoresXpMode(id: string) {
+    const { error } = await supabase.from("hiscores_xp_modes").delete().eq("id", id);
+    if (error) throw error;
+  },
+
+  async createHiscoresSkill(skill: { server_id: string; name: string; display_name: string; icon_url?: string; ordinal: number }) {
+    const id = `sk-${Date.now()}`;
+    const { data, error } = await supabase.from("hiscores_skills").insert({ ...skill, id, enabled: true }).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateHiscoresSkill(id: string, updates: { display_name?: string; icon_url?: string; ordinal?: number; enabled?: boolean }) {
+    const { data, error } = await supabase.from("hiscores_skills").update(updates).eq("id", id).select();
+    if (error) throw error;
+    return data?.[0] || null;
+  },
+
+  async deleteHiscoresSkill(id: string) {
+    const { error } = await supabase.from("hiscores_skills").delete().eq("id", id);
+    if (error) throw error;
+  },
+
+  async toggleServerHiscores(serverId: string, enabled: boolean) {
+    const { data, error } = await supabase.from("servers").update({ hiscores_enabled: enabled }).eq("id", serverId).select();
+    if (error) throw error;
+    return data?.[0] || null;
   }
 };

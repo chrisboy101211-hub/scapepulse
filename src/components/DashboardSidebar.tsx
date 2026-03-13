@@ -8,6 +8,7 @@ import {
   Key,
   Settings,
   LogOut,
+  Trophy,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Logo } from "@/components/Logo";
@@ -39,6 +40,7 @@ const storeItems = [
 
 const systemItems = [
   { title: "Votes", url: "/dashboard/votes", icon: Vote },
+  { title: "Hiscores", url: "/dashboard/hiscores-settings", icon: Trophy },
   { title: "API Keys", url: "/dashboard/api", icon: Key },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];

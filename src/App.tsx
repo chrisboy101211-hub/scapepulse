@@ -17,6 +17,7 @@ import Orders from "./pages/dashboard/Orders.tsx";
 import Votes from "./pages/dashboard/Votes.tsx";
 import ApiKeys from "./pages/dashboard/ApiKeys.tsx";
 import Settings from "./pages/dashboard/Settings.tsx";
+import HiscoresSettings from "./pages/dashboard/HiscoresSettings.tsx";
 import StoreFront from "./pages/StoreFront.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Docs from "./pages/Docs.tsx";
@@ -71,6 +72,7 @@ const App = () => (
               <Route path="votes" element={<Votes />} />
               <Route path="api" element={<ApiKeys />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="hiscores-settings" element={<HiscoresSettings />} />
             </Route>
             <Route path="/store/:slug" element={<StoreFront />} />
             <Route path="/hiscores/:slug" element={<Hiscores />} />

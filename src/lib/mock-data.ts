@@ -10,6 +10,7 @@ export interface Server {
   created_at: string;
   status: "online" | "offline";
   players_online: number;
+  hiscores_enabled?: boolean;
 }
 
 export interface Category {

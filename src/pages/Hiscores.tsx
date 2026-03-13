@@ -2,35 +2,17 @@ import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { dataService } from "@/lib/data"
 import { Logo } from "@/components/Logo"
-import { Loader2, Search, Trophy, Target, Swords, Zap, Shield, Heart, Crosshair, BookOpen, Pickaxe, Hammer, Scissors, Trees, Fish, Flame, Gem, Crown, Star } from "lucide-react"
+import { Loader2, Search, Trophy } from "lucide-react"
 import type { Server } from "@/lib/mock-data"
 
-const SKILLS = [
-  { name: "overall", label: "Overall", icon: Trophy },
-  { name: "attack", label: "Attack", icon: Swords },
-  { name: "strength", label: "Strength", icon: Zap },
-  { name: "defence", label: "Defence", icon: Shield },
-  { name: "hitpoints", label: "Hitpoints", icon: Heart },
-  { name: "ranged", label: "Ranged", icon: Crosshair },
-  { name: "prayer", label: "Prayer", icon: BookOpen },
-  { name: "magic", label: "Magic", icon: Zap },
-  { name: "cooking", label: "Cooking", icon: Flame },
-  { name: "woodcutting", label: "Woodcutting", icon: Trees },
-  { name: "fletching", label: "Fletching", icon: Target },
-  { name: "fishing", label: "Fishing", icon: Fish },
-  { name: "firemaking", label: "Firemaking", icon: Flame },
-  { name: "crafting", label: "Crafting", icon: Gem },
-  { name: "smithing", label: "Smithing", icon: Hammer },
-  { name: "mining", label: "Mining", icon: Pickaxe },
-  { name: "herblore", label: "Herblore", icon: BookOpen },
-  { name: "agility", label: "Agility", icon: Zap },
-  { name: "thieving", label: "Thieving", icon: Crosshair },
-  { name: "slayer", label: "Slayer", icon: Swords },
-  { name: "farming", label: "Farming", icon: Trees },
-  { name: "runecraft", label: "Runecraft", icon: BookOpen },
-  { name: "hunter", label: "Hunter", icon: Crosshair },
-  { name: "construction", label: "Construction", icon: Hammer },
-]
+interface Skill {
+  id: string;
+  name: string;
+  display_name: string;
+  icon_url: string;
+  ordinal: number;
+  enabled: boolean;
+}
 
 const getSubdomain = () => {
   const hostname = window.location.hostname
@@ -49,6 +31,7 @@ const Hiscores = () => {
   const paramsSlug = useParams()
   const [server, setServer] = useState<Server | null>(null)
   const [hiscores, setHiscores] = useState<any[]>([])
+  const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
   const [activeSkill, setActiveSkill] = useState("overall")
@@ -66,8 +49,12 @@ const Hiscores = () => {
       setServer(serverData)
       
       if (serverData) {
-        const hiscoresData = await dataService.getHiscores(serverData.id, activeSkill)
+        const [hiscoresData, skillsData] = await Promise.all([
+          dataService.getHiscores(serverData.id, activeSkill),
+          dataService.getHiscoresSkills(serverData.id),
+        ])
         setHiscores(hiscoresData)
+        setSkills(skillsData)
       }
     } catch (error) {
       console.error("Failed to load hiscores:", error)
@@ -86,6 +73,28 @@ const Hiscores = () => {
   const filteredHiscores = search
     ? hiscores.filter(p => p.username.toLowerCase().includes(search.toLowerCase()))
     : hiscores
+
+  const getSkillLevel = (player: any, skillName: string) => {
+    if (skillName === "overall") return player.total_level
+    const skillLevels = player.skill_levels
+    if (skillLevels && typeof skillLevels === "object") {
+      return skillLevels[skillName] || 1
+    }
+    return player[skillName] || 1
+  }
+
+  const getSkillXP = (player: any, skillName: string) => {
+    if (skillName === "overall") return Number(player.total_xp)
+    const skillXP = player.skill_xp
+    if (skillXP && typeof skillXP === "object") {
+      return Number(skillXP[skillName] || 0)
+    }
+    return Number(player[`${skillName}_xp`] || 0)
+  }
+
+  const displaySkills = skills.length > 0 
+    ? [{ name: "overall", display_name: "Overall", icon_url: "" }, ...skills]
+    : [{ name: "overall", display_name: "Overall", icon_url: "" }]
 
   if (loading) {
     return (
@@ -144,7 +153,7 @@ const Hiscores = () => {
         </div>
 
         <div className="flex flex-wrap gap-2 mb-6">
-          {SKILLS.slice(0, 8).map((skill) => (
+          {displaySkills.slice(0, 8).map((skill) => (
             <button
               key={skill.name}
               onClick={() => setActiveSkill(skill.name)}
@@ -154,7 +163,7 @@ const Hiscores = () => {
                   : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
               }`}
             >
-              {skill.label}
+              {skill.display_name}
             </button>
           ))}
         </div>
@@ -192,10 +201,10 @@ const Hiscores = () => {
                     </td>
                     <td className="px-4 py-3 font-medium">{player.username}</td>
                     <td className="px-4 py-3 text-right">
-                      {activeSkill === "overall" ? player.total_level : player[activeSkill]}
+                      {getSkillLevel(player, activeSkill)}
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-muted-foreground">
-                      {formatXP(activeSkill === "overall" ? Number(player.total_xp) : Number(player[`${activeSkill}_xp`]))}
+                      {formatXP(getSkillXP(player, activeSkill))}
                     </td>
                   </tr>
                 ))
