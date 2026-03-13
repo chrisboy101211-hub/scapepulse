@@ -3,15 +3,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import { useAuth } from "@/lib/auth";
 
 const Settings = () => {
+  const { user } = useAuth()
+  
   const handleSave = () => toast.success("Settings saved");
 
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
         <h1 className="font-display text-2xl font-bold">Settings</h1>
-        <p className="text-sm text-muted-foreground">Configure your account and platform preferences</p>
+        <p className="text-sm text-muted-foreground">Configure your account and payment settings</p>
       </div>
 
       {/* Account */}
@@ -19,24 +22,20 @@ const Settings = () => {
         <h3 className="font-display font-semibold">Account</h3>
         <div className="space-y-2">
           <Label>Email</Label>
-          <Input defaultValue="owner@example.com" className="bg-muted border-border" />
+          <Input defaultValue={user?.email || ""} className="bg-muted border-border" disabled />
         </div>
-        <Button variant="outline" size="sm">Change Password</Button>
+        <p className="text-xs text-muted-foreground">Contact support to change your email</p>
       </div>
 
-      {/* Platform Fee */}
+      {/* Platform Fee Notice */}
       <div className="rounded-lg border border-border bg-card p-6 space-y-4">
         <h3 className="font-display font-semibold">Platform Fee</h3>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm">Enable platform fee</p>
-            <p className="text-xs text-muted-foreground">A percentage of each sale goes to the platform</p>
+            <p className="text-sm">Platform fee (5%)</p>
+            <p className="text-xs text-muted-foreground">A 5% fee is applied to all sales to maintain the platform</p>
           </div>
-          <Switch defaultChecked />
-        </div>
-        <div className="space-y-2">
-          <Label>Fee percentage</Label>
-          <Input defaultValue="5" type="number" className="bg-muted border-border w-24" />
+          <span className="text-lg font-bold text-neon-green">5%</span>
         </div>
       </div>
 

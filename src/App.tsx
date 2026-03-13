@@ -19,6 +19,8 @@ import ApiKeys from "./pages/dashboard/ApiKeys.tsx";
 import Settings from "./pages/dashboard/Settings.tsx";
 import StoreFront from "./pages/StoreFront.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Docs from "./pages/Docs.tsx";
+import Pricing from "./pages/Pricing.tsx";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +53,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/docs" element={<Docs />} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <ServerProvider>

@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import NavBar from "@/components/NavBar";
 import { motion } from "framer-motion";
 import { Logo } from "@/components/Logo";
 import { dataService } from "@/lib/data";
@@ -105,22 +106,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50">
-        <div className="container mx-auto flex h-16 items-center justify-between px-6">
-          <Link to="/" className="flex items-center gap-2">
-            <Logo size="md" />
-          </Link>
-          <div className="flex items-center gap-3">
-            <Link to="/login">
-              <Button variant="ghost" size="sm">Log In</Button>
-            </Link>
-            <Link to="/register">
-              <Button variant="hero" size="sm">Get Started</Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <NavBar />
 
       {/* Hero */}
       <section className="relative flex min-h-screen items-center justify-center overflow-hidden pt-16">
