@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import { DollarSign, ShoppingCart, Package, Key, Users, Loader2, Copy } from "lucide-react";
-import StatCard from "@/components/StatCard";
 import { dataService } from "@/lib/data";
 import { useServers } from "@/lib/server-context";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import type { Order, Product } from "@/lib/mock-data";
+import type { Order, OrderItem } from "@/lib/mock-data";
 
 const Overview = () => {
   const { selectedServer } = useServers()
   const [orders, setOrders] = useState<Order[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [orderItems, setOrderItems] = useState<Record<string, OrderItem[]>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,12 +22,17 @@ const Overview = () => {
     if (!selectedServer) return;
     setLoading(true);
     try {
-      const [ordersData, productsData] = await Promise.all([
+      const [ordersData] = await Promise.all([
         dataService.getOrders(selectedServer.id),
-        dataService.getProducts(selectedServer.id)
       ]);
       setOrders(ordersData);
-      setProducts(productsData);
+
+      const itemsMap: Record<string, OrderItem[]> = {};
+      for (const order of ordersData) {
+        const items = await dataService.getOrderItems(order.id);
+        itemsMap[order.id] = items;
+      }
+      setOrderItems(itemsMap);
     } catch (error) {
       console.error("Failed to load dashboard data:", error);
     } finally {
@@ -91,7 +95,7 @@ const Overview = () => {
         </div>
       </div>
 
-      {/* Stats Grid - TeamGames Style */}
+      {/* Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg border border-border bg-card p-5">
           <div className="flex items-center gap-3">
@@ -99,7 +103,7 @@ const Overview = () => {
               <DollarSign className="h-5 w-5 text-neon-green" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Total Spent</p>
+              <p className="text-sm text-muted-foreground">Total Revenue</p>
               <p className="text-2xl font-bold">${totalRevenue.toFixed(2)}</p>
             </div>
           </div>
@@ -111,20 +115,20 @@ const Overview = () => {
               <ShoppingCart className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Products</p>
-              <p className="text-2xl font-bold">{products.length}</p>
+              <p className="text-sm text-muted-foreground">Total Orders</p>
+              <p className="text-2xl font-bold">{totalOrders}</p>
             </div>
           </div>
         </div>
         
         <div className="rounded-lg border border-border bg-card p-5">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-yellow-500/10">
-              <Key className="h-5 w-5 text-yellow-500" />
+            <div className="p-2 rounded-lg bg-neon-green/10">
+              <Package className="h-5 w-5 text-neon-green" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Active Keys</p>
-              <p className="text-2xl font-bold">1</p>
+              <p className="text-sm text-muted-foreground">Delivered</p>
+              <p className="text-2xl font-bold">{deliveredOrders}</p>
             </div>
           </div>
         </div>
@@ -135,27 +139,27 @@ const Overview = () => {
               <Users className="h-5 w-5 text-purple-500" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Total Orders</p>
-              <p className="text-2xl font-bold">{totalOrders}</p>
+              <p className="text-sm text-muted-foreground">Pending</p>
+              <p className="text-2xl font-bold">{orders.filter(o => o.status === "pending").length}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Orders Table - TeamGames Style */}
+      {/* Orders Table */}
       <div className="rounded-lg border border-border bg-card overflow-hidden">
         <div className="px-6 py-4 border-b border-border">
-          <h3 className="font-display text-lg font-semibold">Purchase History</h3>
+          <h3 className="font-display text-lg font-semibold">Recent Orders</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/30">
+                <th className="px-6 py-3 text-left font-medium text-muted-foreground">Order ID</th>
                 <th className="px-6 py-3 text-left font-medium text-muted-foreground">Date</th>
-                <th className="px-6 py-3 text-left font-medium text-muted-foreground">Transaction ID</th>
-                <th className="px-6 py-3 text-left font-medium text-muted-foreground">Amount</th>
-                <th className="px-6 py-3 text-left font-medium text-muted-foreground">Products</th>
                 <th className="px-6 py-3 text-left font-medium text-muted-foreground">Username</th>
+                <th className="px-6 py-3 text-left font-medium text-muted-foreground">Items</th>
+                <th className="px-6 py-3 text-left font-medium text-muted-foreground">Amount</th>
                 <th className="px-6 py-3 text-left font-medium text-muted-foreground">Status</th>
               </tr>
             </thead>
@@ -167,15 +171,23 @@ const Overview = () => {
                   </td>
                 </tr>
               ) : (
-                orders.map((order) => (
+                orders.slice(0, 10).map((order) => (
                   <tr key={order.id} className="border-b border-border/50 hover:bg-secondary/30">
+                    <td className="px-6 py-4 font-mono text-xs">{order.id}</td>
                     <td className="px-6 py-4 text-muted-foreground">
                       {order.created_at ? new Date(order.created_at).toLocaleDateString() : "-"}
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs">{order.id}</td>
+                    <td className="px-6 py-4 font-medium">{order.username}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap gap-1">
+                        {orderItems[order.id]?.map((item, idx) => (
+                          <span key={idx} className="text-xs bg-secondary px-2 py-0.5 rounded">
+                            {item.quantity}x {item.product_name}
+                          </span>
+                        )) || <span className="text-muted-foreground text-xs">-</span>}
+                      </div>
+                    </td>
                     <td className="px-6 py-4 font-medium">${Number(order.total).toFixed(2)}</td>
-                    <td className="px-6 py-4">{order.username}</td>
-                    <td className="px-6 py-4">{order.username}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                         order.status === "delivered" ? "bg-neon-green/10 text-neon-green" :

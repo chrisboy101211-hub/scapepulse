@@ -1,82 +1,115 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { dataService } from "@/lib/data"
 import { useServers } from "@/lib/server-context"
 import { Button } from "@/components/ui/button"
-import { Copy, RefreshCw, Eye, EyeOff, Loader2 } from "lucide-react"
+import { Copy, RefreshCw, Eye, EyeOff, Loader2, Key } from "lucide-react"
 import { toast } from "sonner"
-import type { Server } from "@/lib/mock-data"
 
 const ApiKeys = () => {
-  const { servers } = useServers()
-  const [visible, setVisible] = useState<Record<string, boolean>>({})
+  const { selectedServer } = useServers()
+  const [visible, setVisible] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  const toggleVisibility = (id: string) => setVisible((prev) => ({ ...prev, [id]: !prev[id] }))
-
-  const copyKey = (key: string) => {
-    navigator.clipboard.writeText(key)
-    toast.success("API key copied to clipboard")
+  const copyKey = () => {
+    if (selectedServer?.api_key) {
+      navigator.clipboard.writeText(selectedServer.api_key)
+      toast.success("API key copied!")
+    }
   }
 
-  const regenerateKey = async (server: Server) => {
+  const regenerateKey = async () => {
+    if (!selectedServer) return
     setLoading(true)
     try {
       const newKey = `sk_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 5)}`
-      await dataService.updateServer(server.id, { api_key: newKey })
-      toast.success("API key regenerated")
+      await dataService.updateServer(selectedServer.id, { api_key: newKey })
+      toast.success("API key regenerated!")
       window.location.reload()
-    } catch (error) {
-      toast.error("Failed to regenerate API key")
+    } catch (error: any) {
+      toast.error(error.message || "Failed to regenerate API key")
     } finally {
       setLoading(false)
     }
+  }
+
+  if (!selectedServer) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="font-display text-2xl font-bold">API Keys</h1>
+          <p className="text-sm text-muted-foreground">Manage server API keys for reward delivery</p>
+        </div>
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <Key className="h-12 w-12 text-muted-foreground mb-4" />
+          <h2 className="text-xl font-semibold mb-2">No Server Selected</h2>
+          <p className="text-muted-foreground">Select a server from the dropdown to view its API key</p>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-bold">API Keys</h1>
-        <p className="text-sm text-muted-foreground">Manage server API keys for reward delivery</p>
+        <p className="text-sm text-muted-foreground">API key for {selectedServer.name}</p>
       </div>
 
-      {servers.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          No servers found. Create a server first to get API keys.
+      <div className="rounded-lg border border-border bg-card p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className={`h-3 w-3 rounded-full ${selectedServer.status === "online" ? "bg-neon-green animate-pulse-glow" : "bg-muted-foreground"}`} />
+            <h3 className="font-display font-semibold text-lg">{selectedServer.name}</h3>
+            <span className="rounded-md bg-secondary px-2 py-0.5 text-xs uppercase">{selectedServer.game_type}</span>
+          </div>
         </div>
-      ) : (
+
         <div className="space-y-4">
-          {servers.map((server) => (
-            <div key={server.id} className="rounded-lg border border-border bg-card p-5">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-display font-semibold">{server.name}</h3>
-                <span className="rounded-md bg-secondary px-2 py-0.5 text-xs uppercase">{server.game_type}</span>
+          <div>
+            <Label className="text-xs text-muted-foreground">Your API Key</Label>
+            <div className="flex items-center gap-2 mt-1.5">
+              <div className="flex-1 rounded-md bg-muted px-3 py-2.5 font-mono text-sm">
+                {visible ? selectedServer.api_key : "••••••••••••••••••••••••••••••"}
               </div>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 rounded-md bg-muted px-3 py-2 font-mono text-xs">
-                  {visible[server.id] ? server.api_key : "••••••••••••••••••••"}
-                </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleVisibility(server.id)}>
-                  {visible[server.id] ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => copyKey(server.api_key)}>
-                  <Copy className="h-3.5 w-3.5" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => regenerateKey(server)} disabled={loading}>
-                  {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
-                </Button>
-              </div>
-              <div className="mt-3 rounded-md bg-muted/50 p-3">
-                <p className="text-xs text-muted-foreground mb-1">Base64 encoded (use in requests):</p>
-                <code className="font-mono text-xs text-primary">
-                  {visible[server.id] ? btoa(server.api_key) : "Base64-encoded API key"}
-                </code>
-              </div>
+              <Button variant="outline" size="icon" onClick={() => setVisible(!visible)}>
+                {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+              <Button variant="outline" size="icon" onClick={copyKey}>
+                <Copy className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" onClick={regenerateKey} disabled={loading}>
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              </Button>
             </div>
-          ))}
+          </div>
         </div>
-      )}
+
+        <div className="mt-6 p-4 rounded-lg bg-muted/50">
+          <h4 className="font-medium mb-2">Java Integration</h4>
+          <pre className="text-xs font-mono overflow-x-auto">
+{`// Use this key directly in your Java code
+private static final String SECRET_KEY = "${selectedServer.api_key}";`}
+          </pre>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-border bg-card p-6">
+        <h3 className="font-display font-semibold mb-4">API Endpoints</h3>
+        <div className="space-y-3 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Base URL:</span>
+            <code className="text-primary">https://your-project.supabase.co/functions/v1/</code>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Claim endpoint:</span>
+            <code className="text-primary">store-transaction-v3</code>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
+
+import { Label } from "@/components/ui/label"
 
 export default ApiKeys;

@@ -182,5 +182,17 @@ export const dataService = {
     const { data, error } = await supabase.from("votes").insert({ ...vote, id }).select().single();
     if (error) throw error;
     return data;
+  },
+
+  async getUserSettings(userId: string) {
+    const { data, error } = await supabase.from("users").select("*").eq("id", userId).single();
+    if (error) return null;
+    return data;
+  },
+
+  async updateUserSettings(userId: string, updates: { paypal_email?: string; paypal_enabled?: boolean; crypto_enabled?: boolean }) {
+    const { data, error } = await supabase.from("users").update(updates).eq("id", userId).select();
+    if (error) throw error;
+    return data?.[0] || null;
   }
 };
