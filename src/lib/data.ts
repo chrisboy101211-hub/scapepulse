@@ -312,5 +312,85 @@ export const dataService = {
     const { data, error } = await supabase.from("servers").update({ hiscores_enabled: enabled }).eq("id", serverId).select();
     if (error) throw error;
     return data?.[0] || null;
+  },
+
+  async seedHiscoresDefaults(serverId: string) {
+    const defaultGameModes = [
+      { name: "REGULAR", display_name: "Regular", is_default: true },
+      { name: "IRONMAN", display_name: "Ironman", is_default: false },
+      { name: "ULTIMATE_IRONMAN", display_name: "Ultimate Ironman", is_default: false },
+      { name: "HCIM", display_name: "Hardcore Ironman", is_default: false },
+    ];
+
+    const defaultXpModes = [
+      { name: "NORMAL", display_name: "Normal", xp_multiplier: 1.0, is_default: true },
+      { name: "5X", display_name: "5x XP", xp_multiplier: 5.0, is_default: false },
+      { name: "10X", display_name: "10x XP", xp_multiplier: 10.0, is_default: false },
+      { name: "50X", display_name: "50x XP", xp_multiplier: 50.0, is_default: false },
+      { name: "100X", display_name: "100x XP", xp_multiplier: 100.0, is_default: false },
+    ];
+
+    const defaultSkills = [
+      { name: "attack", display_name: "Attack", icon_url: "https://oldschool.runescape.wiki/images/Attack_icon.png?3ec1e", ordinal: 1 },
+      { name: "strength", display_name: "Strength", icon_url: "https://oldschool.runescape.wiki/images/Strength_icon.png?a45b7", ordinal: 2 },
+      { name: "defence", display_name: "Defence", icon_url: "https://oldschool.runescape.wiki/images/Defence_icon.png?3ec1e", ordinal: 3 },
+      { name: "hitpoints", display_name: "Hitpoints", icon_url: "https://oldschool.runescape.wiki/images/Hitpoints_icon.png?3ec1e", ordinal: 4 },
+      { name: "ranged", display_name: "Ranged", icon_url: "https://oldschool.runescape.wiki/images/Ranged_icon.png?3ec1e", ordinal: 5 },
+      { name: "prayer", display_name: "Prayer", icon_url: "https://oldschool.runescape.wiki/images/Prayer_icon.png?3ec1e", ordinal: 6 },
+      { name: "magic", display_name: "Magic", icon_url: "https://oldschool.runescape.wiki/images/Magic_icon.png?3ec1e", ordinal: 7 },
+      { name: "cooking", display_name: "Cooking", icon_url: "https://oldschool.runescape.wiki/images/Cooking_icon.png?3ec1e", ordinal: 8 },
+      { name: "woodcutting", display_name: "Woodcutting", icon_url: "https://oldschool.runescape.wiki/images/Woodcutting_icon.png?3ec1e", ordinal: 9 },
+      { name: "fletching", display_name: "Fletching", icon_url: "https://oldschool.runescape.wiki/images/Fletching_icon.png?3ec1e", ordinal: 10 },
+      { name: "fishing", display_name: "Fishing", icon_url: "https://oldschool.runescape.wiki/images/Fishing_icon.png?3ec1e", ordinal: 11 },
+      { name: "firemaking", display_name: "Firemaking", icon_url: "https://oldschool.runescape.wiki/images/Firemaking_icon.png?3ec1e", ordinal: 12 },
+      { name: "crafting", display_name: "Crafting", icon_url: "https://oldschool.runescape.wiki/images/Crafting_icon.png?3ec1e", ordinal: 13 },
+      { name: "smithing", display_name: "Smithing", icon_url: "https://oldschool.runescape.wiki/images/Smithing_icon.png?3ec1e", ordinal: 14 },
+      { name: "mining", display_name: "Mining", icon_url: "https://oldschool.runescape.wiki/images/Mining_icon.png?3ec1e", ordinal: 15 },
+      { name: "herblore", display_name: "Herblore", icon_url: "https://oldschool.runescape.wiki/images/Herblore_icon.png?3ec1e", ordinal: 16 },
+      { name: "agility", display_name: "Agility", icon_url: "https://oldschool.runescape.wiki/images/Agility_icon.png?3ec1e", ordinal: 17 },
+      { name: "thieving", display_name: "Thieving", icon_url: "https://oldschool.runescape.wiki/images/Thieving_icon.png?3ec1e", ordinal: 18 },
+      { name: "slayer", display_name: "Slayer", icon_url: "https://oldschool.runescape.wiki/images/Slayer_icon.png?3ec1e", ordinal: 19 },
+      { name: "farming", display_name: "Farming", icon_url: "https://oldschool.runescape.wiki/images/Farming_icon.png?3ec1e", ordinal: 20 },
+      { name: "runecraft", display_name: "Runecraft", icon_url: "https://oldschool.runescape.wiki/images/Runecraft_icon.png?3ec1e", ordinal: 21 },
+      { name: "hunter", display_name: "Hunter", icon_url: "https://oldschool.runescape.wiki/images/Hunter_icon.png?3ec1e", ordinal: 22 },
+      { name: "construction", display_name: "Construction", icon_url: "https://oldschool.runescape.wiki/images/Construction_icon.png?3ec1e", ordinal: 23 },
+    ];
+
+    const timestamp = Date.now();
+
+    const gameModeInserts = defaultGameModes.map((gm, i) => ({
+      id: `gm-${timestamp}-${i}`,
+      server_id: serverId,
+      name: gm.name,
+      display_name: gm.display_name,
+      is_default: gm.is_default,
+      enabled: true,
+    }));
+
+    const xpModeInserts = defaultXpModes.map((xm, i) => ({
+      id: `xm-${timestamp}-${i}`,
+      server_id: serverId,
+      name: xm.name,
+      display_name: xm.display_name,
+      xp_multiplier: xm.xp_multiplier,
+      is_default: xm.is_default,
+      enabled: true,
+    }));
+
+    const skillInserts = defaultSkills.map((sk, i) => ({
+      id: `sk-${timestamp}-${i}`,
+      server_id: serverId,
+      name: sk.name,
+      display_name: sk.display_name,
+      icon_url: sk.icon_url,
+      ordinal: sk.ordinal,
+      enabled: true,
+    }));
+
+    await Promise.all([
+      supabase.from("hiscores_game_modes").insert(gameModeInserts),
+      supabase.from("hiscores_xp_modes").insert(xpModeInserts),
+      supabase.from("hiscores_skills").insert(skillInserts),
+    ]);
   }
 };

@@ -80,8 +80,21 @@ const HiscoresSettings = () => {
     if (!selectedServer) return;
     try {
       await dataService.toggleServerHiscores(selectedServer.id, enabled);
+      
+      if (enabled) {
+        await dataService.seedHiscoresDefaults(selectedServer.id);
+        const [gmData, xmData, skData] = await Promise.all([
+          dataService.getHiscoresGameModes(selectedServer.id),
+          dataService.getHiscoresXpModes(selectedServer.id),
+          dataService.getHiscoresSkills(selectedServer.id),
+        ]);
+        setGameModes(gmData);
+        setXpModes(xmData);
+        setSkills(skData);
+      }
+      
       setHiscoresEnabled(enabled);
-      toast.success(enabled ? "Hiscores enabled" : "Hiscores disabled");
+      toast.success(enabled ? "Hiscores enabled with default settings" : "Hiscores disabled");
     } catch (error) {
       toast.error("Failed to toggle hiscores");
     }
