@@ -7,10 +7,10 @@ import {
   Vote,
   Key,
   Settings,
-  Gamepad2,
   LogOut,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
+import { Logo } from "@/components/Logo";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar,
@@ -81,10 +81,9 @@ export function DashboardSidebar() {
     <Sidebar collapsible="icon" className="border-r border-border">
       <SidebarContent>
         <div className="flex h-16 items-center gap-2 px-4 border-b border-border">
-          <Gamepad2 className="h-6 w-6 text-primary shrink-0" />
+          <Logo size="sm" />
           {!collapsed && (
-            <span className="font-display text-lg font-bold">
-              Game<span className="text-primary">Store</span>
+            <span className="font-display text-lg font-bold text-foreground">
             </span>
           )}
         </div>

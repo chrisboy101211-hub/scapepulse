@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { Logo } from "@/components/Logo";
 import {
   ShoppingCart,
   Vote,
@@ -9,7 +10,6 @@ import {
   Zap,
   Globe,
   ArrowRight,
-  Gamepad2,
   ChevronRight,
   Check,
 } from "lucide-react";
@@ -75,10 +75,7 @@ const Index = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50">
         <div className="container mx-auto flex h-16 items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-2">
-            <Gamepad2 className="h-7 w-7 text-primary" />
-            <span className="font-display text-xl font-bold text-foreground">
-              Game<span className="text-primary">Store</span>
-            </span>
+            <Logo size="md" />
           </Link>
           <div className="flex items-center gap-3">
             <Link to="/login">
@@ -268,11 +265,10 @@ const Index = () => {
       <footer className="border-t border-border/50 py-12">
         <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-6 md:flex-row">
           <div className="flex items-center gap-2">
-            <Gamepad2 className="h-5 w-5 text-primary" />
-            <span className="font-display font-semibold">GameStore</span>
+            <Logo size="sm" />
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2026 GameStore. All rights reserved.
+            © 2026 ScapePulse. All rights reserved.
           </p>
         </div>
       </footer>

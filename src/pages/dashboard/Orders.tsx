@@ -1,19 +1,26 @@
 import { useEffect, useState } from "react"
 import { dataService } from "@/lib/data"
+import { useServers } from "@/lib/server-context"
 import { Loader2 } from "lucide-react"
 import type { Order } from "@/lib/mock-data"
 
 const Orders = () => {
+  const { selectedServer } = useServers()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadOrders()
-  }, [])
+  }, [selectedServer])
 
   const loadOrders = async () => {
+    if (!selectedServer) {
+      setOrders([])
+      setLoading(false)
+      return
+    }
     try {
-      const data = await dataService.getOrders()
+      const data = await dataService.getOrders(selectedServer.id)
       setOrders(data)
     } catch (error) {
       console.error("Failed to load orders:", error)

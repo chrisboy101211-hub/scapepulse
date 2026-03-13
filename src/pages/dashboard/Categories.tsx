@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { dataService } from "@/lib/data"
+import { useServers } from "@/lib/server-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -23,8 +24,8 @@ import { toast } from "sonner"
 import type { Category } from "@/lib/mock-data"
 
 const Categories = () => {
+  const { selectedServer } = useServers()
   const [categories, setCategories] = useState<Category[]>([])
-  const [servers, setServers] = useState<{id: string, name: string}[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -39,25 +40,29 @@ const Categories = () => {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [selectedServer])
 
   const loadData = async () => {
+    if (!selectedServer) {
+      setCategories([])
+      setLoading(false)
+      return
+    }
     try {
-      const [categoriesData, serversData] = await Promise.all([
-        dataService.getCategories(),
-        dataService.getServers()
-      ])
+      const categoriesData = await dataService.getCategories(selectedServer.id)
       setCategories(categoriesData)
-      setServers(serversData)
-      if (serversData.length > 0 && !formData.server_id) {
-        setFormData(prev => ({ ...prev, server_id: serversData[0].id }))
-      }
     } catch (error) {
       console.error("Failed to load categories:", error)
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (selectedServer) {
+      setFormData(prev => ({ ...prev, server_id: selectedServer.id }))
+    }
+  }, [selectedServer])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

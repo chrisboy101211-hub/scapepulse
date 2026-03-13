@@ -3,9 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Gamepad2, ArrowRight, Loader2, Globe } from "lucide-react";
+import { ArrowRight, Loader2, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { Logo } from "@/components/Logo";
 
 const MAIN_DOMAIN = "scapepulse.com";
 
@@ -70,12 +71,8 @@ const Register = () => {
       if (authError) throw authError;
 
       if (authData.user) {
-        const { error: userError } = await supabase.from("users").insert({
-          id: authData.user.id,
-          email,
-        });
-        if (userError) console.error("User insert error:", userError);
-
+        const userId = authData.user.id;
+        
         const { error: serverError } = await supabase.from("servers").insert({
           id: `srv-${Date.now()}`,
           name: serverName,
@@ -86,10 +83,13 @@ const Register = () => {
           api_key: `sk_live_${Math.random().toString(36).substring(2, 15)}`,
           status: "online",
           players_online: 0,
-          user_id: authData.user.id,
+          user_id: userId,
         });
 
-        if (serverError) throw serverError;
+        if (serverError) {
+          console.error("Server insert error:", serverError);
+          throw new Error("Failed to create server: " + serverError.message);
+        }
       }
 
       toast.success("Account created! Check your email to verify.");
@@ -107,10 +107,7 @@ const Register = () => {
       <div className="relative z-10 w-full max-w-md px-6">
         <div className="mb-8 text-center">
           <Link to="/" className="inline-flex items-center gap-2 mb-8">
-            <Gamepad2 className="h-7 w-7 text-primary" />
-            <span className="font-display text-xl font-bold">
-              Game<span className="text-primary">Store</span>
-            </span>
+            <Logo size="md" />
           </Link>
           <h1 className="font-display text-2xl font-bold">Create your account</h1>
           <p className="mt-2 text-sm text-muted-foreground">Start monetizing your game server</p>

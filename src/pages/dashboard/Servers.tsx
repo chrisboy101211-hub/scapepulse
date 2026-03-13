@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { dataService } from "@/lib/data"
+import { useAuth } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -30,6 +31,7 @@ const generateSlug = (name: string) => {
 }
 
 const Servers = () => {
+  const { user } = useAuth()
   const [servers, setServers] = useState<Server[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -46,11 +48,11 @@ const Servers = () => {
 
   useEffect(() => {
     loadServers()
-  }, [])
+  }, [user])
 
   const loadServers = async () => {
     try {
-      const data = await dataService.getServers()
+      const data = await dataService.getServers(user?.id)
       setServers(data)
     } catch (error) {
       console.error("Failed to load servers:", error)
@@ -69,6 +71,10 @@ const Servers = () => {
       toast.error("Server name must be at least 3 characters")
       return
     }
+    if (!user) {
+      toast.error("You must be logged in")
+      return
+    }
     setSubmitting(true)
     try {
       await dataService.createServer({
@@ -80,6 +86,7 @@ const Servers = () => {
         api_key: `sk_live_${Math.random().toString(36).substring(2, 15)}`,
         status: "offline",
         players_online: 0,
+        user_id: user.id,
       })
       toast.success("Server created!")
       setDialogOpen(false)

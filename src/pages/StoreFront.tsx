@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { dataService } from "@/lib/data";
 import { supabase } from "@/lib/supabase";
-import { ShoppingCart, Gamepad2, X, Plus, Minus, Loader2 } from "lucide-react";
+import { Logo } from "@/components/Logo";
+import { ShoppingCart, X, Plus, Minus, Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Product, Category, Server } from "@/lib/mock-data";
@@ -13,8 +14,31 @@ interface CartItem {
   quantity: number;
 }
 
+const getSubdomain = () => {
+  const hostname = window.location.hostname;
+  
+  // If it's the Vercel preview URL, check for subdomain
+  if (hostname.includes("vercel.app")) {
+    return null; // Let the /store/:slug route handle it
+  }
+  
+  // For custom domain (scapepulse.com)
+  const parts = hostname.split(".");
+  
+  // If we have 2+ parts and first part is not www, it's a subdomain
+  if (parts.length >= 2) {
+    const mainDomain = parts.slice(-2).join("."); // e.g., "scapepulse.com"
+    if (mainDomain === "scapepulse.com" && parts[0] !== "www" && parts[0] !== "scapepulse") {
+      return parts[0];
+    }
+  }
+  return null;
+};
+
 const StoreFront = () => {
-  const { slug } = useParams();
+  const paramsSlug = useParams();
+  const location = useLocation();
+  const slugFromParams = paramsSlug.slug;
   const [server, setServer] = useState<Server | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -23,20 +47,34 @@ const StoreFront = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
 
+  const subdomain = getSubdomain();
+  const slug = slugFromParams || subdomain;
+
   useEffect(() => {
     loadData();
   }, [slug]);
 
   const loadData = async () => {
     try {
-      const [serverData, categoriesData, productsData] = await Promise.all([
-        slug ? dataService.getServerBySlug(slug!) : dataService.getServers().then(s => s[0] || null),
-        dataService.getCategories(),
-        dataService.getProducts()
-      ]);
+      let serverData = null;
+      
+      if (slug) {
+        serverData = await dataService.getServerBySlug(slug);
+      } else {
+        const servers = await dataService.getServers();
+        serverData = servers[0] || null;
+      }
+      
       setServer(serverData);
-      setCategories(categoriesData);
-      setProducts(productsData);
+      
+      if (serverData) {
+        const [categoriesData, productsData] = await Promise.all([
+          dataService.getCategories(serverData.id),
+          dataService.getProducts(serverData.id)
+        ]);
+        setCategories(categoriesData);
+        setProducts(productsData);
+      }
     } catch (error) {
       console.error("Failed to load store data:", error);
     } finally {
@@ -94,7 +132,9 @@ const StoreFront = () => {
       <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
         <div className="container mx-auto flex h-14 items-center justify-between px-6">
           <div className="flex items-center gap-3">
-            <Gamepad2 className="h-5 w-5 text-primary" />
+            <Link to="/" className="flex items-center gap-2">
+              <Logo size="sm" />
+            </Link>
             <span className="font-display font-bold">{server.name}</span>
             <span className="rounded-md bg-secondary px-2 py-0.5 text-xs uppercase text-secondary-foreground">{server.game_type}</span>
           </div>
