@@ -194,5 +194,30 @@ export const dataService = {
     const { data, error } = await supabase.from("users").update(updates).eq("id", userId).select();
     if (error) throw error;
     return data?.[0] || null;
+  },
+
+  async getHiscores(serverId: string, skill?: string) {
+    let query = supabase.from("hiscores").select("*").eq("server_id", serverId);
+    
+    if (skill && skill !== "overall") {
+      query = query.order(`${skill}_xp`, { ascending: false });
+    } else {
+      query = query.order("total_xp", { ascending: false });
+    }
+    
+    const { data, error } = await query.limit(100);
+    if (error) throw error;
+    return data || [];
+  },
+
+  async getPlayerHiscores(serverId: string, username: string) {
+    const { data, error } = await supabase
+      .from("hiscores")
+      .select("*")
+      .eq("server_id", serverId)
+      .ilike("username", username)
+      .single();
+    if (error) return null;
+    return data;
   }
 };

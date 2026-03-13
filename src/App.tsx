@@ -21,6 +21,7 @@ import StoreFront from "./pages/StoreFront.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Docs from "./pages/Docs.tsx";
 import Pricing from "./pages/Pricing.tsx";
+import Hiscores from "./pages/Hiscores.tsx";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +73,7 @@ const App = () => (
               <Route path="settings" element={<Settings />} />
             </Route>
             <Route path="/store/:slug" element={<StoreFront />} />
+            <Route path="/hiscores/:slug" element={<Hiscores />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
