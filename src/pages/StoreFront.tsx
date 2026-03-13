@@ -172,7 +172,7 @@ const StoreFront = () => {
           >
             All
           </Button>
-          {mockCategories.map((cat) => (
+          {categories.map((cat) => (
             <Button
               key={cat.id}
               variant={selectedCategory === cat.id ? "default" : "outline"}

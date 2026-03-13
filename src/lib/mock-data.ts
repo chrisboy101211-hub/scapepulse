@@ -43,8 +43,8 @@ export interface Order {
   username: string;
   status: "pending" | "paid" | "delivered" | "failed";
   total: number;
-  created_at: string;
-  items: OrderItem[];
+  created_at?: string;
+  items?: OrderItem[];
 }
 
 export interface OrderItem {
