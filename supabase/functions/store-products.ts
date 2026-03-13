@@ -64,6 +64,7 @@ Deno.serve(async (req) => {
         .select("id")
         .eq("server_id", server.id)
         .eq("numeric_id", body.categoryId)
+        .eq("enabled", true)
         .single();
       
       if (category) {

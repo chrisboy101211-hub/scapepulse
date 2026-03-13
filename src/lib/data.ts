@@ -32,7 +32,7 @@ export const dataService = {
   },
 
   async getCategories(serverId?: string): Promise<Category[]> {
-    let query = supabase.from("categories").select("*").order("display_order");
+    let query = supabase.from("categories").select("*").eq("enabled", true).order("display_order");
     if (serverId) query = query.eq("server_id", serverId);
     const { data, error } = await query;
     if (error) throw error;
@@ -40,7 +40,7 @@ export const dataService = {
   },
 
   async getProducts(serverId?: string, categoryId?: string): Promise<Product[]> {
-    let query = supabase.from("products").select("*");
+    let query = supabase.from("products").select("*").eq("enabled", true);
     if (serverId) query = query.eq("server_id", serverId);
     if (categoryId) query = query.eq("category_id", categoryId);
     const { data, error } = await query;
@@ -118,9 +118,9 @@ export const dataService = {
   },
 
   async updateServer(id: string, updates: Partial<Server>): Promise<Server> {
-    const { data, error } = await supabase.from("servers").update(updates).eq("id", id).select().single();
+    const { data, error } = await supabase.from("servers").update(updates).eq("id", id).select();
     if (error) throw error;
-    return data;
+    return data?.[0] || null;
   },
 
   async deleteServer(id: string): Promise<void> {
@@ -136,9 +136,9 @@ export const dataService = {
   },
 
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product> {
-    const { data, error } = await supabase.from("products").update(updates).eq("id", id).select().single();
+    const { data, error } = await supabase.from("products").update(updates).eq("id", id).select();
     if (error) throw error;
-    return data;
+    return data?.[0] || null;
   },
 
   async deleteProduct(id: string): Promise<void> {
@@ -154,9 +154,9 @@ export const dataService = {
   },
 
   async updateCategory(id: string, updates: Partial<Category>): Promise<Category> {
-    const { data, error } = await supabase.from("categories").update(updates).eq("id", id).select().single();
+    const { data, error } = await supabase.from("categories").update(updates).eq("id", id).select();
     if (error) throw error;
-    return data;
+    return data?.[0] || null;
   },
 
   async deleteCategory(id: string): Promise<void> {
@@ -172,9 +172,9 @@ export const dataService = {
   },
 
   async updateOrderStatus(id: string, status: Order["status"]): Promise<Order> {
-    const { data, error } = await supabase.from("orders").update({ status }).eq("id", id).select().single();
+    const { data, error } = await supabase.from("orders").update({ status }).eq("id", id).select();
     if (error) throw error;
-    return data;
+    return data?.[0] || null;
   },
 
   async createVote(vote: Omit<Vote, "id" | "timestamp">): Promise<Vote> {
