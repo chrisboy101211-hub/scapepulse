@@ -24,7 +24,7 @@ import { toast } from "sonner"
 import type { Product, Category } from "@/lib/mock-data"
 
 const Products = () => {
-  const { selectedServer } = useServers()
+  const { selectedServer, servers } = useServers()
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,6 +33,7 @@ const Products = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [formData, setFormData] = useState({
     name: "",
+    item_id: "",
     description: "",
     price: "",
     image: "🎁",
@@ -84,6 +85,7 @@ const Products = () => {
       const commands = formData.commands.split("\n").filter(c => c.trim())
       const productData = {
         name: formData.name,
+        item_id: formData.item_id ? parseInt(formData.item_id) : null,
         description: formData.description,
         price: parseFloat(formData.price),
         image: formData.image,
@@ -91,6 +93,7 @@ const Products = () => {
         category_id: formData.category_id,
         commands,
         enabled: formData.enabled,
+        currency: "USD",
       }
       
       if (editingProduct) {
@@ -134,6 +137,7 @@ const Products = () => {
     setEditingProduct(product)
     setFormData({
       name: product.name,
+      item_id: product.item_id ? String(product.item_id) : "",
       description: product.description || "",
       price: String(product.price),
       image: product.image || "🎁",
@@ -149,10 +153,11 @@ const Products = () => {
     setEditingProduct(null)
     setFormData({
       name: "",
+      item_id: "",
       description: "",
       price: "",
       image: "🎁",
-      server_id: servers[0]?.id || "",
+      server_id: selectedServer?.id || "",
       category_id: "",
       commands: "",
       enabled: true,
@@ -187,6 +192,12 @@ const Products = () => {
                   <Label htmlFor="name">Product Name *</Label>
                   <Input id="name" placeholder="VIP Rank" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="item_id">Item ID (optional)</Label>
+                  <Input id="item_id" type="number" placeholder="995" value={formData.item_id} onChange={(e) => setFormData({ ...formData, item_id: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="price">Price *</Label>
                   <Input id="price" type="number" step="0.01" placeholder="9.99" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} />

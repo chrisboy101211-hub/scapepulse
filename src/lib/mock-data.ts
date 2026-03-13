@@ -25,6 +25,7 @@ export interface Product {
   server_id: string;
   category_id: string;
   name: string;
+  item_id: number | null;
   description: string;
   price: number;
   commands: string[];
@@ -104,13 +105,13 @@ export const mockCategories: Category[] = [
 ];
 
 export const mockProducts: Product[] = [
-  { id: "prod-1", server_id: "srv-1", category_id: "cat-1", name: "VIP Rank", description: "Access to VIP zone, custom title, and exclusive perks", price: 9.99, commands: ["add_rank {username} VIP"], enabled: true, image: "🎖️", currency: "USD" },
-  { id: "prod-2", server_id: "srv-1", category_id: "cat-1", name: "MVP Rank", description: "All VIP perks plus priority queue and bonus XP", price: 24.99, commands: ["add_rank {username} MVP"], enabled: true, image: "⭐", currency: "USD" },
-  { id: "prod-3", server_id: "srv-1", category_id: "cat-1", name: "Legend Rank", description: "Ultimate rank with all perks and exclusive cosmetics", price: 49.99, commands: ["add_rank {username} Legend"], enabled: true, image: "👑", currency: "USD" },
-  { id: "prod-4", server_id: "srv-1", category_id: "cat-2", name: "1M Gold", description: "1,000,000 gold coins delivered instantly", price: 4.99, commands: ["add_item {username} 995 1000000"], enabled: true, image: "💰", currency: "USD" },
-  { id: "prod-5", server_id: "srv-1", category_id: "cat-2", name: "Armadyl Godsword", description: "The powerful AGS weapon", price: 14.99, commands: ["add_item {username} 11802 1"], enabled: true, image: "⚔️", currency: "USD" },
-  { id: "prod-6", server_id: "srv-1", category_id: "cat-3", name: "Mystery Key x5", description: "5 keys for the mystery chest", price: 7.99, commands: ["add_item {username} 4151 5"], enabled: true, image: "🔑", currency: "USD" },
-  { id: "prod-7", server_id: "srv-1", category_id: "cat-4", name: "Starter Bundle", description: "VIP Rank + 1M Gold + 5 Mystery Keys", price: 19.99, commands: ["add_rank {username} VIP", "add_item {username} 995 1000000", "add_item {username} 4151 5"], enabled: true, image: "📦", currency: "USD" },
+  { id: "prod-1", server_id: "srv-1", category_id: "cat-1", name: "VIP Rank", item_id: null, description: "Access to VIP zone, custom title, and exclusive perks", price: 9.99, commands: ["add_rank {username} VIP"], enabled: true, image: "🎖️", currency: "USD" },
+  { id: "prod-2", server_id: "srv-1", category_id: "cat-1", name: "MVP Rank", item_id: null, description: "All VIP perks plus priority queue and bonus XP", price: 24.99, commands: ["add_rank {username} MVP"], enabled: true, image: "⭐", currency: "USD" },
+  { id: "prod-3", server_id: "srv-1", category_id: "cat-1", name: "Legend Rank", item_id: null, description: "Ultimate rank with all perks and exclusive cosmetics", price: 49.99, commands: ["add_rank {username} Legend"], enabled: true, image: "👑", currency: "USD" },
+  { id: "prod-4", server_id: "srv-1", category_id: "cat-2", name: "1M Gold", item_id: 995, description: "1,000,000 gold coins delivered instantly", price: 4.99, commands: ["add_item {username} 995 1000000"], enabled: true, image: "💰", currency: "USD" },
+  { id: "prod-5", server_id: "srv-1", category_id: "cat-2", name: "Armadyl Godsword", item_id: 11802, description: "The powerful AGS weapon", price: 14.99, commands: ["add_item {username} 11802 1"], enabled: true, image: "⚔️", currency: "USD" },
+  { id: "prod-6", server_id: "srv-1", category_id: "cat-3", name: "Mystery Key x5", item_id: 4151, description: "5 keys for the mystery chest", price: 7.99, commands: ["add_item {username} 4151 5"], enabled: true, image: "🔑", currency: "USD" },
+  { id: "prod-7", server_id: "srv-1", category_id: "cat-4", name: "Starter Bundle", item_id: null, description: "VIP Rank + 1M Gold + 5 Mystery Keys", price: 19.99, commands: ["add_rank {username} VIP", "add_item {username} 995 1000000", "add_item {username} 4151 5"], enabled: true, image: "📦", currency: "USD" },
 ];
 
 export const mockOrders: Order[] = [
