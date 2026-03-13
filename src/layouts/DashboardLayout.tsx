@@ -4,7 +4,7 @@ import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { useAuth } from "@/lib/auth";
 import { useServers } from "@/lib/server-context";
 import { Button } from "@/components/ui/button";
-import { LogOut, Loader2, ChevronDown } from "lucide-react";
+import { LogOut, Loader2, Globe, Users, Gamepad2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   Select,
@@ -24,41 +24,66 @@ const DashboardLayout = () => {
     navigate("/login")
   }
 
+  const handleServerChange = (value: string) => {
+    const server = servers.find(s => s.id === value);
+    setSelectedServer(server || null);
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <DashboardSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="h-14 flex items-center justify-between border-b border-border px-4 bg-card/50">
-            <div className="flex items-center gap-3">
+          <header className="h-16 flex items-center justify-between border-b border-border px-4 bg-card/50">
+            <div className="flex items-center gap-4">
               <SidebarTrigger className="mr-2" />
               
               {serversLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               ) : servers.length > 0 ? (
-                <Select 
-                  value={selectedServer?.id} 
-                  onValueChange={(value) => {
-                    const server = servers.find(s => s.id === value);
-                    setSelectedServer(server || null);
-                  }}
-                >
-                  <SelectTrigger className="w-[200px] h-8">
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full bg-neon-green animate-pulse-glow" />
-                      <SelectValue placeholder="Select server" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {servers.map((server) => (
-                      <SelectItem key={server.id} value={server.id}>
-                        {server.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center gap-3">
+                  <Select 
+                    value={selectedServer?.id || ""} 
+                    onValueChange={handleServerChange}
+                  >
+                    <SelectTrigger className="w-[220px] h-9">
+                      <div className="flex items-center gap-2">
+                        {selectedServer ? (
+                          <>
+                            <div className={`h-2 w-2 rounded-full ${selectedServer.status === "online" ? "bg-neon-green animate-pulse-glow" : "bg-muted-foreground"}`} />
+                          </>
+                        ) : null}
+                        <SelectValue placeholder="Select server" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {servers.map((server) => (
+                        <SelectItem key={server.id} value={server.id}>
+                          <div className="flex items-center gap-2">
+                            <Gamepad2 className="h-4 w-4" />
+                            <span>{server.name}</span>
+                            <span className="text-xs text-muted-foreground capitalize">({server.game_type})</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  {selectedServer && (
+                    <>
+                      <div className="hidden md:flex items-center gap-1 text-sm text-muted-foreground">
+                        <Globe className="h-3.5 w-3.5" />
+                        <span className="font-mono text-xs">{selectedServer.subdomain}</span>
+                      </div>
+                      <div className="hidden md:flex items-center gap-1 text-sm text-muted-foreground">
+                        <Users className="h-3.5 w-3.5" />
+                        <span>{selectedServer.players_online}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
               ) : (
-                <span className="text-sm text-muted-foreground">No Server</span>
+                <span className="text-sm text-muted-foreground">No servers yet</span>
               )}
             </div>
             <div className="flex items-center gap-3">

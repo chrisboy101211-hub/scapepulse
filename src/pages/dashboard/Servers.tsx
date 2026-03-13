@@ -20,7 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Plus, ExternalLink, Globe, Users, Loader2 } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Plus, ExternalLink, Globe, Users, Loader2, Eye, EyeOff, RefreshCw, Gamepad2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import type { Server } from "@/lib/mock-data"
@@ -38,6 +39,8 @@ const Servers = () => {
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [visibleKeys, setVisibleKeys] = useState<Record<string, boolean>>({})
+  const [regenerating, setRegenerating] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: "",
     game_type: "rsps" as "rsps" | "minecraft",
@@ -85,7 +88,7 @@ const Servers = () => {
         game_type: formData.game_type,
         description: formData.description,
         subdomain: subdomain,
-        api_key: `sk_live_${Math.random().toString(36).substring(2, 15)}`,
+        api_key: `sk_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 5)}`,
         status: "offline",
         players_online: 0,
         user_id: user.id,
@@ -98,6 +101,34 @@ const Servers = () => {
       toast.error(error.message || "Failed to create server")
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const toggleKeyVisibility = (serverId: string) => {
+    setVisibleKeys(prev => ({ ...prev, [serverId]: !prev[serverId] }))
+  }
+
+  const regenerateApiKey = async (server: Server) => {
+    setRegenerating(server.id)
+    try {
+      const newKey = `sk_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 5)}`
+      await dataService.updateServer(server.id, { api_key: newKey })
+      toast.success("API key regenerated!")
+      loadServers()
+    } catch (error: any) {
+      toast.error(error.message || "Failed to regenerate API key")
+    } finally {
+      setRegenerating(null)
+    }
+  }
+
+  const toggleServerStatus = async (server: Server) => {
+    try {
+      const newStatus = server.status === "online" ? "offline" : "online"
+      await dataService.updateServer(server.id, { status: newStatus })
+      loadServers()
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update server status")
     }
   }
 
@@ -147,7 +178,7 @@ const Servers = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="rsps">RSPS (RuneScape Private Server)</SelectItem>
+                    <SelectItem value="rsps">RuneScape</SelectItem>
                     <SelectItem value="minecraft">Minecraft</SelectItem>
                   </SelectContent>
                 </Select>
@@ -182,41 +213,86 @@ const Servers = () => {
           No servers found. Add your first server to get started.
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-4">
           {servers.map((server) => (
-            <div key={server.id} className="rounded-lg border border-border bg-card p-6 transition-all hover:border-primary/20">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-display text-lg font-semibold">{server.name}</h3>
-                    <span className={`inline-flex h-2 w-2 rounded-full ${server.status === "online" ? "bg-neon-green animate-pulse-glow" : "bg-muted-foreground"}`} />
+            <Card key={server.id} className="overflow-hidden">
+              <CardContent className="p-0">
+                <div className="flex items-stretch">
+                  <div className="flex-1 p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`h-3 w-3 rounded-full ${server.status === "online" ? "bg-neon-green animate-pulse-glow" : "bg-muted-foreground"}`} />
+                        <h3 className="font-display text-lg font-semibold">{server.name}</h3>
+                        <span className="rounded-md bg-secondary px-2 py-0.5 text-xs uppercase text-secondary-foreground flex items-center gap-1">
+                          <Gamepad2 className="h-3 w-3" />
+                          {server.game_type === "rsps" ? "RuneScape" : "Minecraft"}
+                        </span>
+                      </div>
+                      <Button 
+                        variant={server.status === "online" ? "default" : "outline"} 
+                        size="sm"
+                        onClick={() => toggleServerStatus(server)}
+                      >
+                        {server.status === "online" ? "Online" : "Offline"}
+                      </Button>
+                    </div>
+                    
+                    <p className="text-sm text-muted-foreground mb-4">{server.description}</p>
+                    
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-muted-foreground">Store URL</Label>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-secondary rounded-md text-sm">
+                            <Globe className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-mono text-xs">{server.subdomain}</span>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => navigate(`/store/${server.slug}`)}>
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-muted-foreground">API Key</Label>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-secondary rounded-md text-sm">
+                            <span className="font-mono text-xs truncate flex-1">
+                              {visibleKeys[server.id] ? server.api_key : "••••••••••••••••••••••••••••••"}
+                            </span>
+                          </div>
+                          <Button variant="outline" size="icon" onClick={() => toggleKeyVisibility(server.id)}>
+                            {visibleKeys[server.id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            onClick={() => regenerateApiKey(server)}
+                            disabled={regenerating === server.id}
+                          >
+                            {regenerating === server.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">{server.description}</p>
+                  
+                  <div className="w-32 border-l border-border flex flex-col items-center justify-center gap-4 bg-muted/30 p-4">
+                    <div className="text-center">
+                      <Users className="h-5 w-5 mx-auto mb-1 text-muted-foreground" />
+                      <span className="text-2xl font-bold">{server.players_online}</span>
+                      <p className="text-xs text-muted-foreground">Online</p>
+                    </div>
+                    <Button variant="hero" size="sm" onClick={() => {
+                      setSelectedServer(server)
+                      navigate("/dashboard/products")
+                    }}>
+                      Manage
+                    </Button>
+                  </div>
                 </div>
-                <span className="rounded-md bg-secondary px-2 py-1 text-xs font-medium uppercase text-secondary-foreground">
-                  {server.game_type}
-                </span>
-              </div>
-              <div className="mt-4 flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Globe className="h-3.5 w-3.5" />
-                  <span className="font-mono text-xs">{server.subdomain}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Users className="h-3.5 w-3.5" />
-                  <span>{server.players_online} online</span>
-                </div>
-              </div>
-              <div className="mt-4 flex gap-2">
-                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => navigate(`/store/${server.slug}`)}>
-                  <ExternalLink className="h-3.5 w-3.5" /> View Store
-                </Button>
-                <Button variant="hero" size="sm" onClick={() => {
-                  setSelectedServer(server)
-                  navigate("/dashboard/products")
-                }}>Manage</Button>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
