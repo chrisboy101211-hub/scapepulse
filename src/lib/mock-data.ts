@@ -1,5 +1,6 @@
 export interface Server {
   id: string;
+  user_id?: string;
   name: string;
   slug: string;
   game_type: "rsps" | "minecraft";
@@ -14,6 +15,7 @@ export interface Server {
 export interface Category {
   id: string;
   server_id: string;
+  numeric_id?: number;
   name: string;
   description: string;
   display_order: number;
@@ -24,6 +26,7 @@ export interface Product {
   id: string;
   server_id: string;
   category_id: string;
+  numeric_id?: number;
   name: string;
   item_id: number | null;
   description: string;
