@@ -1,5 +1,5 @@
 import { supabase } from "./supabase"
-import type { Server, Category, Product, Order, OrderItem, Vote, DashboardStats } from "./mock-data"
+import type { Server, Category, Product, Order, OrderItem, Vote, DashboardStats, PendingTransaction } from "./mock-data"
 
 const getUserId = () => {
   const userData = localStorage.getItem("supabase.auth.token");
@@ -314,6 +314,34 @@ export const dataService = {
     const { data, error } = await supabase.from("servers").update({ hiscores_enabled: enabled }).eq("id", serverId).select();
     if (error) throw error;
     return data?.[0] || null;
+  },
+
+  async getPendingTransactions(serverId?: string): Promise<PendingTransaction[]> {
+    let query = supabase.from("pending_transactions").select("*").order("created_at", { ascending: false });
+    if (serverId) query = query.eq("server_id", serverId);
+    const { data, error } = await query;
+    if (error) throw error;
+    return data || [];
+  },
+
+  async createPendingTransaction(tx: Omit<PendingTransaction, "id" | "created_at" | "updated_at">): Promise<PendingTransaction> {
+    const id = `tx-${Date.now()}`;
+    const { data, error } = await supabase.from("pending_transactions").insert({ ...tx, id }).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updatePendingTransactionStatus(id: string, status: PendingTransaction["status"], claimed?: boolean): Promise<PendingTransaction> {
+    const updates: Partial<PendingTransaction> = { status };
+    if (claimed !== undefined) updates.claimed = claimed;
+    const { data, error } = await supabase.from("pending_transactions").update(updates).eq("id", id).select();
+    if (error) throw error;
+    return data?.[0] || null;
+  },
+
+  async deletePendingTransaction(id: string): Promise<void> {
+    const { error } = await supabase.from("pending_transactions").delete().eq("id", id);
+    if (error) throw error;
   },
 
   async seedHiscoresDefaults(serverId: string) {

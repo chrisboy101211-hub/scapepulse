@@ -65,6 +65,19 @@ export interface Vote {
   timestamp: string;
 }
 
+export interface PendingTransaction {
+  id: string;
+  server_id: string;
+  username: string;
+  cart_items: Array<{ product_id: string; product_name: string; quantity: number; price: number }>;
+  total: number;
+  transaction_id: string;
+  status: "pending" | "paid" | "failed" | "claimed";
+  claimed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface DashboardStats {
   total_revenue: number;
   total_orders: number;
