@@ -109,3 +109,24 @@
     font-family: 'JetBrains Mono', monospace;
   }
 }
+
+/* ===== Toplist Animations ===== */
+@keyframes premium-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(234, 179, 8, 0.3), 0 0 20px rgba(234, 179, 8, 0.1); }
+  50% { box-shadow: 0 0 20px rgba(234, 179, 8, 0.5), 0 0 40px rgba(234, 179, 8, 0.2); }
+}
+
+@keyframes sponsor-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(168, 85, 247, 0.3), 0 0 20px rgba(168, 85, 247, 0.1); }
+  50% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.2); }
+}
+
+@keyframes ticker-scroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.premium-glow { animation: premium-glow 3s ease-in-out infinite; }
+.sponsor-glow { animation: sponsor-glow 3s ease-in-out infinite; }
+.ticker-scroll { animation: ticker-scroll 30s linear infinite; }
+.ticker-scroll:hover { animation-play-state: paused; }

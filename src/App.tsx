@@ -24,6 +24,10 @@ import NotFound from "./pages/NotFound.tsx";
 import Docs from "./pages/Docs.tsx";
 import Pricing from "./pages/Pricing.tsx";
 import Hiscores from "./pages/Hiscores.tsx";
+import ToplistHome from "./pages/toplist/ToplistHome.tsx";
+import ToplistServerDetail from "./pages/toplist/ToplistServerDetail.tsx";
+import ToplistVote from "./pages/toplist/ToplistVote.tsx";
+import ToplistSubmitServer from "./pages/toplist/ToplistSubmitServer.tsx";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +82,10 @@ const App = () => (
             </Route>
             <Route path="/store/:slug" element={<StoreFront />} />
             <Route path="/hiscores/:slug" element={<Hiscores />} />
+            <Route path="/toplist" element={<ToplistHome />} />
+            <Route path="/toplist/servers/:id" element={<ToplistServerDetail />} />
+            <Route path="/toplist/vote/:id" element={<ToplistVote />} />
+            <Route path="/toplist/submit" element={<ToplistSubmitServer />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

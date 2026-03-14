@@ -1,15 +1,14 @@
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { MessageCircle, ExternalLink } from "lucide-react"
+import { MessageCircle } from "lucide-react"
+import { Logo } from "@/components/Logo"
 
 const NavBar = () => {
   return (
     <nav className="h-14 border-b border-border bg-card/80 backdrop-blur-sm">
       <div className="container mx-auto flex h-full items-center justify-between px-6">
         <Link to="/" className="flex items-center gap-2">
-          <span className="font-display text-xl font-bold tracking-tight">
-            SCAPE<span className="text-primary">PULSE</span>
-          </span>
+          <Logo size="sm" />
         </Link>
         
         <div className="flex items-center gap-6">
