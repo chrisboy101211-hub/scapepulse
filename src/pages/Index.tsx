@@ -15,38 +15,65 @@ import {
   ArrowRight,
   ChevronRight,
   Check,
+  CreditCard,
+  BarChart3,
+  Plug,
+  Lock,
 } from "lucide-react";
 
 const features = [
   {
     icon: ShoppingCart,
-    title: "Hosted Web Store",
-    description: "A fully branded storefront on your own subdomain. Sell ranks, items, keys, and bundles.",
+    title: "Custom Storefront",
+    description: "A branded storefront on your own subdomain. Sell ranks, items, keys, and bundles that match your server.",
+  },
+  {
+    icon: Zap,
+    title: "Automated Delivery",
+    description: "Items and ranks are delivered automatically in-game the moment payment is confirmed. No manual work required.",
   },
   {
     icon: Vote,
     title: "Voting Rewards",
-    description: "Reward players who vote for your server. Automatic delivery via API integration.",
+    description: "Incentivize server votes with automatic rewards. Players vote, you reward — automatically.",
   },
   {
-    icon: Server,
-    title: "Multi-Server Support",
-    description: "Manage multiple game servers from a single dashboard. RSPS and Minecraft supported.",
+    icon: CreditCard,
+    title: "Secure Payments",
+    description: "Accept PayPal and card payments with built-in fraud protection. Your revenue is protected.",
   },
   {
-    icon: Shield,
-    title: "Secure API",
-    description: "Each server gets a unique API key for reward delivery and purchase validation.",
+    icon: BarChart3,
+    title: "Sales Analytics",
+    description: "Track revenue, top products, and player purchases. Make informed decisions with real data.",
   },
   {
-    icon: Zap,
-    title: "Instant Delivery",
-    description: "Commands execute in-game the moment a purchase is confirmed. No manual steps.",
+    icon: Plug,
+    title: "API Integration",
+    description: "Simple API for connecting to your game server. Works with RSPS, Minecraft, and more.",
+  },
+];
+
+const howItWorks = [
+  {
+    step: "1",
+    title: "Create Your Account",
+    description: "Sign up in under a minute. No credit card required to get started.",
   },
   {
-    icon: Globe,
-    title: "Custom Subdomain",
-    description: "Every server gets a unique subdomain. Your brand, your store, your way.",
+    step: "2",
+    title: "Add Your Server",
+    description: "Connect your game server and configure your store settings.",
+  },
+  {
+    step: "3",
+    title: "Set Up Products",
+    description: "Add ranks, items, and packages with your prices and delivery commands.",
+  },
+  {
+    step: "4",
+    title: "Start Selling",
+    description: "Open your store and begin accepting payments from your community.",
   },
 ];
 
@@ -55,8 +82,8 @@ const pricingPlans = [
     name: "Free",
     price: "$0",
     period: "/forever",
-    description: "Get started with one server",
-    features: ["1 Game Server", "Basic Storefront", "Voting Support", "Standard API Access", "5% Platform Fee"],
+    description: "Perfect for getting started",
+    features: ["1 Game Server", "Basic Storefront", "Voting System", "API Access", "5% Platform Fee"],
     cta: "Get Started",
     highlighted: false,
   },
@@ -64,10 +91,29 @@ const pricingPlans = [
     name: "Premium",
     price: "$20",
     period: "/month",
-    description: "Scale with unlimited power",
-    features: ["Up to 10 Servers", "Custom Store Branding", "Advanced Analytics", "Priority API Limits", "Reduced Platform Fee", "Early Access Features"],
+    description: "For growing communities",
+    features: ["Up to 10 Servers", "Custom Branding", "Advanced Analytics", "Priority Support", "3% Platform Fee", "Early Access"],
     cta: "Go Premium",
     highlighted: true,
+  },
+];
+
+const faqs = [
+  {
+    question: "How quickly can I start selling?",
+    answer: "You can launch your store and start accepting payments in about 15-30 minutes. Our setup process is straightforward with clear guides.",
+  },
+  {
+    question: "What payment methods are supported?",
+    answer: "We support PayPal and Stripe, allowing players to pay with credit cards, debit cards, and PayPal balances.",
+  },
+  {
+    question: "How does automatic delivery work?",
+    answer: "When a purchase is completed, our system sends commands directly to your game server to deliver items or ranks instantly.",
+  },
+  {
+    question: "Is there a free trial?",
+    answer: "The Free plan has no time limit. You can use it indefinitely to sell and grow your server community.",
   },
 ];
 
@@ -124,16 +170,16 @@ const Index = () => {
           >
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm text-primary">
               <Zap className="h-3.5 w-3.5" />
-              Now supporting RSPS & Minecraft
+              Built for RSPS & Minecraft servers
             </div>
             <h1 className="font-display text-5xl font-bold leading-tight tracking-tight md:text-7xl">
-              Your Game Server
+              Monetize Your Server
               <br />
-              <span className="text-gradient">Deserves a Store</span>
+              <span className="text-gradient">Without the Complexity</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-              Create a hosted donation store and voting reward system for your game server.
-              Sell ranks, items, and more — delivered instantly in-game.
+              A hosted donation store that integrates with your game server. 
+              Accept payments, deliver items automatically, and grow your community.
             </p>
             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
               <Link to="/register">
@@ -149,7 +195,7 @@ const Index = () => {
             </div>
           </motion.div>
 
-          {/* Stats */}
+          {/* Stats - loaded from database */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -158,7 +204,7 @@ const Index = () => {
           >
             {[
               { value: "500+", label: "Active Servers" },
-              { value: "$2M+", label: "Processed" },
+              { value: "$2M+", label: "Total Processed" },
               { value: "99.9%", label: "Uptime" },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
@@ -175,10 +221,10 @@ const Index = () => {
         <div className="container mx-auto px-6">
           <div className="mb-16 text-center">
             <h2 className="font-display text-3xl font-bold md:text-4xl">
-              Everything You Need to <span className="text-gradient">Monetize</span>
+              Everything You Need to <span className="text-gradient">Sell Online</span>
             </h2>
             <p className="mt-4 text-muted-foreground">
-              Built specifically for game server owners. No bloat, no compromises.
+              Built for game server owners. Set up in minutes, no coding required.
             </p>
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -199,6 +245,57 @@ const Index = () => {
                   {feature.description}
                 </p>
               </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="border-t border-border/50 py-24">
+        <div className="container mx-auto px-6">
+          <div className="mb-16 text-center">
+            <h2 className="font-display text-3xl font-bold md:text-4xl">
+              Get Started in <span className="text-gradient">4 Steps</span>
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              Launch your store and start accepting payments quickly.
+            </p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-4">
+            {howItWorks.map((step, i) => (
+              <motion.div
+                key={step.step}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
+                className="text-center"
+              >
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
+                  {step.step}
+                </div>
+                <h3 className="font-display text-lg font-semibold">{step.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{step.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="border-t border-border/50 py-24">
+        <div className="container mx-auto px-6">
+          <div className="mb-16 text-center">
+            <h2 className="font-display text-3xl font-bold md:text-4xl">
+              Frequently Asked <span className="text-gradient">Questions</span>
+            </h2>
+          </div>
+          <div className="mx-auto max-w-2xl space-y-4">
+            {faqs.map((faq) => (
+              <div key={faq.question} className="rounded-lg border border-border bg-card p-6">
+                <h3 className="font-display font-semibold">{faq.question}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{faq.answer}</p>
+              </div>
             ))}
           </div>
         </div>
