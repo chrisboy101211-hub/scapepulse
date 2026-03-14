@@ -33,6 +33,12 @@ const NavBar = () => {
           >
             Pricing
           </Link>
+          <Link 
+            to="/toplist" 
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Toplist
+          </Link>
           <Button variant="outline" size="sm" asChild>
             <Link to="/login">
               Login

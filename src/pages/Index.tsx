@@ -1,10 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import NavBar from "@/components/NavBar";
 import { motion } from "framer-motion";
 import { Logo } from "@/components/Logo";
 import { dataService } from "@/lib/data";
+import { SponsoredSlider } from "@/components/toplist/SponsoredSlider";
 import {
   ShoppingCart,
   Vote,
@@ -119,6 +120,8 @@ const faqs = [
 
 const Index = () => {
   const navigate = useNavigate();
+  const [stats, setStats] = useState({ total_servers: 0, total_revenue: 0, total_transactions: 0, uptime_percentage: 99.9 });
+  const [loadingStats, setLoadingStats] = useState(true);
 
   useEffect(() => {
     const checkSubdomain = async () => {
@@ -146,8 +149,20 @@ const Index = () => {
         }
       }
     };
+
+    const loadStats = async () => {
+      try {
+        const statsData = await dataService.getPlatformStats();
+        setStats(statsData);
+      } catch (e) {
+        console.error("Failed to load stats:", e);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
     
     checkSubdomain();
+    loadStats();
   }, [navigate]);
 
   return (
@@ -168,6 +183,8 @@ const Index = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
+            <SponsoredSlider />
+            
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm text-primary">
               <Zap className="h-3.5 w-3.5" />
               Built for RSPS & Minecraft servers
@@ -200,18 +217,26 @@ const Index = () => {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
-            className="mx-auto mt-20 grid max-w-3xl grid-cols-3 gap-8"
+            className="mx-auto mt-16 grid max-w-3xl grid-cols-3 gap-8"
           >
-            {[
-              { value: "500+", label: "Active Servers" },
-              { value: "$2M+", label: "Total Processed" },
-              { value: "99.9%", label: "Uptime" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="font-display text-3xl font-bold text-primary">{stat.value}</div>
-                <div className="mt-1 text-sm text-muted-foreground">{stat.label}</div>
+            <div className="text-center">
+              <div className="font-display text-3xl font-bold text-primary">
+                {loadingStats ? "..." : stats.total_servers}
               </div>
-            ))}
+              <div className="mt-1 text-sm text-muted-foreground">Active Servers</div>
+            </div>
+            <div className="text-center">
+              <div className="font-display text-3xl font-bold text-primary">
+                {loadingStats ? "..." : `$${(stats.total_revenue / 1000).toFixed(0)}K`}
+              </div>
+              <div className="mt-1 text-sm text-muted-foreground">Total Revenue</div>
+            </div>
+            <div className="text-center">
+              <div className="font-display text-3xl font-bold text-primary">
+                {loadingStats ? "..." : `${stats.uptime_percentage}%`}
+              </div>
+              <div className="mt-1 text-sm text-muted-foreground">Uptime</div>
+            </div>
           </motion.div>
         </div>
       </section>
