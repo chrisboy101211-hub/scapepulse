@@ -40,7 +40,6 @@ const HiscoresSettings = () => {
   const { selectedServer } = useServers();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [hiscoresEnabled, setHiscoresEnabled] = useState(false);
   
   const [gameModes, setGameModes] = useState<GameMode[]>([]);
   const [xpModes, setXpModes] = useState<XpMode[]>([]);
@@ -60,7 +59,6 @@ const HiscoresSettings = () => {
     if (!selectedServer) return;
     setLoading(true);
     try {
-      setHiscoresEnabled(selectedServer.hiscores_enabled || false);
       const [gmData, xmData, skData] = await Promise.all([
         dataService.getHiscoresGameModes(selectedServer.id),
         dataService.getHiscoresXpModes(selectedServer.id),
@@ -73,30 +71,6 @@ const HiscoresSettings = () => {
       console.error("Failed to load hiscores data:", error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleToggleHiscores = async (enabled: boolean) => {
-    if (!selectedServer) return;
-    try {
-      await dataService.toggleServerHiscores(selectedServer.id, enabled);
-      
-      if (enabled) {
-        await dataService.seedHiscoresDefaults(selectedServer.id);
-        const [gmData, xmData, skData] = await Promise.all([
-          dataService.getHiscoresGameModes(selectedServer.id),
-          dataService.getHiscoresXpModes(selectedServer.id),
-          dataService.getHiscoresSkills(selectedServer.id),
-        ]);
-        setGameModes(gmData);
-        setXpModes(xmData);
-        setSkills(skData);
-      }
-      
-      setHiscoresEnabled(enabled);
-      toast.success(enabled ? "Hiscores enabled with default settings" : "Hiscores disabled");
-    } catch (error) {
-      toast.error("Failed to toggle hiscores");
     }
   };
 
@@ -223,42 +197,31 @@ const HiscoresSettings = () => {
         <p className="text-sm text-muted-foreground">Configure your server's hiscores system</p>
       </div>
 
-      {/* Enable/Disable Hiscores */}
+      {/* Hiscores Info */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Hiscores System</span>
-            <Switch
-              checked={hiscoresEnabled}
-              onCheckedChange={handleToggleHiscores}
-            />
-          </CardTitle>
+          <CardTitle>Hiscores</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            {hiscoresEnabled 
-              ? "Hiscores are currently enabled and visible to players."
-              : "Enable hiscores to let players view their stats on your server."}
+            Hiscores are automatically enabled for your server. Configure game modes, XP modes, and skills below.
           </p>
-          {hiscoresEnabled && (
-            <a 
-              href={`/hiscores/${selectedServer?.slug}`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-sm text-primary hover:underline mt-2 inline-block"
-            >
-              View hiscores page →
-            </a>
-          )}
+          <a 
+            href={`/hiscores/${selectedServer?.slug}`} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-sm text-primary hover:underline mt-2 inline-block"
+          >
+            View hiscores page →
+          </a>
         </CardContent>
       </Card>
 
-      {hiscoresEnabled && (
-        <Tabs defaultValue="game-modes" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="game-modes">Game Modes ({gameModes.length})</TabsTrigger>
-            <TabsTrigger value="xp-modes">XP Modes ({xpModes.length})</TabsTrigger>
-            <TabsTrigger value="skills">Skills ({skills.length})</TabsTrigger>
+      <Tabs defaultValue="game-modes" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="game-modes">Game Modes ({gameModes.length})</TabsTrigger>
+          <TabsTrigger value="xp-modes">XP Modes ({xpModes.length})</TabsTrigger>
+          <TabsTrigger value="skills">Skills ({skills.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="game-modes" className="space-y-4">
@@ -422,7 +385,6 @@ const HiscoresSettings = () => {
             </Card>
           </TabsContent>
         </Tabs>
-      )}
     </div>
   );
 };

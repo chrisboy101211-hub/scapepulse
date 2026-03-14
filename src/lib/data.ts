@@ -114,6 +114,10 @@ export const dataService = {
     const id = `srv-${Date.now()}`;
     const { data, error } = await supabase.from("servers").insert({ ...server, id }).select().single();
     if (error) throw error;
+    
+    // Auto-create hiscores configuration for the new server
+    await dataService.seedHiscoresDefaults(id);
+    
     return data;
   },
 
