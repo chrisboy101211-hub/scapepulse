@@ -185,10 +185,6 @@ const Index = () => {
           >
             <SponsoredSlider />
             
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm text-primary">
-              <Zap className="h-3.5 w-3.5" />
-              Built for RSPS & Minecraft servers
-            </div>
             <h1 className="font-display text-5xl font-bold leading-tight tracking-tight md:text-7xl">
               Monetize Your Server
               <br />
