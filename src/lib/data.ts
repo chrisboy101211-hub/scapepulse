@@ -424,5 +424,17 @@ export const dataService = {
       supabase.from("hiscores_xp_modes").insert(xpModeInserts),
       supabase.from("hiscores_skills").insert(skillInserts),
     ]);
+  },
+
+  async getPlatformStats() {
+    const { data, error } = await supabase
+      .from("platform_stats")
+      .select("*")
+      .eq("id", "stats-main")
+      .single();
+    if (error) {
+      return { total_servers: 0, total_revenue: 0, total_transactions: 0, uptime_percentage: 99.9 };
+    }
+    return data;
   }
 };
