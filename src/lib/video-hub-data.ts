@@ -22,6 +22,15 @@ export interface Video {
   user_vote?: "LIKE" | "DISLIKE" | null
 }
 
+export interface VideoComment {
+  id: string
+  video_id: string
+  user_id: string
+  display_name: string
+  content: string
+  created_at: string
+}
+
 export type VideoCategory = "GENERAL" | "PVP" | "PVM" | "GUIDES" | "REVIEWS" | "UPDATES" | "MONTAGES"
 
 export const VIDEO_CATEGORIES = [
@@ -189,6 +198,31 @@ export const videoHubService = {
 
     if (error) throw error
     return data as Video
+  },
+
+  async getComments(videoId: string): Promise<VideoComment[]> {
+    const { data, error } = await supabase
+      .from("video_comments")
+      .select("*")
+      .eq("video_id", videoId)
+      .order("created_at", { ascending: true })
+    if (error) throw error
+    return (data ?? []) as VideoComment[]
+  },
+
+  async postComment(videoId: string, userId: string, displayName: string, content: string): Promise<VideoComment> {
+    const { data, error } = await supabase
+      .from("video_comments")
+      .insert({ video_id: videoId, user_id: userId, display_name: displayName, content: content.trim() })
+      .select()
+      .single()
+    if (error) throw error
+    return data as VideoComment
+  },
+
+  async deleteComment(commentId: string): Promise<void> {
+    const { error } = await supabase.from("video_comments").delete().eq("id", commentId)
+    if (error) throw error
   },
 
   async likeVideo(videoId: string, userId: string, type: "LIKE" | "DISLIKE") {

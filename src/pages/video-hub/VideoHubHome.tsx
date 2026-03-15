@@ -4,6 +4,7 @@ import NavBar from "@/components/NavBar"
 import { ToplistFooter } from "@/components/toplist/ToplistFooter"
 import { VideoLikeButton } from "@/components/VideoLikeButton"
 import { videoHubService, VIDEO_CATEGORIES, getYouTubeVideoId, formatViews, formatTimeAgo, type Video } from "@/lib/video-hub-data"
+import { VideoComments } from "@/components/VideoComments"
 import { useAuth } from "@/lib/auth"
 
 export default function VideoHubHome() {
@@ -332,6 +333,8 @@ export default function VideoHubHome() {
                   size="md"
                 />
               </div>
+
+              <VideoComments videoId={selectedVideo.id} />
             </div>
           </div>
         </div>
