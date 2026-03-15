@@ -23,6 +23,9 @@ const SERVER_TYPE_OPTIONS = ["Economy", "PvP", "PvM", "Skilling", "Custom", "Har
 const EXPERIENCE_RATE_OPTIONS = ["1x (Vanilla)", "2x", "5x", "10x", "25x", "50x", "100x", "200x", "500x", "1000x", "Custom"]
 const PLAYER_COUNT_OPTIONS = ["0-50", "51-100", "101-250", "251-500", "501-1000", "1000+"]
 
+// shared input className
+const inputCls = "px-3 py-2 bg-secondary/40 border border-border/60 rounded text-foreground text-sm focus:outline-none focus:border-primary/70 focus:ring-1 focus:ring-primary/20 transition-colors placeholder:text-muted-foreground/50"
+
 // ── Reusable form row ────────────────────────────────────────────────────────
 function Row({ label, required, hint, children }: {
   label: string
@@ -31,16 +34,16 @@ function Row({ label, required, hint, children }: {
   children: React.ReactNode
 }) {
   return (
-    <div className="grid grid-cols-[160px_1fr] gap-4 py-5 border-b border-border/50 last:border-0">
-      <div className="pt-2.5">
-        <span className="text-sm font-semibold text-foreground">
+    <div className="grid grid-cols-[190px_1fr] border-b border-border/30 last:border-0">
+      <div className="flex items-start justify-end pr-5 pt-3 pb-3">
+        <span className="text-sm font-semibold text-foreground text-right leading-tight">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </span>
       </div>
-      <div>
+      <div className="py-3 pr-4">
         {children}
-        {hint && <p className="text-xs text-muted-foreground mt-1.5">{hint}</p>}
+        {hint && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
       </div>
     </div>
   )
@@ -64,13 +67,15 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (t: string[]) 
   }
 
   return (
-    <div className="flex flex-wrap gap-2 px-3 py-2 bg-background border border-border rounded-md focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary min-h-[42px] cursor-text"
-      onClick={(e) => (e.currentTarget.querySelector("input") as HTMLInputElement)?.focus()}>
+    <div
+      className="flex flex-wrap gap-1.5 px-3 py-2 bg-secondary/40 border border-border/60 rounded min-h-[38px] cursor-text focus-within:border-primary/70 focus-within:ring-1 focus-within:ring-primary/20 transition-colors"
+      onClick={(e) => (e.currentTarget.querySelector("input") as HTMLInputElement)?.focus()}
+    >
       {tags.map((t) => (
-        <span key={t} className="flex items-center gap-1 px-2.5 py-0.5 bg-primary/20 text-primary rounded-full text-xs font-medium border border-primary/30">
+        <span key={t} className="flex items-center gap-1 px-2 py-0.5 bg-primary/20 text-primary rounded text-xs font-medium border border-primary/30">
           {t}
           <button type="button" onClick={() => onChange(tags.filter((x) => x !== t))}
-            className="hover:text-destructive transition-colors leading-none">×</button>
+            className="hover:text-destructive transition-colors leading-none text-base">×</button>
         </span>
       ))}
       <input
@@ -79,19 +84,18 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (t: string[]) 
         onKeyDown={onKey}
         onBlur={() => input.trim() && add(input)}
         placeholder={tags.length === 0 ? "osrs, pvp, economy …" : ""}
-        className="flex-1 min-w-[120px] bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
+        className="flex-1 min-w-[120px] bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground/50"
       />
     </div>
   )
 }
 
 // ── Drag-and-drop file uploader ───────────────────────────────────────────────
-function FileUpload({ label, preview, onUpload, onClear, hint }: {
+function FileUpload({ label, preview, onUpload, onClear }: {
   label: string
   preview: string
   onUpload: (file: File) => Promise<void>
   onClear: () => void
-  hint?: string
 }) {
   const [dragging, setDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -138,47 +142,43 @@ function FileUpload({ label, preview, onUpload, onClear, hint }: {
         onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
-        className={`relative border-2 border-dashed rounded-lg transition-colors ${dragging ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`}
+        className={`relative border-2 border-dashed rounded transition-colors ${dragging ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/40"}`}
       >
-        <div className="flex items-center gap-4 p-4">
+        <div className="flex items-center gap-4 p-3">
           <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading}
-            className="flex-shrink-0 px-4 py-2 bg-secondary hover:bg-secondary/80 text-foreground text-sm font-medium rounded-md transition-colors border border-border disabled:opacity-50">
+            className="flex-shrink-0 px-3 py-1.5 bg-secondary hover:bg-secondary/80 text-foreground text-xs font-medium rounded border border-border/60 disabled:opacity-50 transition-colors">
             {uploading ? "Uploading…" : "Choose File"}
           </button>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-xs text-muted-foreground">
             {uploading ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <span>Uploading to storage…</span>
+                <div className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <span>Uploading…</span>
               </div>
             ) : (
-              <>
-                <p>Or drag and drop your file here</p>
-                <p className="text-xs mt-0.5">Accepted: gif, jpeg, jpg, png, webp · Max 5 MB</p>
-              </>
+              <span>Or drag and drop · gif, jpeg, jpg, png, webp · Max 5 MB</span>
             )}
           </div>
         </div>
         <input ref={inputRef} type="file" accept="image/*" onChange={onChange} className="hidden" />
       </div>
 
-      {uploadError && <p className="text-xs text-destructive mt-1.5">{uploadError}</p>}
+      {uploadError && <p className="text-xs text-destructive mt-1">{uploadError}</p>}
 
       {preview && !uploading && (
-        <div className="mt-3 flex items-center gap-3 p-3 bg-card border border-border rounded-lg">
-          <img src={preview} alt="Preview" className="w-14 h-14 object-cover rounded border border-border flex-shrink-0" />
+        <div className="mt-2 flex items-center gap-3 p-2.5 bg-secondary/30 border border-border/40 rounded">
+          <img src={preview} alt="Preview" className="w-12 h-12 object-cover rounded border border-border/40 flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-foreground truncate">{fileName || label}</p>
+            <p className="text-xs font-medium text-foreground truncate">{fileName || label}</p>
             {fileSize > 0 && <p className="text-xs text-muted-foreground">{(fileSize / 1024).toFixed(1)} kB</p>}
             <p className="text-xs text-green-500 mt-0.5">✓ Uploaded</p>
           </div>
           <button type="button" onClick={clear}
-            className="flex-shrink-0 w-6 h-6 rounded-full bg-muted hover:bg-destructive/20 hover:text-destructive text-muted-foreground flex items-center justify-center text-sm transition-colors">
+            className="flex-shrink-0 w-5 h-5 rounded-full bg-muted hover:bg-destructive/20 hover:text-destructive text-muted-foreground flex items-center justify-center text-sm transition-colors">
             ×
           </button>
         </div>
       )}
-      {hint && <p className="text-xs text-muted-foreground mt-1.5">{hint}</p>}
     </div>
   )
 }
@@ -266,19 +266,19 @@ export default function ToplistSubmitServer() {
 
       <div className="container mx-auto px-8 py-10 max-w-5xl">
         <h1 className="text-3xl font-bold text-foreground mb-1">Submit Your Server</h1>
-        <p className="text-muted-foreground text-sm mb-8">Get your RSPS listed on the ScapePulse Toplist</p>
+        <p className="text-muted-foreground text-sm mb-6">Get your RSPS listed on the ScapePulse Toplist</p>
 
         {error && (
-          <div className="mb-6 bg-red-900/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg text-sm">{error}</div>
+          <div className="mb-5 bg-red-900/20 border border-red-500/30 text-red-300 px-4 py-3 rounded text-sm">{error}</div>
         )}
 
         <form onSubmit={handleSubmit}>
-          <div className="bg-card border border-border rounded-2xl overflow-hidden">
+          <div className="border border-border/40 rounded-lg overflow-hidden">
 
             <Row label="Server Name" required>
               <input type="text" name="name" required value={form.name} onChange={set}
                 placeholder="My Awesome RSPS"
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors" />
+                className={`w-full max-w-sm ${inputCls}`} />
             </Row>
 
             <Row label="Tags" required hint="Press Enter or comma to add. Up to 8 tags.">
@@ -288,30 +288,30 @@ export default function ToplistSubmitServer() {
             <Row label="Website URL" required hint="The URL to your server's website.">
               <input type="url" name="website" required value={form.website} onChange={set}
                 placeholder="https://www.yourserver.com"
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors" />
+                className={`w-full max-w-sm ${inputCls}`} />
             </Row>
 
-            <Row label="Url Callback" hint="ScapePulse POSTs uid=<key>&voter_name=<player> here after each confirmed vote so your server can grant in-game rewards automatically.">
+            <Row label="Url Callback" required hint="ScapePulse POSTs uid=<key>&voter_name=<player> here after each confirmed vote.">
               <input type="url" name="callback_url" value={form.callback_url} onChange={set}
                 placeholder="https://yourserver.com/vote/callback.php"
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors" />
+                className={`w-full max-w-sm ${inputCls}`} />
             </Row>
 
             <Row label="Discord Invite" hint="Add your Discord invite link.">
               <input type="url" name="discord_invite" value={form.discord_invite} onChange={set}
                 placeholder="https://discord.gg/yourserver"
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors" />
+                className={`w-full max-w-sm ${inputCls}`} />
             </Row>
 
             <Row label="Vote Page URL" hint="Page players are sent to when they click Vote Now.">
               <input type="url" name="vote_link" value={form.vote_link} onChange={set}
                 placeholder="https://yourserver.com/vote"
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors" />
+                className={`w-full max-w-sm ${inputCls}`} />
             </Row>
 
             <Row label="Revision" required>
               <select name="revision" required value={form.revision} onChange={set}
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors">
+                className={inputCls}>
                 <option value="">Select Revision</option>
                 {REVISION_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
               </select>
@@ -319,7 +319,7 @@ export default function ToplistSubmitServer() {
 
             <Row label="Category" required>
               <select name="server_type" required value={form.server_type} onChange={set}
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors">
+                className={inputCls}>
                 <option value="">Select Category</option>
                 {SERVER_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
               </select>
@@ -327,7 +327,7 @@ export default function ToplistSubmitServer() {
 
             <Row label="Experience Rate">
               <select name="experience_rate" value={form.experience_rate} onChange={set}
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors">
+                className={inputCls}>
                 <option value="">Select Rate</option>
                 {EXPERIENCE_RATE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
               </select>
@@ -335,21 +335,21 @@ export default function ToplistSubmitServer() {
 
             <Row label="Player Count">
               <select name="player_count" value={form.player_count} onChange={set}
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors">
+                className={inputCls}>
                 <option value="">Select Count</option>
                 {PLAYER_COUNT_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
               </select>
             </Row>
 
             <Row label="Short Description" required hint="Shown in list and card views. Max 350 characters.">
-              <textarea name="short_description" required rows={2} maxLength={350}
+              <textarea name="short_description" required rows={3} maxLength={350}
                 value={form.short_description} onChange={set}
                 placeholder="A brief summary of your server..."
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors resize-none" />
-              <p className="text-xs text-muted-foreground text-right mt-0.5">{form.short_description.length}/350</p>
+                className={`w-full resize-none ${inputCls}`} />
+              <p className="text-xs text-muted-foreground/60 text-right mt-0.5">{form.short_description.length}/350</p>
             </Row>
 
-            <Row label="Server Description" required hint="Full server description shown on your server's detail page. Supports rich formatting, code blocks, images, and more.">
+            <Row label="Server Description" required hint="Supports rich formatting, code blocks, images, and more.">
               <RichTextEditor
                 value={form.description}
                 onChange={(html) => setForm((p) => ({ ...p, description: html }))}
@@ -368,7 +368,6 @@ export default function ToplistSubmitServer() {
                   setForm((p) => ({ ...p, image_url: url }))
                 }}
                 onClear={() => setForm((p) => ({ ...p, image_url: "" }))}
-                hint="Square logo/icon for your server."
               />
             </Row>
 
@@ -382,18 +381,17 @@ export default function ToplistSubmitServer() {
                   setForm((p) => ({ ...p, banner_url: url }))
                 }}
                 onClear={() => setForm((p) => ({ ...p, banner_url: "" }))}
-                hint="Servers with only an icon and no banner may be replaced with a placeholder."
               />
             </Row>
 
           </div>
 
-          <div className="mt-6 flex items-center justify-between">
+          <div className="mt-5 flex items-center justify-between">
             <Link to="/toplist" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               ← Back to Toplist
             </Link>
             <button type="submit" disabled={loading}
-              className="px-8 py-3 bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-lg font-semibold hover:opacity-90 disabled:opacity-50 transition-all shadow-lg text-sm">
+              className="px-8 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded font-semibold disabled:opacity-50 transition-colors text-sm">
               {loading ? "Submitting…" : "Submit Server"}
             </button>
           </div>
