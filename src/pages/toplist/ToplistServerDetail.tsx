@@ -227,7 +227,15 @@ export default function ToplistServerDetail() {
           <div className="h-1 bg-gradient-to-r from-transparent via-yellow-500/80 to-transparent" />
 
           <div className="border-t border-border/50 p-6 bg-background/5 relative z-10">
-            <p className="text-foreground leading-relaxed">{server.description}</p>
+            <div
+              className="text-foreground leading-relaxed prose prose-invert max-w-none text-sm
+                [&_blockquote]:border-l-4 [&_blockquote]:border-primary/50 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground
+                [&_code]:bg-white/10 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-xs
+                [&_pre]:bg-[#1e1e2e] [&_pre]:border [&_pre]:border-white/10 [&_pre]:rounded-lg [&_pre]:p-4 [&_pre]:overflow-x-auto
+                [&_a]:text-primary [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5
+                [&_img]:max-w-full [&_img]:rounded [&_img]:my-2"
+              dangerouslySetInnerHTML={{ __html: server.description }}
+            />
             {parseTags(server.tags).length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border/30">
                 {parseTags(server.tags).map((tag, i) => (

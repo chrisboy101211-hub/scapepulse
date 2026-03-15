@@ -5,6 +5,7 @@ import { ToplistFooter } from "@/components/toplist/ToplistFooter"
 import { toplistDataService } from "@/lib/toplist-data"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/lib/auth"
+import { RichTextEditor } from "@/components/RichTextEditor"
 
 const BUCKET = "server-banners"
 
@@ -290,6 +291,12 @@ export default function ToplistSubmitServer() {
                 className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors" />
             </Row>
 
+            <Row label="Url Callback" hint="ScapePulse POSTs uid=<key>&voter_name=<player> here after each confirmed vote so your server can grant in-game rewards automatically.">
+              <input type="url" name="callback_url" value={form.callback_url} onChange={set}
+                placeholder="https://yourserver.com/vote/callback.php"
+                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors" />
+            </Row>
+
             <Row label="Discord Invite" hint="Add your Discord invite link.">
               <input type="url" name="discord_invite" value={form.discord_invite} onChange={set}
                 placeholder="https://discord.gg/yourserver"
@@ -299,12 +306,6 @@ export default function ToplistSubmitServer() {
             <Row label="Vote Page URL" hint="Page players are sent to when they click Vote Now.">
               <input type="url" name="vote_link" value={form.vote_link} onChange={set}
                 placeholder="https://yourserver.com/vote"
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors" />
-            </Row>
-
-            <Row label="Url Callback" hint={`ScapePulse will POST uid=<key>&voter_name=<player> here after each vote to trigger in-game rewards.`}>
-              <input type="url" name="callback_url" value={form.callback_url} onChange={set}
-                placeholder="https://yourserver.com/vote/callback.php"
                 className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors" />
             </Row>
 
@@ -348,11 +349,13 @@ export default function ToplistSubmitServer() {
               <p className="text-xs text-muted-foreground text-right mt-0.5">{form.short_description.length}/350</p>
             </Row>
 
-            <Row label="Server Description" required hint="Full server description shown on your server's detail page.">
-              <textarea name="description" required rows={8}
-                value={form.description} onChange={set}
-                placeholder="Tell players about your server's features, content, and community..."
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors resize-y" />
+            <Row label="Server Description" required hint="Full server description shown on your server's detail page. Supports rich formatting, code blocks, images, and more.">
+              <RichTextEditor
+                value={form.description}
+                onChange={(html) => setForm((p) => ({ ...p, description: html }))}
+                placeholder="Tell players about your server's features, content, and community…"
+                minHeight={300}
+              />
             </Row>
 
             <Row label="Server Icon" hint="Recommended: 64×64px. Shown on your server card.">
