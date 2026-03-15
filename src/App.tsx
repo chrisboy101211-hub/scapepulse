@@ -30,6 +30,7 @@ import ToplistVote from "./pages/toplist/ToplistVote.tsx";
 import ToplistSubmitServer from "./pages/toplist/ToplistSubmitServer.tsx";
 import VideoHubHome from "./pages/video-hub/VideoHubHome.tsx";
 import VideoHubSubmit from "./pages/video-hub/VideoHubSubmit.tsx";
+import VideoHubWatch from "./pages/video-hub/VideoHubWatch.tsx";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +91,7 @@ const App = () => (
             <Route path="/toplist/submit" element={<ProtectedRoute><ToplistSubmitServer /></ProtectedRoute>} />
             <Route path="/video-hub" element={<ProtectedRoute><VideoHubHome /></ProtectedRoute>} />
             <Route path="/video-hub/submit" element={<ProtectedRoute><VideoHubSubmit /></ProtectedRoute>} />
+            <Route path="/video-hub/:id" element={<ProtectedRoute><VideoHubWatch /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

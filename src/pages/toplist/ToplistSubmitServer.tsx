@@ -31,8 +31,8 @@ function Row({ label, required, hint, children }: {
   children: React.ReactNode
 }) {
   return (
-    <div className="grid grid-cols-[200px_1fr] gap-6 py-5 border-b border-border/50 last:border-0">
-      <div className="pt-2.5 text-right">
+    <div className="grid grid-cols-[160px_1fr] gap-4 py-5 border-b border-border/50 last:border-0">
+      <div className="pt-2.5">
         <span className="text-sm font-semibold text-foreground">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}

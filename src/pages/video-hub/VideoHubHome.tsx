@@ -1,21 +1,20 @@
 import { useState, useEffect, useCallback } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import NavBar from "@/components/NavBar"
 import { ToplistFooter } from "@/components/toplist/ToplistFooter"
 import { VideoLikeButton } from "@/components/VideoLikeButton"
 import { videoHubService, VIDEO_CATEGORIES, getYouTubeVideoId, formatViews, formatTimeAgo, type Video } from "@/lib/video-hub-data"
-import { VideoComments } from "@/components/VideoComments"
 import { useAuth } from "@/lib/auth"
 
 export default function VideoHubHome() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [videos, setVideos] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState("all")
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null)
 
   const fetchVideos = useCallback(async () => {
     setLoading(true)
@@ -37,13 +36,6 @@ export default function VideoHubHome() {
   }, [category, page, user?.id])
 
   useEffect(() => { fetchVideos() }, [fetchVideos])
-
-  // Close modal on Escape
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setSelectedVideo(null) }
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [])
 
   const handleSearch = () => { setPage(1); fetchVideos() }
 
@@ -144,7 +136,7 @@ export default function VideoHubHome() {
                     {/* Thumbnail */}
                     <div
                       className="relative aspect-video bg-muted cursor-pointer overflow-hidden"
-                      onClick={() => setSelectedVideo(video)}
+                      onClick={() => navigate(`/video-hub/${video.id}`)}
                     >
                       <img
                         src={thumb}
@@ -172,7 +164,7 @@ export default function VideoHubHome() {
                     <div className="p-4">
                       <h3
                         className="font-semibold text-foreground mb-1.5 line-clamp-2 group-hover:text-primary transition-colors cursor-pointer"
-                        onClick={() => setSelectedVideo(video)}
+                        onClick={() => navigate(`/video-hub/${video.id}`)}
                       >
                         {video.title}
                       </h3>
@@ -195,7 +187,7 @@ export default function VideoHubHome() {
                           <span>{formatViews(video.views)} views</span>
                         </div>
                         <button
-                          onClick={() => setSelectedVideo(video)}
+                          onClick={() => navigate(`/video-hub/${video.id}`)}
                           className="text-xs px-3 py-1.5 border border-border rounded-lg hover:bg-secondary text-foreground transition-colors"
                         >
                           Watch
@@ -253,92 +245,6 @@ export default function VideoHubHome() {
           </>
         )}
       </div>
-
-      {/* Video Modal */}
-      {selectedVideo && (
-        <div
-          className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
-          onClick={() => setSelectedVideo(null)}
-        >
-          <div
-            className="relative w-full max-w-4xl my-8 bg-card rounded-2xl shadow-2xl overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setSelectedVideo(null)}
-              className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition-all hover:scale-110"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            <div className="aspect-video bg-black">
-              <iframe
-                width="100%"
-                height="100%"
-                src={`https://www.youtube.com/embed/${getYouTubeVideoId(selectedVideo.youtube_url)}?autoplay=1`}
-                title={selectedVideo.title}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              />
-            </div>
-
-            <div className="p-6 border-t border-border">
-              <div className="flex items-start justify-between gap-4 mb-3">
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-xl font-bold text-foreground mb-1">{selectedVideo.title}</h2>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                    {selectedVideo.channel_url ? (
-                      <a href={selectedVideo.channel_url} target="_blank" rel="noopener noreferrer" className="hover:text-foreground font-medium transition-colors">
-                        {selectedVideo.channel_name}
-                      </a>
-                    ) : (
-                      <span className="font-medium">{selectedVideo.channel_name}</span>
-                    )}
-                    <span>•</span>
-                    <span>{formatViews(selectedVideo.views)} views</span>
-                    <span>•</span>
-                    <span>{formatTimeAgo(selectedVideo.created_at)}</span>
-                    <span className="bg-secondary px-2 py-0.5 rounded capitalize text-xs">
-                      {selectedVideo.category.toLowerCase()}
-                    </span>
-                  </div>
-                </div>
-                <a
-                  href={selectedVideo.youtube_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary text-sm text-foreground transition-colors"
-                >
-                  <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
-                  </svg>
-                  YouTube
-                </a>
-              </div>
-
-              {selectedVideo.description && (
-                <p className="text-sm text-muted-foreground mb-4 whitespace-pre-wrap">{selectedVideo.description}</p>
-              )}
-
-              <div className="pt-3 border-t border-border">
-                <VideoLikeButton
-                  videoId={selectedVideo.id}
-                  initialLikes={selectedVideo.likes}
-                  initialDislikes={selectedVideo.dislikes}
-                  initialUserVote={selectedVideo.user_vote}
-                  size="md"
-                />
-              </div>
-
-              <VideoComments videoId={selectedVideo.id} />
-            </div>
-          </div>
-        </div>
-      )}
 
       <ToplistFooter />
     </div>

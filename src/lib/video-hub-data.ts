@@ -136,6 +136,18 @@ export const videoHubService = {
     }
   },
 
+  async getRelatedVideos(excludeId: string, limit = 15): Promise<Video[]> {
+    const { data } = await supabase
+      .from("videos")
+      .select("*")
+      .eq("is_approved", true)
+      .neq("id", excludeId)
+      .order("is_featured", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(limit)
+    return (data ?? []) as Video[]
+  },
+
   async getVideo(id: string, userId?: string): Promise<Video | null> {
     const { data, error } = await supabase
       .from("videos")
