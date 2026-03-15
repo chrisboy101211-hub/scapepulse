@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { supabase } from "@/lib/supabase"
 import { getYouTubeVideoId, formatViews, formatTimeAgo, type Video } from "@/lib/video-hub-data"
+import { useAuth } from "@/lib/auth"
 import { Video as VideoIcon, ThumbsUp, ThumbsDown, Eye, TrendingUp, Film, ExternalLink } from "lucide-react"
 
 interface Stats {
@@ -26,20 +27,28 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 
 export default function VideoHubAnalytics() {
+  const { user } = useAuth()
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!user) return
     async function load() {
       const { data: videos } = await supabase
         .from("videos")
         .select("*")
+        .eq("submitter_id", user.id)
         .eq("is_approved", true)
         .order("views", { ascending: false })
 
-      const { count: commentCount } = await supabase
-        .from("video_comments")
-        .select("*", { count: "exact", head: true })
+      const videoIds = (videos ?? []).map((v: Video) => v.id)
+
+      const { count: commentCount } = videoIds.length > 0
+        ? await supabase
+            .from("video_comments")
+            .select("*", { count: "exact", head: true })
+            .in("video_id", videoIds)
+        : { count: 0 }
 
       const all = (videos ?? []) as Video[]
 
@@ -68,7 +77,7 @@ export default function VideoHubAnalytics() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [user])
 
   if (loading) {
     return (
@@ -79,6 +88,30 @@ export default function VideoHubAnalytics() {
   }
 
   if (!stats) return null
+
+  if (stats.totalVideos === 0) {
+    return (
+      <div>
+        <div className="flex items-center gap-3 mb-6">
+          <VideoIcon className="h-6 w-6 text-red-500" />
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Video Hub Analytics</h1>
+            <p className="text-sm text-muted-foreground">Your submitted videos</p>
+          </div>
+        </div>
+        <div className="border border-border/40 rounded-lg p-8 text-center">
+          <VideoIcon className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm mb-4">You haven't submitted any videos yet.</p>
+          <Link
+            to="/video-hub/submit"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded text-sm font-medium transition-colors"
+          >
+            Submit a Video
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   const statCards = [
     { label: "Total Videos",   value: stats.totalVideos.toLocaleString(),   icon: Film,       color: "text-blue-400" },
@@ -96,7 +129,7 @@ export default function VideoHubAnalytics() {
           <VideoIcon className="h-6 w-6 text-red-500" />
           <div>
             <h1 className="text-2xl font-bold text-foreground">Video Hub Analytics</h1>
-            <p className="text-sm text-muted-foreground">Overview of all video content on the hub</p>
+            <p className="text-sm text-muted-foreground">Analytics for your submitted videos</p>
           </div>
         </div>
         <Link

@@ -34,7 +34,17 @@ const NavBar = () => {
         </Link>
         
         {/* Pill Navigation */}
-        <div className="hidden md:flex items-center gap-1 p-1 rounded-full bg-muted/50 border border-border/50">
+        <div className="hidden md:flex items-center gap-2">
+          {/* Home icon — outside the pill, links to main page */}
+          <Link
+            to="/"
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-muted/50 border border-border/50 hover:bg-muted hover:border-border transition-all"
+            title="Home"
+          >
+            <img src="/favicon.svg" alt="Home" className="w-5 h-5" />
+          </Link>
+
+        <div className="flex items-center gap-1 p-1 rounded-full bg-muted/50 border border-border/50">
           {/* Discord - Blue */}
           <a 
             href="https://discord.gg/cVhguuca3X" 
@@ -95,6 +105,7 @@ const NavBar = () => {
               <div className="absolute inset-0 rounded-full bg-muted border border-border -z-10" />
             )}
           </Link>
+        </div>
         </div>
 
         {/* Auth Buttons */}
