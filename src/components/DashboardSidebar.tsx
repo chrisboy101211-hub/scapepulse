@@ -19,6 +19,7 @@ import {
   Crown,
   BarChart3,
   ThumbsUp,
+  Clapperboard,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Logo } from "@/components/Logo";
@@ -70,6 +71,10 @@ const hiscoresItems = [
 
 const toplistItems = [
   { title: "My Listing", url: "/dashboard/toplist", icon: Trophy },
+];
+
+const videoHubItems = [
+  { title: "Analytics", url: "/dashboard/video-hub", icon: BarChart3 },
 ];
 
 const systemItems = [
@@ -234,6 +239,15 @@ export function DashboardSidebar() {
           items={toplistItems}
           collapsed={collapsed}
           defaultOpen={toplistItems.some((i) => location.pathname === i.url)}
+        />
+
+        {/* VIDEO HUB */}
+        <CollapsibleSection
+          label="Video Hub"
+          icon={Clapperboard}
+          items={videoHubItems}
+          collapsed={collapsed}
+          defaultOpen={videoHubItems.some((i) => location.pathname === i.url)}
         />
 
         {/* SYSTEM */}

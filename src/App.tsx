@@ -20,6 +20,7 @@ import Settings from "./pages/dashboard/Settings.tsx";
 import HiscoresSettings from "./pages/dashboard/HiscoresSettings.tsx";
 import Transactions from "./pages/dashboard/Transactions.tsx";
 import DashboardToplistServer from "./pages/dashboard/ToplistServer.tsx";
+import VideoHubAnalytics from "./pages/dashboard/VideoHubAnalytics.tsx";
 import StoreFront from "./pages/StoreFront.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Docs from "./pages/Docs.tsx";
@@ -84,16 +85,17 @@ const App = () => (
               <Route path="hiscores-settings" element={<HiscoresSettings />} />
               <Route path="transactions" element={<Transactions />} />
               <Route path="toplist" element={<DashboardToplistServer />} />
+              <Route path="video-hub" element={<VideoHubAnalytics />} />
             </Route>
             <Route path="/store/:slug" element={<StoreFront />} />
             <Route path="/hiscores/:slug" element={<Hiscores />} />
-            <Route path="/toplist" element={<ProtectedRoute><ToplistHome /></ProtectedRoute>} />
-            <Route path="/toplist/servers/:id" element={<ProtectedRoute><ToplistServerDetail /></ProtectedRoute>} />
-            <Route path="/toplist/vote/:id" element={<ProtectedRoute><ToplistVote /></ProtectedRoute>} />
+            <Route path="/toplist" element={<ToplistHome />} />
+            <Route path="/toplist/servers/:id" element={<ToplistServerDetail />} />
+            <Route path="/toplist/vote/:id" element={<ToplistVote />} />
             <Route path="/toplist/submit" element={<ProtectedRoute><ToplistSubmitServer /></ProtectedRoute>} />
-            <Route path="/video-hub" element={<ProtectedRoute><VideoHubHome /></ProtectedRoute>} />
+            <Route path="/video-hub" element={<VideoHubHome />} />
             <Route path="/video-hub/submit" element={<ProtectedRoute><VideoHubSubmit /></ProtectedRoute>} />
-            <Route path="/video-hub/:id" element={<ProtectedRoute><VideoHubWatch /></ProtectedRoute>} />
+            <Route path="/video-hub/:id" element={<VideoHubWatch />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
