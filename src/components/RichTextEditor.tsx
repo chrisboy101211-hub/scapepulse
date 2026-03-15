@@ -1,5 +1,82 @@
 import { useRef, useState, useEffect, useCallback } from "react"
 
+// ── Discord Markdown Parser ────────────────────────────────────────────────────
+function escapeHtml(t: string) {
+  return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+}
+
+function parseInline(raw: string): string {
+  let t = escapeHtml(raw)
+  // Bold-italic ***
+  t = t.replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
+  // Underline __
+  t = t.replace(/__(.+?)__/g, "<u>$1</u>")
+  // Bold **
+  t = t.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+  // Strikethrough ~~
+  t = t.replace(/~~(.+?)~~/g, "<del>$1</del>")
+  // Italic * or _
+  t = t.replace(/\*([^*]+?)\*/g, "<em>$1</em>")
+  t = t.replace(/_([^_]+?)_/g, "<em>$1</em>")
+  // Inline code `
+  t = t.replace(/`([^`]+?)`/g, '<code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:0.88em;">$1</code>')
+  // URLs
+  t = t.replace(/(https?:\/\/[^\s&lt;&gt;"]+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:#00aff4;text-decoration:underline;">$1</a>')
+  return t
+}
+
+export function parseDiscordMarkdown(text: string): string {
+  const lines = text.split("\n")
+  const out: string[] = []
+  let i = 0
+  while (i < lines.length) {
+    const line = lines[i]
+    // Empty line
+    if (line.trim() === "") { out.push("<br>"); i++; continue }
+    // Horizontal divider: line made only of ━ ─ — = - chars (3+)
+    if (/^[━─—=\-]{3,}$/.test(line.trim())) {
+      out.push('<hr style="border:none;border-top:1px solid rgba(255,255,255,0.15);margin:10px 0;">')
+      i++; continue
+    }
+    // Headings (must check ### before ## before #)
+    if (line.startsWith("### ")) {
+      out.push(`<h3 style="font-size:1em;font-weight:700;color:#fff;margin:8px 0 2px;">${parseInline(line.slice(4))}</h3>`)
+      i++; continue
+    }
+    if (line.startsWith("## ")) {
+      out.push(`<h2 style="font-size:1.2em;font-weight:700;color:#fff;margin:10px 0 4px;">${parseInline(line.slice(3))}</h2>`)
+      i++; continue
+    }
+    if (line.startsWith("# ")) {
+      out.push(`<h1 style="font-size:1.6em;font-weight:700;color:#fff;margin:12px 0 6px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.1);">${parseInline(line.slice(2))}</h1>`)
+      i++; continue
+    }
+    // Blockquote: group consecutive "> " lines
+    if (line.startsWith("> ") || line === ">") {
+      const bq: string[] = []
+      while (i < lines.length && (lines[i].startsWith("> ") || lines[i] === ">")) {
+        bq.push(lines[i].startsWith("> ") ? parseInline(lines[i].slice(2)) : "")
+        i++
+      }
+      out.push(`<blockquote style="border-left:4px solid rgba(255,255,255,0.18);padding:2px 0 2px 12px;margin:3px 0;color:rgba(255,255,255,0.75);">${bq.join("<br>")}</blockquote>`)
+      continue
+    }
+    // Plain paragraph
+    out.push(`<p style="margin:2px 0;">${parseInline(line)}</p>`)
+    i++
+  }
+  return out.join("")
+}
+
+function isDiscordMarkdown(text: string): boolean {
+  return /^#{1,3} /m.test(text) ||
+    /^> /m.test(text) ||
+    /^━{3,}/m.test(text) ||
+    /\*\*.+?\*\*/.test(text) ||
+    /~~.+?~~/.test(text)
+}
+
 interface RichTextEditorProps {
   value: string
   onChange: (html: string) => void
@@ -46,6 +123,8 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your desc
   const [showCodeBlock, setShowCodeBlock] = useState(false)
   const [codeBlockLang, setCodeBlockLang] = useState("javascript")
   const [codeBlockContent, setCodeBlockContent] = useState("")
+  const [showDiscord, setShowDiscord] = useState(false)
+  const [discordInput, setDiscordInput] = useState("")
   const [linkUrl, setLinkUrl] = useState("https://")
   const [imageUrl, setImageUrl] = useState("https://")
   const [currentColor, setCurrentColor] = useState("#ffffff")
@@ -108,6 +187,27 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your desc
     setShowEmoji(false)
   }
 
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const text = e.clipboardData.getData("text/plain")
+    if (text && isDiscordMarkdown(text)) {
+      e.preventDefault()
+      const html = parseDiscordMarkdown(text)
+      document.execCommand("insertHTML", false, html)
+      sync()
+    }
+  }
+
+  const insertDiscord = () => {
+    if (!discordInput.trim()) { setShowDiscord(false); return }
+    restoreSelection()
+    const html = parseDiscordMarkdown(discordInput)
+    editorRef.current?.focus()
+    document.execCommand("insertHTML", false, html)
+    sync()
+    setDiscordInput("")
+    setShowDiscord(false)
+  }
+
   const applySize = (size: string) => {
     setCurrentSize(size)
     restoreSelection()
@@ -164,6 +264,11 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your desc
       </Btn>,
       <Btn key="code-block" title="Code Block (Discord style)" onClick={() => { saveSelection(); setShowCodeBlock((v) => !v) }}>
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M4 5a1 1 0 000 2h1v10H4a1 1 0 000 2h16a1 1 0 000-2h-1V7h1a1 1 0 000-2H4zm3 2h10v10H7V7zm2 2v6h6V9H9z"/></svg>
+      </Btn>,
+      <Btn key="discord" title="Paste Discord Markdown" active={showDiscord} onClick={() => { saveSelection(); setShowDiscord((v) => !v) }}>
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.196.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+        </svg>
       </Btn>,
       <div key="emoji" className="relative">
         <Btn title="Emoji" onClick={() => { saveSelection(); setShowEmoji((v) => !v) }}>😊</Btn>
@@ -270,6 +375,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your desc
           suppressContentEditableWarning
           onInput={sync}
           onKeyUp={sync}
+          onPaste={handlePaste}
           data-placeholder={placeholder}
           className="px-4 py-3 text-sm text-foreground outline-none overflow-y-auto
             [&_blockquote]:border-l-4 [&_blockquote]:border-primary/50 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_blockquote]:my-2
@@ -320,6 +426,39 @@ export function RichTextEditor({ value, onChange, placeholder = "Write your desc
             className="px-3 py-1.5 border border-border text-xs rounded text-muted-foreground hover:text-foreground transition-colors">
             Cancel
           </button>
+        </div>
+      )}
+
+      {/* Discord Markdown paste dialog */}
+      {showDiscord && (
+        <div className="border-t border-border bg-[#313338]">
+          <div className="flex items-center gap-3 px-4 pt-3 pb-2">
+            <svg className="w-4 h-4 text-[#5865f2] flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.196.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+            </svg>
+            <span className="text-xs font-semibold text-[#dcddde]">Paste Discord Markdown</span>
+            <span className="text-xs text-[#96989d] ml-1">— supports # headings, **bold**, &gt; quotes, ━━ dividers, URLs</span>
+            <div className="flex gap-2 ml-auto">
+              <button type="button" onClick={insertDiscord}
+                className="px-3 py-1.5 bg-[#5865f2] hover:bg-[#4752c4] text-white text-xs rounded font-medium transition-colors">
+                Insert
+              </button>
+              <button type="button" onClick={() => { setShowDiscord(false); setDiscordInput("") }}
+                className="px-3 py-1.5 border border-white/10 text-xs rounded text-[#96989d] hover:text-white transition-colors">
+                Cancel
+              </button>
+            </div>
+          </div>
+          <div className="px-4 pb-3">
+            <textarea
+              autoFocus
+              value={discordInput}
+              onChange={(e) => setDiscordInput(e.target.value)}
+              rows={8}
+              placeholder={"Paste your Discord message here…\n\n# Heading\n## Subheading\n> Blockquote line\n**bold** ~~strike~~ *italic*\n━━━━━━━━━━━━━━━━━━━━"}
+              className="w-full px-3 py-2 bg-[#1e1f22] border border-white/10 rounded font-mono text-xs text-[#dcddde] focus:outline-none focus:ring-1 focus:ring-[#5865f2] resize-y placeholder:text-[#4e5058]"
+            />
+          </div>
         </div>
       )}
 
