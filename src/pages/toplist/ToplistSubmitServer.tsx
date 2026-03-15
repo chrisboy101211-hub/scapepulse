@@ -311,7 +311,7 @@ export default function ToplistSubmitServer() {
 
             <Row label="Revision" required>
               <select name="revision" required value={form.revision} onChange={set}
-                className="px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors">
+                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors">
                 <option value="">Select Revision</option>
                 {REVISION_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
               </select>
@@ -319,7 +319,7 @@ export default function ToplistSubmitServer() {
 
             <Row label="Category" required>
               <select name="server_type" required value={form.server_type} onChange={set}
-                className="px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors">
+                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors">
                 <option value="">Select Category</option>
                 {SERVER_TYPE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
               </select>
@@ -327,7 +327,7 @@ export default function ToplistSubmitServer() {
 
             <Row label="Experience Rate">
               <select name="experience_rate" value={form.experience_rate} onChange={set}
-                className="px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors">
+                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors">
                 <option value="">Select Rate</option>
                 {EXPERIENCE_RATE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
               </select>
@@ -335,7 +335,7 @@ export default function ToplistSubmitServer() {
 
             <Row label="Player Count">
               <select name="player_count" value={form.player_count} onChange={set}
-                className="px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors">
+                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-sm transition-colors">
                 <option value="">Select Count</option>
                 {PLAYER_COUNT_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
               </select>
