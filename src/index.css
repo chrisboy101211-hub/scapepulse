@@ -130,3 +130,34 @@
 .sponsor-glow { animation: sponsor-glow 3s ease-in-out infinite; }
 .ticker-scroll { animation: ticker-scroll 30s linear infinite; }
 .ticker-scroll:hover { animation-play-state: paused; }
+
+/* ===== Electric Border (favicon home button) ===== */
+@property --electric-angle {
+  inherits: false;
+  initial-value: 0deg;
+  syntax: "<angle>";
+}
+
+@keyframes electric-spin {
+  to { --electric-angle: 360deg; }
+}
+
+.electric-border {
+  border: 2px solid transparent;
+  background:
+    hsl(var(--background)) padding-box,
+    conic-gradient(
+      from var(--electric-angle),
+      #00fff0 0%,
+      #7b2fff 25%,
+      #ff003c 50%,
+      #ffcc00 75%,
+      #00fff0 100%
+    ) border-box;
+  animation: electric-spin 1.6s linear infinite paused;
+}
+
+.electric-border:hover {
+  animation-play-state: running;
+  box-shadow: 0 0 12px rgba(0, 255, 240, 0.4), 0 0 24px rgba(123, 47, 255, 0.2);
+}

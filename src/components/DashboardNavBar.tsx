@@ -27,7 +27,7 @@ const DashboardNavBar = () => {
           {/* Home icon — outside the pill, links to main page */}
           <Link
             to="/"
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-muted/50 border border-border/50 hover:bg-muted hover:border-border transition-all"
+            className="electric-border flex items-center justify-center w-9 h-9 rounded-full bg-muted/50 transition-all"
             title="Home"
           >
             <img src="/favicon.svg" alt="Home" className="w-5 h-5" />
