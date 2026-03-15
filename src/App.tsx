@@ -28,6 +28,8 @@ import ToplistHome from "./pages/toplist/ToplistHome.tsx";
 import ToplistServerDetail from "./pages/toplist/ToplistServerDetail.tsx";
 import ToplistVote from "./pages/toplist/ToplistVote.tsx";
 import ToplistSubmitServer from "./pages/toplist/ToplistSubmitServer.tsx";
+import VideoHubHome from "./pages/video-hub/VideoHubHome.tsx";
+import VideoHubSubmit from "./pages/video-hub/VideoHubSubmit.tsx";
 
 const queryClient = new QueryClient();
 
@@ -82,10 +84,12 @@ const App = () => (
             </Route>
             <Route path="/store/:slug" element={<StoreFront />} />
             <Route path="/hiscores/:slug" element={<Hiscores />} />
-            <Route path="/toplist" element={<ToplistHome />} />
-            <Route path="/toplist/servers/:id" element={<ToplistServerDetail />} />
-            <Route path="/toplist/vote/:id" element={<ToplistVote />} />
-            <Route path="/toplist/submit" element={<ToplistSubmitServer />} />
+            <Route path="/toplist" element={<ProtectedRoute><ToplistHome /></ProtectedRoute>} />
+            <Route path="/toplist/servers/:id" element={<ProtectedRoute><ToplistServerDetail /></ProtectedRoute>} />
+            <Route path="/toplist/vote/:id" element={<ProtectedRoute><ToplistVote /></ProtectedRoute>} />
+            <Route path="/toplist/submit" element={<ProtectedRoute><ToplistSubmitServer /></ProtectedRoute>} />
+            <Route path="/video-hub" element={<ProtectedRoute><VideoHubHome /></ProtectedRoute>} />
+            <Route path="/video-hub/submit" element={<ProtectedRoute><VideoHubSubmit /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

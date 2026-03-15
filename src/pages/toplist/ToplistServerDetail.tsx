@@ -209,10 +209,12 @@ export default function ToplistServerDetail() {
                 className="px-4 py-2 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-400/30 rounded-lg transition-all text-sm font-medium">
                 🌐 Visit Website
               </a>
-              <button onClick={() => setShowReviewForm(true)}
-                className="px-4 py-2 border border-yellow-400/30 hover:bg-yellow-400/10 rounded-lg text-sm font-medium text-foreground transition-all">
-                ⭐ Leave Review
-              </button>
+              {user && (
+                <button onClick={() => setShowReviewForm(true)}
+                  className="px-4 py-2 border border-yellow-400/30 hover:bg-yellow-400/10 rounded-lg text-sm font-medium text-foreground transition-all">
+                  ⭐ Leave Review
+                </button>
+              )}
               {server.discord_invite && (
                 <a href={server.discord_invite} target="_blank" rel="noopener noreferrer"
                   className="px-4 py-2 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg text-sm font-medium transition-colors">

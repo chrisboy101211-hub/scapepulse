@@ -53,6 +53,17 @@ const NavBar = () => {
             )}
           </Link>
 
+          {/* Video Hub - Red */}
+          <Link
+            to="/video-hub"
+            className="relative px-4 py-1.5 rounded-full text-sm font-medium text-red-500 hover:bg-red-500/10 transition-all"
+          >
+            Video Hub
+            {activePill.startsWith("/video-hub") && (
+              <div className="absolute inset-0 rounded-full bg-red-500/20 border border-red-500/30 -z-10" />
+            )}
+          </Link>
+
           {/* Docs */}
           <Link
             to="/docs"

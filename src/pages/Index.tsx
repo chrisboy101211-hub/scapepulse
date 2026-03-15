@@ -116,6 +116,10 @@ const faqs = [
     question: "Is there a free trial?",
     answer: "The Free plan has no time limit. You can use it indefinitely to sell and grow your server community.",
   },
+  {
+    question: "What fees do you charge?",
+    answer: "We charge a 5% platform fee on all transactions. The Free plan includes this 5% fee, while Premium ($20/month) reduces it to 3%. No other hidden fees.",
+  },
 ];
 
 const Index = () => {
@@ -237,6 +241,38 @@ const Index = () => {
         </div>
       </section>
 
+      {/* How It Works */}
+      <section className="border-t border-border/50 py-24">
+        <div className="container mx-auto px-6">
+          <div className="mb-16 text-center">
+            <h2 className="font-display text-3xl font-bold md:text-4xl">
+              Get Started in <span className="text-gradient">4 Steps</span>
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              Launch your store and start accepting payments quickly.
+            </p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-4">
+            {howItWorks.map((step, i) => (
+              <motion.div
+                key={step.step}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
+                className="text-center"
+              >
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
+                  {step.step}
+                </div>
+                <h3 className="font-display text-lg font-semibold">{step.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{step.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
       <section className="border-t border-border/50 py-24">
         <div className="container mx-auto px-6">
@@ -271,113 +307,77 @@ const Index = () => {
         </div>
       </section>
 
-      {/* How It Works */}
+      {/* FAQ & Pricing */}
       <section className="border-t border-border/50 py-24">
         <div className="container mx-auto px-6">
-          <div className="mb-16 text-center">
-            <h2 className="font-display text-3xl font-bold md:text-4xl">
-              Get Started in <span className="text-gradient">4 Steps</span>
-            </h2>
-            <p className="mt-4 text-muted-foreground">
-              Launch your store and start accepting payments quickly.
-            </p>
-          </div>
-          <div className="grid gap-8 md:grid-cols-4">
-            {howItWorks.map((step, i) => (
-              <motion.div
-                key={step.step}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-                className="text-center"
-              >
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
-                  {step.step}
-                </div>
-                <h3 className="font-display text-lg font-semibold">{step.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{step.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="border-t border-border/50 py-24">
-        <div className="container mx-auto px-6">
-          <div className="mb-16 text-center">
-            <h2 className="font-display text-3xl font-bold md:text-4xl">
-              Frequently Asked <span className="text-gradient">Questions</span>
-            </h2>
-          </div>
-          <div className="mx-auto max-w-2xl space-y-4">
-            {faqs.map((faq) => (
-              <div key={faq.question} className="rounded-lg border border-border bg-card p-6">
-                <h3 className="font-display font-semibold">{faq.question}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{faq.answer}</p>
+          <div className="grid gap-12 lg:grid-cols-2">
+            {/* FAQ */}
+            <div>
+              <h2 className="font-display text-3xl font-bold md:text-4xl mb-8">
+                Frequently Asked <span className="text-gradient">Questions</span>
+              </h2>
+              <div className="space-y-4">
+                {faqs.map((faq) => (
+                  <div key={faq.question} className="rounded-lg border border-border bg-card p-6">
+                    <h3 className="font-display font-semibold">{faq.question}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">{faq.answer}</p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            </div>
 
-      {/* Pricing */}
-      <section className="border-t border-border/50 py-24">
-        <div className="container mx-auto px-6">
-          <div className="mb-16 text-center">
-            <h2 className="font-display text-3xl font-bold md:text-4xl">
-              Simple <span className="text-gradient">Pricing</span>
-            </h2>
-            <p className="mt-4 text-muted-foreground">
-              Start free, upgrade when you need more.
-            </p>
-          </div>
-          <div className="mx-auto grid max-w-3xl gap-8 md:grid-cols-2">
-            {pricingPlans.map((plan, i) => (
-              <motion.div
-                key={plan.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.15 }}
-                className={`relative rounded-xl border p-8 ${
-                  plan.highlighted
-                    ? "border-primary/40 glow-border bg-card"
-                    : "border-border/50 bg-card"
-                }`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
-                    Most Popular
-                  </div>
-                )}
-                <div className="mb-6">
-                  <h3 className="font-display text-xl font-bold">{plan.name}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
-                  <div className="mt-4">
-                    <span className="font-display text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground">{plan.period}</span>
-                  </div>
-                </div>
-                <ul className="mb-8 space-y-3">
-                  {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-secondary-foreground">
-                      <Check className="h-4 w-4 text-primary" />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link to="/register">
-                  <Button
-                    variant={plan.highlighted ? "hero" : "outline"}
-                    className="w-full"
+            {/* Pricing */}
+            <div>
+              <h2 className="font-display text-3xl font-bold md:text-4xl mb-8">
+                Simple <span className="text-gradient">Pricing</span>
+              </h2>
+              <div className="grid gap-6">
+                {pricingPlans.map((plan, i) => (
+                  <motion.div
+                    key={plan.name}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: i * 0.1 }}
+                    className={`relative rounded-xl border p-6 ${
+                      plan.highlighted
+                        ? "border-primary/40 glow-border bg-card"
+                        : "border-border/50 bg-card"
+                    }`}
                   >
-                    {plan.cta}
-                  </Button>
-                </Link>
-              </motion.div>
-            ))}
+                    {plan.highlighted && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
+                        Most Popular
+                      </div>
+                    )}
+                    <div className="mb-4">
+                      <h3 className="font-display text-xl font-bold">{plan.name}</h3>
+                      <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
+                      <div className="mt-3">
+                        <span className="font-display text-3xl font-bold">{plan.price}</span>
+                        <span className="text-muted-foreground text-sm">{plan.period}</span>
+                      </div>
+                    </div>
+                    <ul className="mb-6 space-y-2">
+                      {plan.features.map((f) => (
+                        <li key={f} className="flex items-center gap-2 text-sm text-secondary-foreground">
+                          <Check className="h-4 w-4 text-primary" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                    <Link to="/register">
+                      <Button
+                        variant={plan.highlighted ? "hero" : "outline"}
+                        className="w-full"
+                      >
+                        {plan.cta}
+                      </Button>
+                    </Link>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>

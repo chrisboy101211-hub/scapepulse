@@ -240,4 +240,26 @@ export const toplistDataService = {
       .order("priority", { ascending: false })
     return data || []
   },
+
+  /**
+   * Submit a vote via the sp-toplist-vote edge function.
+   * The edge function records the vote, fires the callback to the server's
+   * callback_url (GET first, POST fallback — same as runespace), and inserts
+   * into fx_votes for the Java SupabaseVoteProcessor.
+   */
+  async submitVote(serverId: number, username: string): Promise<{ newVoteCount: number }> {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+    const res = await fetch(`${supabaseUrl}/functions/v1/sp-toplist-vote`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${anonKey}`,
+      },
+      body: JSON.stringify({ server_id: serverId, username }),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data?.error || "Vote failed")
+    return { newVoteCount: data.newVoteCount }
+  },
 }
