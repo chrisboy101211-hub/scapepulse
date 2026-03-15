@@ -151,10 +151,21 @@ export const toplistDataService = {
   async getUserServer(userId: string) {
     const { data } = await supabase
       .from("toplist_servers")
-      .select("id")
+      .select("*")
       .eq("user_id", userId)
       .single()
-    return data
+    return data as ToplistServer | null
+  },
+
+  async updateServer(id: number, updates: Partial<Omit<ToplistServer, "id" | "user_id" | "votes" | "monthly_votes" | "is_premium" | "is_top10" | "is_sponsor" | "is_active" | "created_at" | "updated_at">>) {
+    const { data, error } = await supabase
+      .from("toplist_servers")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single()
+    if (error) throw error
+    return data as ToplistServer
   },
 
   async voteForServer(serverId: number, userId?: string) {

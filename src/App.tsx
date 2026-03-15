@@ -19,6 +19,7 @@ import ApiKeys from "./pages/dashboard/ApiKeys.tsx";
 import Settings from "./pages/dashboard/Settings.tsx";
 import HiscoresSettings from "./pages/dashboard/HiscoresSettings.tsx";
 import Transactions from "./pages/dashboard/Transactions.tsx";
+import DashboardToplistServer from "./pages/dashboard/ToplistServer.tsx";
 import StoreFront from "./pages/StoreFront.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Docs from "./pages/Docs.tsx";
@@ -82,6 +83,7 @@ const App = () => (
               <Route path="settings" element={<Settings />} />
               <Route path="hiscores-settings" element={<HiscoresSettings />} />
               <Route path="transactions" element={<Transactions />} />
+              <Route path="toplist" element={<DashboardToplistServer />} />
             </Route>
             <Route path="/store/:slug" element={<StoreFront />} />
             <Route path="/hiscores/:slug" element={<Hiscores />} />

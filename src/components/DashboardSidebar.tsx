@@ -68,6 +68,10 @@ const hiscoresItems = [
   { title: "Settings", url: "/dashboard/hiscores-settings", icon: Settings },
 ];
 
+const toplistItems = [
+  { title: "My Listing", url: "/dashboard/toplist", icon: Trophy },
+];
+
 const systemItems = [
   { title: "API Keys", url: "/dashboard/api", icon: Key },
 ];
@@ -221,6 +225,15 @@ export function DashboardSidebar() {
           items={hiscoresItems}
           collapsed={collapsed}
           defaultOpen={hiscoresItems.some((i) => location.pathname === i.url)}
+        />
+
+        {/* TOPLIST */}
+        <CollapsibleSection
+          label="Toplist"
+          icon={BarChart3}
+          items={toplistItems}
+          collapsed={collapsed}
+          defaultOpen={toplistItems.some((i) => location.pathname === i.url)}
         />
 
         {/* SYSTEM */}
