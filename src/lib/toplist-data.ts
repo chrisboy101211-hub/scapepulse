@@ -20,6 +20,7 @@ export interface ToplistServer {
   staff_info: string | null
   rules: string | null
   vote_link: string | null
+  callback_url: string | null
   votes: number
   monthly_votes: number
   is_premium: boolean

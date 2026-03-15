@@ -20,7 +20,7 @@ export default function ToplistSubmitServer() {
     name: "", website: "", discord_invite: "", description: "",
     short_description: "", revision: "", server_type: "",
     experience_rate: "", player_count: "", tags: "",
-    image_url: "", banner_url: "",
+    image_url: "", banner_url: "", vote_link: "", callback_url: "",
   })
 
   useEffect(() => {
@@ -73,7 +73,8 @@ export default function ToplistSubmitServer() {
         custom_content: null,
         staff_info: null,
         rules: null,
-        vote_link: null,
+        vote_link: formData.vote_link || null,
+        callback_url: formData.callback_url || null,
       })
       navigate("/toplist?submitted=1")
     } catch (err: any) {
@@ -135,7 +136,36 @@ export default function ToplistSubmitServer() {
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Discord Invite</label>
               <input type="url" name="discord_invite" value={formData.discord_invite} onChange={handleChange}
+                placeholder="https://discord.gg/..."
                 className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-foreground" />
+            </div>
+
+            {/* Voting & Callback */}
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 space-y-4">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground mb-0.5">Voting & In-Game Rewards</h3>
+                <p className="text-xs text-muted-foreground">Configure how players vote and how your game server is notified to grant rewards.</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Vote Page URL</label>
+                <input type="url" name="vote_link" value={formData.vote_link} onChange={handleChange}
+                  placeholder="https://your-vote-site.com/vote"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-foreground" />
+                <p className="text-xs text-muted-foreground mt-1">The external page players are sent to when they click "Vote Now".</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Callback URL</label>
+                <input type="url" name="callback_url" value={formData.callback_url} onChange={handleChange}
+                  placeholder="https://your-game-server.com/vote-callback"
+                  className="w-full px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary text-foreground" />
+                <p className="text-xs text-muted-foreground mt-1">
+                  After a player votes, ScapePulse will POST to this URL with{" "}
+                  <code className="bg-muted px-1 rounded text-xs">uid=&lt;key&gt;&amp;voter_name=&lt;player&gt;</code>.
+                  Your server uses this to grant in-game rewards automatically.
+                </p>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
