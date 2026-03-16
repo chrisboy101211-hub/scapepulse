@@ -33,6 +33,8 @@ import ToplistSubmitServer from "./pages/toplist/ToplistSubmitServer.tsx";
 import VideoHubHome from "./pages/video-hub/VideoHubHome.tsx";
 import VideoHubSubmit from "./pages/video-hub/VideoHubSubmit.tsx";
 import VideoHubWatch from "./pages/video-hub/VideoHubWatch.tsx";
+import ProfilePage from "./pages/profile/ProfilePage.tsx";
+import ProfileSettings from "./pages/dashboard/ProfileSettings.tsx";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +88,7 @@ const App = () => (
               <Route path="transactions" element={<Transactions />} />
               <Route path="toplist" element={<DashboardToplistServer />} />
               <Route path="video-hub" element={<VideoHubAnalytics />} />
+              <Route path="profile" element={<ProfileSettings />} />
             </Route>
             <Route path="/store/:slug" element={<StoreFront />} />
             <Route path="/hiscores/:slug" element={<Hiscores />} />
@@ -96,6 +99,7 @@ const App = () => (
             <Route path="/video-hub" element={<VideoHubHome />} />
             <Route path="/video-hub/submit" element={<ProtectedRoute><VideoHubSubmit /></ProtectedRoute>} />
             <Route path="/video-hub/:id" element={<VideoHubWatch />} />
+            <Route path="/u/:username" element={<ProfilePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

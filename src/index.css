@@ -161,3 +161,104 @@
   animation-play-state: running;
   box-shadow: 0 0 12px rgba(0, 255, 240, 0.4), 0 0 24px rgba(123, 47, 255, 0.2);
 }
+
+/* ===== Avatar Border Effects ===== */
+@property --ab-angle {
+  inherits: false;
+  initial-value: 0deg;
+  syntax: "<angle>";
+}
+@keyframes ab-spin { to { --ab-angle: 360deg; } }
+
+/* Shared wrapper — the inner img must be rounded-full */
+.avatar-border-wrap {
+  padding: 3px;
+  border-radius: 9999px;
+  display: inline-block;
+}
+
+.avatar-border-none        { border: 2px solid rgba(255,255,255,0.15); border-radius: 9999px; padding: 2px; }
+.avatar-border-solid       { border: 3px solid var(--profile-color, #00ffff); border-radius: 9999px; padding: 2px; }
+.avatar-border-glow        { border: 3px solid var(--profile-color, #00ffff); border-radius: 9999px; padding: 2px;
+                             box-shadow: 0 0 12px var(--profile-color, #00ffff), 0 0 24px var(--profile-color,#00ffff44); }
+
+/* Animated premium borders use padding-box/border-box */
+.avatar-border-rainbow {
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  padding: 2px;
+  background:
+    hsl(var(--background)) padding-box,
+    conic-gradient(from var(--ab-angle), #ff0080,#ff8c00,#ffe000,#00ff80,#00cfff,#cc00ff,#ff0080) border-box;
+  animation: ab-spin 2.5s linear infinite;
+}
+.avatar-border-electric {
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  padding: 2px;
+  background:
+    hsl(var(--background)) padding-box,
+    conic-gradient(from var(--ab-angle), #00fff0,#7b2fff,#ff003c,#ffcc00,#00fff0) border-box;
+  animation: ab-spin 1.8s linear infinite;
+  box-shadow: 0 0 10px rgba(0,255,240,0.35);
+}
+.avatar-border-fire {
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  padding: 2px;
+  background:
+    hsl(var(--background)) padding-box,
+    conic-gradient(from var(--ab-angle), #ff4500,#ff8c00,#ffd700,#ff4500) border-box;
+  animation: ab-spin 2s linear infinite;
+  box-shadow: 0 0 14px rgba(255,69,0,0.45);
+}
+.avatar-border-ice {
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  padding: 2px;
+  background:
+    hsl(var(--background)) padding-box,
+    conic-gradient(from var(--ab-angle), #a8edea,#fed6e3,#a8edea,#56ccf2,#a8edea) border-box;
+  animation: ab-spin 3s linear infinite;
+  box-shadow: 0 0 12px rgba(168,237,234,0.4);
+}
+.avatar-border-holographic {
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  padding: 2px;
+  background:
+    hsl(var(--background)) padding-box,
+    conic-gradient(from var(--ab-angle) in oklch longer hue, oklch(0.8 0.3 0) 0 0) border-box;
+  animation: ab-spin 4s linear infinite;
+  box-shadow: 0 0 16px rgba(200,100,255,0.3);
+}
+.avatar-border-gold {
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  padding: 2px;
+  background:
+    hsl(var(--background)) padding-box,
+    conic-gradient(from var(--ab-angle), #b8860b,#ffd700,#fffacd,#ffd700,#b8860b) border-box;
+  animation: ab-spin 3s linear infinite;
+  box-shadow: 0 0 14px rgba(255,215,0,0.4);
+}
+.avatar-border-neon-green {
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  padding: 2px;
+  background:
+    hsl(var(--background)) padding-box,
+    conic-gradient(from var(--ab-angle), #00ff41,#003b00,#00ff41) border-box;
+  animation: ab-spin 2s linear infinite;
+  box-shadow: 0 0 14px rgba(0,255,65,0.5);
+}
+.avatar-border-neon-purple {
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  padding: 2px;
+  background:
+    hsl(var(--background)) padding-box,
+    conic-gradient(from var(--ab-angle), #bf00ff,#4b0082,#bf00ff) border-box;
+  animation: ab-spin 2s linear infinite;
+  box-shadow: 0 0 14px rgba(191,0,255,0.5);
+}

@@ -20,6 +20,7 @@ import {
   BarChart3,
   ThumbsUp,
   Clapperboard,
+  User,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Logo } from "@/components/Logo";
@@ -79,6 +80,10 @@ const videoHubItems = [
 
 const systemItems = [
   { title: "API Keys", url: "/dashboard/api", icon: Key },
+];
+
+const profileItems = [
+  { title: "Profile Settings", url: "/dashboard/profile", icon: User },
 ];
 
 interface CollapsibleSectionProps {
@@ -230,6 +235,15 @@ export function DashboardSidebar() {
           items={hiscoresItems}
           collapsed={collapsed}
           defaultOpen={hiscoresItems.some((i) => location.pathname === i.url)}
+        />
+
+        {/* PROFILE */}
+        <CollapsibleSection
+          label="My Profile"
+          icon={User}
+          items={profileItems}
+          collapsed={collapsed}
+          defaultOpen={profileItems.some((i) => location.pathname === i.url)}
         />
 
         {/* TOPLIST */}
