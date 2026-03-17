@@ -436,5 +436,17 @@ export const dataService = {
       return { total_servers: 0, total_revenue: 0, total_transactions: 0, uptime_percentage: 99.9 };
     }
     return data;
-  }
+  },
+
+  async getServerPaymentGateway(serverId: string, provider = "paypal") {
+    const { data, error } = await supabase
+      .from("server_payment_gateways")
+      .select("paypal_client_id, paypal_email, paypal_mode, hidden, basket_limit_enabled, basket_limit_amount, instant_payments_only, checkout_language, require_shipping_address, verified_addresses_only, verified_paypal_accounts_only, enabled")
+      .eq("server_id", serverId)
+      .eq("provider", provider)
+      .eq("enabled", true)
+      .single();
+    if (error) return null;
+    return data;
+  },
 };

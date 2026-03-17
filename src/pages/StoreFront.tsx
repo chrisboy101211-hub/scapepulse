@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { dataService } from "@/lib/data";
 import { supabase } from "@/lib/supabase";
 import { Logo } from "@/components/Logo";
-import { ShoppingCart, X, Plus, Minus, Loader2, Users } from "lucide-react";
+import { ShoppingCart, X, Plus, Minus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Product, Category, Server } from "@/lib/mock-data";
@@ -16,15 +17,15 @@ interface CartItem {
 
 const getSubdomain = () => {
   const hostname = window.location.hostname;
-  
+
   // If it's the Vercel preview URL, check for subdomain
   if (hostname.includes("vercel.app")) {
     return null; // Let the /store/:slug route handle it
   }
-  
+
   // For custom domain (scapepulse.com)
   const parts = hostname.split(".");
-  
+
   // If we have 2+ parts and first part is not www, it's a subdomain
   if (parts.length >= 2) {
     const mainDomain = parts.slice(-2).join("."); // e.g., "scapepulse.com"
@@ -47,6 +48,16 @@ const StoreFront = () => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
 
+  // Checkout state
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [checkoutUsername, setCheckoutUsername] = useState("");
+  const [checkoutEmail, setCheckoutEmail] = useState("");
+  const [paypalOrderId, setPaypalOrderId] = useState<string | null>(null);
+  const [paypalClientId, setPaypalClientId] = useState<string | null>(null);
+  const [paypalMode, setPaypalMode] = useState<"sandbox" | "live">("live");
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const paypalContainerRef = useRef<HTMLDivElement>(null);
+
   const subdomain = getSubdomain();
   const slug = slugFromParams || subdomain;
 
@@ -57,16 +68,16 @@ const StoreFront = () => {
   const loadData = async () => {
     try {
       let serverData = null;
-      
+
       if (slug) {
         serverData = await dataService.getServerBySlug(slug);
       } else {
         const servers = await dataService.getServers();
         serverData = servers[0] || null;
       }
-      
+
       setServer(serverData);
-      
+
       if (serverData) {
         const [categoriesData, productsData] = await Promise.all([
           dataService.getCategories(serverData.id),
@@ -78,7 +89,94 @@ const StoreFront = () => {
     } catch (error) {
       console.error("Failed to load store data:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
+    }
+  };
+
+  // Load PayPal SDK and render buttons when order is created
+  useEffect(() => {
+    if (!paypalOrderId || !paypalClientId || !paypalContainerRef.current) return;
+
+    // Remove any existing PayPal script
+    const existing = document.getElementById("paypal-sdk");
+    if (existing) existing.remove();
+    if ((window as any).paypal) delete (window as any).paypal;
+
+    const script = document.createElement("script");
+    script.id = "paypal-sdk";
+    script.src = `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=USD${paypalMode === "sandbox" ? "&debug=true" : ""}`;
+    script.onload = () => {
+      (window as any).paypal.Buttons({
+        createOrder: () => paypalOrderId,
+        onApprove: async () => {
+          try {
+            const { data, error } = await supabase.functions.invoke("paypal-capture-order", {
+              body: { paypal_order_id: paypalOrderId, server_id: server!.id },
+            });
+            if (error || data?.error) {
+              toast.error("Payment capture failed");
+              return;
+            }
+            toast.success("Payment successful! Your items will be delivered in-game.");
+            setCart([]);
+            setCartOpen(false);
+            setCheckoutOpen(false);
+            setPaypalOrderId(null);
+            setPaypalClientId(null);
+            setCheckoutUsername("");
+            setCheckoutEmail("");
+          } catch {
+            toast.error("Failed to complete payment");
+          }
+        },
+        onError: (err: any) => {
+          console.error("PayPal error:", err);
+          toast.error("PayPal payment failed. Please try again.");
+        },
+        onCancel: () => {
+          toast.info("Payment cancelled.");
+        },
+        style: { layout: "vertical", color: "blue", shape: "rect", label: "pay" },
+      }).render("#paypal-button-container");
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      const s = document.getElementById("paypal-sdk");
+      if (s) s.remove();
+    };
+  }, [paypalOrderId, paypalClientId]);
+
+  const initiateCheckout = async () => {
+    if (!checkoutUsername.trim()) { toast.error("Please enter your in-game username"); return; }
+    if (!checkoutEmail.trim()) { toast.error("Please enter your email address"); return; }
+    setCheckoutLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("paypal-create-order", {
+        body: {
+          server_id: server!.id,
+          cart_items: cart.map(i => ({
+            product_id: i.product.id,
+            product_name: i.product.name,
+            quantity: i.quantity,
+            price: i.product.price,
+          })),
+          username: checkoutUsername,
+          customer_email: checkoutEmail,
+        },
+      });
+      if (error || data?.error) {
+        toast.error(data?.error || "Failed to create PayPal order");
+        setCheckoutLoading(false);
+        return;
+      }
+      setPaypalOrderId(data.order_id);
+      setPaypalClientId(data.paypal_client_id);
+      setPaypalMode(data.paypal_mode || "live");
+    } catch {
+      toast.error("Failed to initiate checkout");
+    } finally {
+      setCheckoutLoading(false);
     }
   };
 
@@ -268,41 +366,13 @@ const StoreFront = () => {
                       <span className="text-muted-foreground">Subtotal</span>
                       <span className="font-display font-bold">${cartTotal.toFixed(2)}</span>
                     </div>
-                    <Button 
-                      variant="hero" 
-                      className="w-full" 
-                      onClick={async () => {
-                        if (!server) return;
-                        const username = prompt("Enter your in-game username:");
-                        if (!username) return;
-                        
-                        try {
-                          const order = await dataService.createOrder({
-                            server_id: server.id,
-                            username,
-                            status: "pending",
-                            total: cartTotal,
-                          });
-                          
-                          for (const item of cart) {
-                            await supabase.from("order_items").insert({
-                              id: `oi-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-                              order_id: order.id,
-                              product_id: item.product.id,
-                              product_name: item.product.name,
-                              quantity: item.quantity,
-                              price: Number(item.product.price),
-                            });
-                          }
-                          
-                          toast.success(`Order #${order.id.slice(-8)} created!`);
-                          setCart([]);
-                          setCartOpen(false);
-                        } catch (error) {
-                          console.error("Order error:", error);
-                          toast.error("Failed to create order");
-                        }
-                      }}
+                    <div className="text-xs text-muted-foreground text-center px-2">
+                      A 5% platform fee is included. <span className="text-destructive font-medium">Non-Refundable.</span>
+                    </div>
+                    <Button
+                      variant="hero"
+                      className="w-full"
+                      onClick={() => setCheckoutOpen(true)}
                     >
                       Checkout — ${cartTotal.toFixed(2)}
                     </Button>
@@ -313,6 +383,86 @@ const StoreFront = () => {
           </>
         )}
       </AnimatePresence>
+
+      {/* Checkout Modal */}
+      {checkoutOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            onClick={() => { if (!paypalOrderId) setCheckoutOpen(false); }}
+          />
+          <div className="relative z-10 w-full max-w-md rounded-xl border border-border bg-card p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-display font-bold text-lg">Checkout</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setCheckoutOpen(false);
+                  setPaypalOrderId(null);
+                  setPaypalClientId(null);
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Order summary */}
+            <div className="rounded-lg bg-secondary/40 p-3 space-y-1.5 text-sm">
+              {cart.map(i => (
+                <div key={i.product.id} className="flex justify-between">
+                  <span className="text-muted-foreground">{i.quantity}x {i.product.name}</span>
+                  <span>${(Number(i.product.price) * i.quantity).toFixed(2)}</span>
+                </div>
+              ))}
+              <div className="border-t border-border/40 pt-1.5 flex justify-between font-semibold">
+                <span>Total</span>
+                <span>${cartTotal.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-lg p-2.5">
+              This is a Non-Refundable payment for services that have been delivered.
+            </p>
+
+            {!paypalOrderId ? (
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium">In-Game Username</label>
+                  <Input
+                    value={checkoutUsername}
+                    onChange={e => setCheckoutUsername(e.target.value)}
+                    placeholder="YourUsername"
+                    className="h-9 text-sm"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium">Email Address (for receipt)</label>
+                  <Input
+                    type="email"
+                    value={checkoutEmail}
+                    onChange={e => setCheckoutEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="h-9 text-sm"
+                  />
+                </div>
+                <Button
+                  className="w-full bg-[#003087] hover:bg-[#002070] text-white"
+                  onClick={initiateCheckout}
+                  disabled={checkoutLoading}
+                >
+                  {checkoutLoading ? "Loading..." : "Proceed to PayPal"}
+                </Button>
+              </div>
+            ) : (
+              <div>
+                <p className="text-xs text-muted-foreground text-center mb-3">Complete your payment with PayPal</p>
+                <div ref={paypalContainerRef} id="paypal-button-container" className="min-h-[50px]" />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

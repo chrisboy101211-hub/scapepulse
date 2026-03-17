@@ -54,7 +54,7 @@ const webstoreItems = [
   { title: "Discounts", url: "/dashboard/discounts", icon: Tag, comingSoon: true },
   { title: "Loyalty Points", url: "/dashboard/loyalty", icon: Crown, comingSoon: true },
   { title: "Transactions", url: "/dashboard/transactions", icon: ArrowLeftRight },
-  { title: "Payment Methods", url: "/dashboard/payment-methods", icon: CreditCard, comingSoon: true },
+  { title: "Payment Methods", url: "/dashboard/payment-methods", icon: CreditCard },
   { title: "Customers", url: "/dashboard/customers", icon: Users, comingSoon: true },
   { title: "Orders", url: "/dashboard/orders", icon: Receipt },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },

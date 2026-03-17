@@ -48,12 +48,26 @@ Deno.serve(async (req) => {
       );
     }
 
-    const body = await req.json();
-    const playerName = body.playerName;
+    const body = await req.json().catch(() => null);
+    if (!body) {
+      return new Response(
+        JSON.stringify({ message: "Invalid request body" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    const playerName = typeof body.playerName === "string" ? body.playerName.trim() : "";
 
     if (!playerName) {
       return new Response(
         JSON.stringify({ message: "Player name is required" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    if (!/^[a-zA-Z0-9_ -]{1,30}$/.test(playerName)) {
+      return new Response(
+        JSON.stringify({ message: "Invalid player name" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
@@ -76,7 +90,21 @@ Deno.serve(async (req) => {
     const claims: any[] = [];
 
     for (const txn of pendingTxns) {
-      const cartItems = typeof txn.cart_items === "string" ? JSON.parse(txn.cart_items) : txn.cart_items;
+      // Atomic guard — only claim if still in "paid" state
+      const { data: claimGuard } = await supabase
+        .from("pending_transactions")
+        .update({ status: "claimed", updated_at: new Date().toISOString() })
+        .eq("id", txn.id)
+        .eq("status", "paid")
+        .select("id");
+
+      if (!claimGuard || claimGuard.length === 0) continue;
+
+      let cartItems: any[] = [];
+      try {
+        cartItems = typeof txn.cart_items === "string" ? JSON.parse(txn.cart_items) : txn.cart_items;
+        if (!Array.isArray(cartItems)) cartItems = [];
+      } catch { continue; }
       
       for (const item of cartItems) {
         const { data: product } = await supabase
@@ -100,10 +128,6 @@ Deno.serve(async (req) => {
         }
       }
 
-      await supabase
-        .from("pending_transactions")
-        .update({ status: "claimed", updated_at: new Date().toISOString() })
-        .eq("id", txn.id);
 
       const orderId = `ord-${Date.now()}`;
       await supabase.from("orders").insert({

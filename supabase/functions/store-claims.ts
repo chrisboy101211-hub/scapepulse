@@ -46,12 +46,27 @@ Deno.serve(async (req) => {
       );
     }
 
-    const body = await req.json();
-    const playerName = body.playerName;
+    const body = await req.json().catch(() => null);
+    if (!body) {
+      return new Response(
+        JSON.stringify({ status: "ERROR", message: "Invalid request body" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    const playerName = typeof body.playerName === "string" ? body.playerName.trim() : "";
 
     if (!playerName) {
       return new Response(
         JSON.stringify({ status: "ERROR", message: "Player name is required" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
+    }
+
+    // Validate player name — alphanumeric, spaces, underscores, hyphens, 1-30 chars
+    if (!/^[a-zA-Z0-9_ -]{1,30}$/.test(playerName)) {
+      return new Response(
+        JSON.stringify({ status: "ERROR", message: "Invalid player name" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
@@ -78,7 +93,27 @@ Deno.serve(async (req) => {
     const claims: any[] = [];
 
     for (const txn of pendingTxns) {
-      const cartItems = typeof txn.cart_items === "string" ? JSON.parse(txn.cart_items) : txn.cart_items;
+      // Atomic claim: only update if status is still "paid" — prevents double-delivery
+      const { data: claimGuard } = await supabase
+        .from("pending_transactions")
+        .update({ status: "claimed", updated_at: new Date().toISOString() })
+        .eq("id", txn.id)
+        .eq("status", "paid") // guard — only succeeds once
+        .select("id");
+
+      if (!claimGuard || claimGuard.length === 0) {
+        // Already claimed by a concurrent request — skip
+        continue;
+      }
+
+      let cartItems: any[] = [];
+      try {
+        cartItems = typeof txn.cart_items === "string" ? JSON.parse(txn.cart_items) : txn.cart_items;
+        if (!Array.isArray(cartItems)) cartItems = [];
+      } catch (e) {
+        console.error(`Invalid cart_items for transaction ${txn.id}:`, e);
+        continue;
+      }
       
       for (const item of cartItems) {
         const { data: product } = await supabase
@@ -103,11 +138,6 @@ Deno.serve(async (req) => {
           });
         }
       }
-
-      await supabase
-        .from("pending_transactions")
-        .update({ status: "claimed", updated_at: new Date().toISOString() })
-        .eq("id", txn.id);
 
       const orderId = `ord-${Date.now()}`;
       await supabase.from("orders").insert({
