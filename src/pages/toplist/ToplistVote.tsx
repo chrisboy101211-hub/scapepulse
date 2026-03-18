@@ -12,6 +12,7 @@ export default function ToplistVote() {
   const [accentColor, setAccentColor] = useState("#a855f7")
   const [bgColor, setBgColor] = useState("#0f0f0f")
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [isPremium, setIsPremium] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -19,6 +20,7 @@ export default function ToplistVote() {
       .then(async (serverData) => {
         setServer(serverData)
         if (serverData) {
+          setIsPremium(serverData.is_premium)
           const themeData = await dataService.getServerTheme(serverData.id.toString())
           if (themeData) {
             setAccentColor(themeData.theme_vote_accent || "#a855f7")
@@ -65,6 +67,7 @@ export default function ToplistVote() {
         serverName={server.name}
         serverSlug=""
         logoUrl={logoUrl}
+        isPremium={isPremium}
         accentColor={accentColor}
         bgColor={bgColor}
       />

@@ -64,6 +64,8 @@ export default function Hiscores() {
   const [activeSkill, setActiveSkill] = useState("overall")
   const [activeBoss, setActiveBoss] = useState("")
   const [activeGameMode, setActiveGameMode] = useState("ALL")
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [isPremium, setIsPremium] = useState(false)
 
   const subdomain = getSubdomain()
   const slug = paramsSlug.slug || subdomain
@@ -88,9 +90,20 @@ export default function Hiscores() {
       
       if (themeData) {
         setTheme({
-          accent: themeData.theme_hiscores_accent || "#f59e0b",
+          accent: themeData.theme_hiscores_accent || "#a855f7",
           bg: themeData.theme_hiscores_bg || "#0f0f0f",
         })
+        setLogoUrl(themeData.logo_url || null)
+      }
+
+      // Check if server owner is premium
+      if (serverData.user_id) {
+        const { data: userData } = await supabase
+          .from("users")
+          .select("is_premium")
+          .eq("id", serverData.user_id)
+          .single()
+        setIsPremium(userData?.is_premium ?? false)
       }
 
       const { data: bossData } = await supabase
@@ -168,7 +181,8 @@ export default function Hiscores() {
       <ServerNav
         serverName={server.name}
         serverSlug={server.slug}
-        logoUrl={server.logo_url}
+        logoUrl={logoUrl}
+        isPremium={isPremium}
         accentColor={theme.accent}
         bgColor={theme.bg}
       />

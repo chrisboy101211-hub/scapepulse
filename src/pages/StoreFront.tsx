@@ -48,6 +48,8 @@ const StoreFront = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [storeAccent, setStoreAccent] = useState("#a855f7");
   const [storeBg, setStoreBg] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [isPremium, setIsPremium] = useState(false);
 
   // Checkout state
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -88,11 +90,18 @@ const StoreFront = () => {
         setCategories(categoriesData);
         setProducts(productsData);
         if (themeData) {
-          setStoreAccent(themeData.theme_store_accent || "#22c55e");
+          setStoreAccent(themeData.theme_store_accent || "#a855f7");
           setStoreBg(themeData.theme_store_bg || null);
-          if (themeData.logo_url) {
-            setServer(s => s ? { ...s, logo_url: themeData.logo_url } : s);
-          }
+          setLogoUrl(themeData.logo_url || null);
+        }
+        // Check if server owner is premium
+        if (serverData.user_id) {
+          const { data: userData } = await supabase
+            .from("users")
+            .select("is_premium")
+            .eq("id", serverData.user_id)
+            .single();
+          setIsPremium(userData?.is_premium ?? false);
         }
       }
     } catch (error) {
@@ -247,7 +256,8 @@ const StoreFront = () => {
       <ServerNav
         serverName={server.name}
         serverSlug={server.slug}
-        logoUrl={server.logo_url}
+        logoUrl={logoUrl}
+        isPremium={isPremium}
         accentColor={storeAccent}
         bgColor={storeBg}
         showCart={true}
