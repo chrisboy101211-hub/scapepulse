@@ -46,7 +46,7 @@ const StoreFront = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
-  const [storeAccent, setStoreAccent] = useState("#22c55e");
+  const [storeAccent, setStoreAccent] = useState("#a855f7");
   const [storeBg, setStoreBg] = useState<string | null>(null);
 
   // Checkout state

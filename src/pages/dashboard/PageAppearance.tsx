@@ -21,9 +21,9 @@ interface Theme {
 }
 
 const DEFAULTS: Theme = {
-  theme_hiscores_accent: "#f59e0b",
+  theme_hiscores_accent: "#a855f7",
   theme_hiscores_bg: "#0f0f0f",
-  theme_store_accent: "#22c55e",
+  theme_store_accent: "#a855f7",
   theme_store_bg: "#0a0a0f",
   theme_vote_accent: "#a855f7",
   theme_vote_bg: "#0f0f0f",

@@ -1,10 +1,10 @@
 import { Link, useLocation } from "react-router-dom"
-import { Logo } from "@/components/Logo"
 
 interface ServerNavProps {
   serverName: string
   serverSlug: string
   logoUrl?: string | null
+  isPremium?: boolean
   accentColor: string
   bgColor?: string | null
   showCart?: boolean
@@ -16,6 +16,7 @@ export function ServerNav({
   serverName,
   serverSlug,
   logoUrl,
+  isPremium = false,
   accentColor,
   bgColor,
   showCart = false,
@@ -38,14 +39,18 @@ export function ServerNav({
       <div className="container mx-auto flex h-full items-center justify-between px-6">
         {/* Left - Logo */}
         <Link to="/" className="flex items-center gap-2">
-          {logoUrl ? (
+          {logoUrl && isPremium ? (
             <img 
               src={logoUrl} 
               alt={serverName} 
               className="h-8 w-auto max-w-[120px] object-contain"
             />
           ) : (
-            <Logo size="sm" />
+            <img 
+              src="/favicon.svg" 
+              alt="ScapePulse" 
+              className="w-8 h-8" 
+            />
           )}
         </Link>
 
@@ -54,13 +59,13 @@ export function ServerNav({
           {/* Store */}
           <Link
             to={`/store/${serverSlug}`}
-            className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all"
+            className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all hover:text-white"
             style={{ color: isStore ? accentColor : "#9ca3af" }}
           >
             Store
             {isStore && (
               <div 
-                className="absolute inset-0 rounded-full -z-10"
+                className="absolute inset-0 rounded-full -z-10 pointer-events-none"
                 style={{ backgroundColor: `${accentColor}20`, border: `1px solid ${accentColor}50` }}
               />
             )}
@@ -69,13 +74,13 @@ export function ServerNav({
           {/* Vote */}
           <Link
             to={`/vote/${serverSlug}`}
-            className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all"
+            className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all hover:text-white"
             style={{ color: isVote ? accentColor : "#9ca3af" }}
           >
             Vote
             {isVote && (
               <div 
-                className="absolute inset-0 rounded-full -z-10"
+                className="absolute inset-0 rounded-full -z-10 pointer-events-none"
                 style={{ backgroundColor: `${accentColor}20`, border: `1px solid ${accentColor}50` }}
               />
             )}
@@ -84,13 +89,13 @@ export function ServerNav({
           {/* Hiscores */}
           <Link
             to={`/hiscores/${serverSlug}`}
-            className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all"
+            className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all hover:text-white"
             style={{ color: isHiscores ? accentColor : "#9ca3af" }}
           >
             Hiscores
             {isHiscores && (
               <div 
-                className="absolute inset-0 rounded-full -z-10"
+                className="absolute inset-0 rounded-full -z-10 pointer-events-none"
                 style={{ backgroundColor: `${accentColor}20`, border: `1px solid ${accentColor}50` }}
               />
             )}
@@ -102,7 +107,7 @@ export function ServerNav({
           {showCart && (
             <button 
               onClick={onCartClick}
-              className="relative flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all hover:bg-white/10"
+              className="relative flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all"
               style={{ color: "#9ca3af" }}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

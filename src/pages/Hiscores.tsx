@@ -52,7 +52,7 @@ const hexToRgba = (hex: string, alpha: number) => {
 export default function Hiscores() {
   const paramsSlug = useParams()
   const [server, setServer] = useState<Server | null>(null)
-  const [theme, setTheme] = useState<ThemeColors>({ accent: "#f59e0b", bg: "#0f0f0f" })
+  const [theme, setTheme] = useState<ThemeColors>({ accent: "#a855f7", bg: "#0f0f0f" })
   const [skills, setSkills] = useState<Skill[]>([])
   const [bosses, setBosses] = useState<Boss[]>([])
   const [gameModes, setGameModes] = useState<GameMode[]>([])
