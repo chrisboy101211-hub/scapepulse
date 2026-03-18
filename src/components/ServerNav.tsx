@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom"
+import { Logo } from "@/components/Logo"
 
 interface ServerNavProps {
   serverName: string
@@ -46,20 +47,7 @@ export function ServerNav({
               className="h-8 w-auto max-w-[120px] object-contain"
             />
           ) : (
-            <svg width="140" height="32" viewBox="0 0 140 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 16L14 4L18 12L22 4L30 16L22 28L18 20L14 28L6 16Z" fill="url(#spaint0_linear)" stroke="url(#spaint1_linear)" strokeWidth="1"/>
-              <text x="38" y="22" fontFamily="sans-serif" fontSize="16" fontWeight="bold" fill="white">ScapePulse</text>
-              <defs>
-                <linearGradient id="spaint0_linear" x1="6" y1="16" x2="30" y2="16" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#38bdf8"/>
-                  <stop offset="1" stopColor="#818cf8"/>
-                </linearGradient>
-                <linearGradient id="spaint1_linear" x1="6" y1="16" x2="30" y2="16" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#0ea5e9"/>
-                  <stop offset="1" stopColor="#6366f1"/>
-                </linearGradient>
-              </defs>
-            </svg>
+            <Logo size="md" />
           )}
         </Link>
 
