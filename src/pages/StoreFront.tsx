@@ -316,7 +316,16 @@ const StoreFront = () => {
               layout
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="group rounded-lg border border-border bg-card p-5 transition-all hover:border-primary/30 hover:shadow-[0_0_25px_hsl(var(--primary)/0.08)]"
+              className="group rounded-lg border border-border bg-card p-5 transition-all hover:border-primary/30"
+              style={{ "--accent-glow": storeAccent } as any}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = `0 0 25px ${storeAccent}20`
+                e.currentTarget.style.borderColor = `${storeAccent}50`
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = ""
+                e.currentTarget.style.borderColor = ""
+              }}
             >
               <div className="mb-3 text-center text-4xl">{product.image}</div>
               <h3 className="font-display font-semibold">{product.name}</h3>
