@@ -34,7 +34,7 @@ const formatXP = (xp: number) => {
   return xp.toLocaleString()
 }
 
-const OVERALL_ICON = "https://oldschool.runescape.wiki/images/Overall_icon.png"
+const OVERALL_ICON = "https://oldschool.runescape.wiki/images/Stats_icon.png"
 
 export default function Hiscores() {
   const paramsSlug = useParams()
