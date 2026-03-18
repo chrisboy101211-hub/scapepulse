@@ -17,6 +17,7 @@ interface Theme {
   theme_vote_accent: string;
   theme_vote_bg: string;
   logo_url: string | null;
+  pill_logo_url: string | null;
 }
 
 const DEFAULTS: Theme = {
@@ -27,6 +28,7 @@ const DEFAULTS: Theme = {
   theme_vote_accent: "#a855f7",
   theme_vote_bg: "#0f0f0f",
   logo_url: null,
+  pill_logo_url: null,
 };
 
 function ColorField({
@@ -91,6 +93,7 @@ const PageAppearance = () => {
   const [isPremium, setIsPremium] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const pillLogoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (selectedServer) {
@@ -127,6 +130,7 @@ const PageAppearance = () => {
           theme_vote_accent: data.theme_vote_accent ?? DEFAULTS.theme_vote_accent,
           theme_vote_bg: data.theme_vote_bg ?? DEFAULTS.theme_vote_bg,
           logo_url: data.logo_url ?? null,
+          pill_logo_url: data.pill_logo_url ?? null,
         });
       }
     } catch {
@@ -149,7 +153,7 @@ const PageAppearance = () => {
     }
   };
 
-  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "pill") => {
     if (!selectedServer || !e.target.files || e.target.files.length === 0) return;
     
     const file = e.target.files[0];
@@ -167,8 +171,9 @@ const PageAppearance = () => {
     setUploadingLogo(true);
     
     try {
-      const fileName = `logos/${selectedServer.id}/${Date.now()}-${file.name}`;
-      const { data, error } = await supabase.storage
+      const folder = type === "logo" ? "logos" : "pill-logos";
+      const fileName = `${folder}/${selectedServer.id}/${Date.now()}-${file.name}`;
+      const { error } = await supabase.storage
         .from("product-images")
         .upload(fileName, file, { upsert: true });
       
@@ -178,18 +183,30 @@ const PageAppearance = () => {
         .from("product-images")
         .getPublicUrl(fileName);
       
-      setTheme(t => ({ ...t, logo_url: urlData.publicUrl }));
-      toast.success("Logo uploaded");
+      if (type === "logo") {
+        setTheme(t => ({ ...t, logo_url: urlData.publicUrl }));
+      } else {
+        setTheme(t => ({ ...t, pill_logo_url: urlData.publicUrl }));
+      }
+      toast.success(`${type === "logo" ? "Main" : "Pill"} logo uploaded`);
     } catch (err: any) {
       toast.error(err.message || "Failed to upload logo");
     } finally {
       setUploadingLogo(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (type === "logo" && fileInputRef.current) {
+        fileInputRef.current.value = "";
+      } else if (pillLogoInputRef.current) {
+        pillLogoInputRef.current.value = "";
+      }
     }
   };
 
-  const handleRemoveLogo = () => {
-    setTheme(t => ({ ...t, logo_url: null }));
+  const handleRemoveLogo = (type: "logo" | "pill") => {
+    if (type === "logo") {
+      setTheme(t => ({ ...t, logo_url: null }));
+    } else {
+      setTheme(t => ({ ...t, pill_logo_url: null }));
+    }
   };
 
   const resetPage = (page: "hiscores" | "store" | "vote") => {
@@ -250,68 +267,138 @@ const PageAppearance = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Custom Logo</CardTitle>
-                {theme.logo_url && (
-                  <Button variant="ghost" size="sm" onClick={handleRemoveLogo} className="text-destructive gap-1.5">
-                    <X className="h-3.5 w-3.5" />
-                    Remove
-                  </Button>
-                )}
+                <CardTitle>Custom Logos</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {theme.logo_url ? (
-                  <div className="flex items-center gap-4">
-                    <div className="w-32 h-16 rounded-lg border border-border overflow-hidden bg-muted">
-                      <img src={theme.logo_url} alt="Logo preview" className="w-full h-full object-contain" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Main Logo */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">Main Navbar Logo</Label>
+                    {theme.logo_url && (
+                      <Button variant="ghost" size="sm" onClick={() => handleRemoveLogo("logo")} className="text-destructive gap-1.5 h-auto py-0 px-1">
+                        <X className="h-3.5 w-3.5" />
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                  {theme.logo_url ? (
+                    <div className="flex items-center gap-4">
+                      <div className="w-40 h-20 rounded-lg border border-border overflow-hidden bg-muted">
+                        <img src={theme.logo_url} alt="Logo preview" className="w-full h-full object-contain" />
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleLogoUpload(e, "logo")}
+                          className="hidden"
+                          id="logo-upload"
+                        />
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploadingLogo}
+                          className="gap-1.5"
+                        >
+                          {uploadingLogo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                          Change
+                        </Button>
+                        <p className="text-xs text-muted-foreground mt-2">Recommended: 300x80px</p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-muted-foreground mb-2">Current logo</p>
+                  ) : (
+                    <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
                       <input
                         ref={fileInputRef}
                         type="file"
                         accept="image/*"
-                        onChange={handleLogoUpload}
+                        onChange={(e) => handleLogoUpload(e, "logo")}
                         className="hidden"
                         id="logo-upload"
                       />
+                      <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground mb-3">Upload main navbar logo</p>
                       <Button 
                         variant="outline" 
-                        size="sm"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploadingLogo}
                         className="gap-1.5"
                       >
                         {uploadingLogo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                        Change Logo
+                        Choose Image
                       </Button>
+                      <p className="text-xs text-muted-foreground mt-2">Max 2MB, recommended 300x80px</p>
                     </div>
+                  )}
+                </div>
+
+                {/* Pill Logo */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">Pill Logo (Zap Icon)</Label>
+                    {theme.pill_logo_url && (
+                      <Button variant="ghost" size="sm" onClick={() => handleRemoveLogo("pill")} className="text-destructive gap-1.5 h-auto py-0 px-1">
+                        <X className="h-3.5 w-3.5" />
+                        Remove
+                      </Button>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      className="hidden"
-                      id="logo-upload"
-                    />
-                    <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground mb-3">Upload your server logo</p>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploadingLogo}
-                      className="gap-1.5"
-                    >
-                      {uploadingLogo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                      {uploadingLogo ? "Uploading..." : "Choose Image"}
-                    </Button>
-                    <p className="text-xs text-muted-foreground mt-2">Max 2MB, recommended 300x80px</p>
-                  </div>
-                )}
+                  {theme.pill_logo_url ? (
+                    <div className="flex items-center gap-4">
+                      <div className="w-20 h-20 rounded-lg border border-border overflow-hidden bg-muted flex items-center justify-center">
+                        <img src={theme.pill_logo_url} alt="Pill Logo preview" className="w-12 h-12 object-contain" />
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          ref={pillLogoInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleLogoUpload(e, "pill")}
+                          className="hidden"
+                          id="pill-logo-upload"
+                        />
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => pillLogoInputRef.current?.click()}
+                          disabled={uploadingLogo}
+                          className="gap-1.5"
+                        >
+                          {uploadingLogo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                          Change
+                        </Button>
+                        <p className="text-xs text-muted-foreground mt-2">Recommended: 100x100px (square)</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
+                      <input
+                        ref={pillLogoInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleLogoUpload(e, "pill")}
+                        className="hidden"
+                        id="pill-logo-upload"
+                      />
+                      <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground mb-3">Upload pill logo</p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => pillLogoInputRef.current?.click()}
+                        disabled={uploadingLogo}
+                        className="gap-1.5"
+                      >
+                        {uploadingLogo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                        Choose Image
+                      </Button>
+                      <p className="text-xs text-muted-foreground mt-2">Max 2MB, recommended 100x100px</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>

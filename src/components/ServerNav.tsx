@@ -5,6 +5,7 @@ interface ServerNavProps {
   serverName: string
   serverSlug: string
   logoUrl?: string | null
+  pillLogoUrl?: string | null
   isPremium?: boolean
   accentColor: string
   bgColor?: string | null
@@ -17,6 +18,7 @@ export function ServerNav({
   serverName,
   serverSlug,
   logoUrl,
+  pillLogoUrl,
   isPremium = false,
   accentColor,
   bgColor,
@@ -53,14 +55,14 @@ export function ServerNav({
 
         {/* Center - Pill Navigation (absolutely centered) */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
-          {/* Mini Zap Icon - Home button (shows custom logo if premium, otherwise favicon) */}
+          {/* Mini Zap Icon - Home button (shows pill logo if premium, otherwise favicon) */}
           <Link
             to="/"
             className="electric-border flex items-center justify-center w-9 h-9 rounded-full bg-white/5 transition-all hover:bg-white/10"
             title="Home"
           >
-            {logoUrl && isPremium ? (
-              <img src={logoUrl} alt="Home" className="w-6 h-6 object-contain" />
+            {pillLogoUrl && isPremium ? (
+              <img src={pillLogoUrl} alt="Home" className="w-6 h-6 object-contain" />
             ) : (
               <img src="/favicon.svg" alt="Home" className="w-5 h-5" />
             )}

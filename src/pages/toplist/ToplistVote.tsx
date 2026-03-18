@@ -12,6 +12,7 @@ export default function ToplistVote() {
   const [accentColor, setAccentColor] = useState("#a855f7")
   const [bgColor, setBgColor] = useState("#0f0f0f")
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [pillLogoUrl, setPillLogoUrl] = useState<string | null>(null)
   const [isPremium, setIsPremium] = useState(false)
 
   useEffect(() => {
@@ -26,6 +27,7 @@ export default function ToplistVote() {
             setAccentColor(themeData.theme_vote_accent || "#a855f7")
             setBgColor(themeData.theme_vote_bg || "#0f0f0f")
             setLogoUrl(themeData.logo_url || null)
+            setPillLogoUrl(themeData.pill_logo_url || null)
           }
         }
       })
@@ -67,6 +69,7 @@ export default function ToplistVote() {
         serverName={server.name}
         serverSlug=""
         logoUrl={logoUrl}
+        pillLogoUrl={pillLogoUrl}
         isPremium={isPremium}
         accentColor={accentColor}
         bgColor={bgColor}

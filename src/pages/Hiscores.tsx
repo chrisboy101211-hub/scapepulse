@@ -65,6 +65,7 @@ export default function Hiscores() {
   const [activeBoss, setActiveBoss] = useState("")
   const [activeGameMode, setActiveGameMode] = useState("ALL")
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [pillLogoUrl, setPillLogoUrl] = useState<string | null>(null)
   const [isPremium, setIsPremium] = useState(false)
 
   const subdomain = getSubdomain()
@@ -94,6 +95,7 @@ export default function Hiscores() {
           bg: themeData.theme_hiscores_bg || "#0f0f0f",
         })
         setLogoUrl(themeData.logo_url || null)
+        setPillLogoUrl(themeData.pill_logo_url || null)
       }
 
       // Check if server owner is premium
@@ -182,6 +184,7 @@ export default function Hiscores() {
         serverName={server.name}
         serverSlug={server.slug}
         logoUrl={logoUrl}
+        pillLogoUrl={pillLogoUrl}
         isPremium={isPremium}
         accentColor={theme.accent}
         bgColor={theme.bg}

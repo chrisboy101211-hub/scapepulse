@@ -49,6 +49,7 @@ const StoreFront = () => {
   const [storeAccent, setStoreAccent] = useState("#a855f7");
   const [storeBg, setStoreBg] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [pillLogoUrl, setPillLogoUrl] = useState<string | null>(null);
   const [isPremium, setIsPremium] = useState(false);
 
   // Checkout state
@@ -93,6 +94,7 @@ const StoreFront = () => {
           setStoreAccent(themeData.theme_store_accent || "#a855f7");
           setStoreBg(themeData.theme_store_bg || null);
           setLogoUrl(themeData.logo_url || null);
+          setPillLogoUrl(themeData.pill_logo_url || null);
         }
         // Check if server owner is premium
         if (serverData.user_id) {
@@ -257,6 +259,7 @@ const StoreFront = () => {
         serverName={server.name}
         serverSlug={server.slug}
         logoUrl={logoUrl}
+        pillLogoUrl={pillLogoUrl}
         isPremium={isPremium}
         accentColor={storeAccent}
         bgColor={storeBg}

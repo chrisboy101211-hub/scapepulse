@@ -577,7 +577,7 @@ export const dataService = {
   async getServerTheme(serverId: string) {
     const { data, error } = await supabase
       .from("servers")
-      .select("theme_hiscores_accent, theme_hiscores_bg, theme_store_accent, theme_store_bg, theme_vote_accent, theme_vote_bg, logo_url")
+      .select("theme_hiscores_accent, theme_hiscores_bg, theme_store_accent, theme_store_bg, theme_vote_accent, theme_vote_bg, logo_url, pill_logo_url")
       .eq("id", serverId)
       .single();
     if (error) return null;
@@ -592,6 +592,7 @@ export const dataService = {
     theme_vote_accent?: string;
     theme_vote_bg?: string;
     logo_url?: string | null;
+    pill_logo_url?: string | null;
   }) {
     const { data, error } = await supabase.from("servers").update(theme).eq("id", serverId).select();
     if (error) throw error;
