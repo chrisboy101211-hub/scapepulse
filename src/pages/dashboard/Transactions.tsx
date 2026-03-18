@@ -1,54 +1,89 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { dataService } from "@/lib/data"
 import { useServers } from "@/lib/server-context"
 import type { PendingTransaction, Product } from "@/lib/mock-data"
-import { Loader2, Plus, Trash2, CheckCircle, Clock, XCircle, ChevronRight, Home } from "lucide-react"
+import { Loader2, Plus, Trash2, CheckCircle, Clock, XCircle, User, Package, Hash, Truck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
+import { motion, AnimatePresence } from "framer-motion"
 
 const statusConfig = {
-  pending: { label: "Pending", icon: Clock, className: "bg-accent/10 text-accent" },
-  paid: { label: "Paid", icon: CheckCircle, className: "bg-primary/10 text-primary" },
-  failed: { label: "Failed", icon: XCircle, className: "bg-destructive/10 text-destructive" },
-  claimed: { label: "Claimed", icon: CheckCircle, className: "bg-emerald-500/10 text-emerald-500" },
+  pending: { label: "Pending",  icon: Clock,        className: "bg-accent/10 text-accent" },
+  paid:    { label: "Paid",     icon: CheckCircle,  className: "bg-primary/10 text-primary" },
+  failed:  { label: "Failed",   icon: XCircle,      className: "bg-destructive/10 text-destructive" },
+  claimed: { label: "Claimed",  icon: CheckCircle,  className: "bg-emerald-500/10 text-emerald-500" },
 }
 
 const EMPTY_FORM = {
-  username: "",
-  product_id: "",
-  quantity: "1",
-  delivery_status: "waiting", // "waiting" | "complete"
+  username:        "",
+  product_id:      "",
+  quantity:        "1",
+  delivery_status: "waiting",
+}
+
+// Staggered field animation variants
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.07 } },
+  exit:   { transition: { staggerChildren: 0.04, staggerDirection: -1 } },
+}
+
+const fieldVariants = {
+  hidden:  { opacity: 0, y: -10, scale: 0.97 },
+  visible: { opacity: 1, y: 0,   scale: 1,   transition: { type: "spring", stiffness: 400, damping: 28 } },
+  exit:    { opacity: 0, y: -8,  scale: 0.97, transition: { duration: 0.12 } },
+}
+
+const dropdownVariants = {
+  hidden:  { opacity: 0, y: -12, scale: 0.96 },
+  visible: { opacity: 1, y: 0,   scale: 1,   transition: { type: "spring", stiffness: 380, damping: 28, mass: 0.9 } },
+  exit:    { opacity: 0, y: -8,  scale: 0.96, transition: { duration: 0.15 } },
 }
 
 const Transactions = () => {
   const { selectedServer } = useServers()
-  const { toast } = useToast()
+  const { toast }          = useToast()
   const [transactions, setTransactions] = useState<PendingTransaction[]>([])
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-  const [view, setView] = useState<"list" | "create">("list")
+  const [products,     setProducts]     = useState<Product[]>([])
+  const [loading,  setLoading]  = useState(true)
+  const [open,     setOpen]     = useState(false)
   const [creating, setCreating] = useState(false)
-  const [form, setForm] = useState(EMPTY_FORM)
+  const [form,     setForm]     = useState(EMPTY_FORM)
+  const popoverRef = useRef<HTMLDivElement>(null)
+  const buttonRef  = useRef<HTMLButtonElement>(null)
 
-  useEffect(() => {
-    loadTransactions()
-  }, [selectedServer])
+  useEffect(() => { loadTransactions() }, [selectedServer])
 
+  // Load products when dropdown opens
   useEffect(() => {
-    if (view === "create" && selectedServer) {
+    if (open && selectedServer) {
       dataService.getAllProducts(selectedServer.id).then(setProducts).catch(() => setProducts([]))
     }
-  }, [view, selectedServer])
+  }, [open, selectedServer])
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (
+        popoverRef.current && !popoverRef.current.contains(e.target as Node) &&
+        buttonRef.current  && !buttonRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false)
+      }
+    }
+    if (open) document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [open])
 
   const loadTransactions = async () => {
     setLoading(true)
     try {
       const data = await dataService.getPendingTransactions(selectedServer?.id)
       setTransactions(data)
-    } catch (error) {
-      console.error("Failed to load transactions:", error)
+    } catch (err) {
+      console.error("Failed to load transactions:", err)
     } finally {
       setLoading(false)
     }
@@ -59,43 +94,39 @@ const Transactions = () => {
   const handleSubmit = async () => {
     if (!selectedServer) return
     if (!form.username.trim()) {
-      toast({ title: "Missing field", description: "Player username is required.", variant: "destructive" })
-      return
+      toast({ title: "Missing field", description: "Player username is required.", variant: "destructive" }); return
     }
     if (!form.product_id || !selectedProduct) {
-      toast({ title: "Missing field", description: "Please choose a product.", variant: "destructive" })
-      return
+      toast({ title: "Missing field", description: "Please choose a product.", variant: "destructive" }); return
     }
     setCreating(true)
     try {
-      const qty = Math.max(1, parseInt(form.quantity) || 1)
-      const price = Number(selectedProduct.price)
-      // "complete" = already delivered manually; "waiting" = let the plugin claim it
+      const qty        = Math.max(1, parseInt(form.quantity) || 1)
+      const price      = Number(selectedProduct.price)
       const isComplete = form.delivery_status === "complete"
 
       await dataService.createPendingTransaction({
-        server_id: selectedServer.id,
-        username: form.username.trim(),
+        server_id:      selectedServer.id,
+        username:       form.username.trim(),
         cart_items: [{
-          id: selectedProduct.numeric_id ?? selectedProduct.id,
-          product_id: selectedProduct.id,
+          id:           selectedProduct.numeric_id ?? selectedProduct.id,
+          product_id:   selectedProduct.id,
           product_name: selectedProduct.name,
-          quantity: qty,
+          quantity:     qty,
           price,
         }] as any,
-        total: price * qty,
+        total:          price * qty,
         transaction_id: `manual-${Date.now()}`,
-        status: isComplete ? "claimed" : "paid",
-        claimed: isComplete,
+        status:         isComplete ? "claimed" : "paid",
+        claimed:        isComplete,
       })
 
       toast({ title: "Transaction created", description: isComplete ? "Marked as delivered." : "Waiting for player to claim." })
       setForm(EMPTY_FORM)
-      setView("list")
+      setOpen(false)
       loadTransactions()
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Unknown error"
-      toast({ title: "Failed to create transaction", description: msg, variant: "destructive" })
+      toast({ title: "Failed to create transaction", description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" })
     } finally {
       setCreating(false)
     }
@@ -111,117 +142,165 @@ const Transactions = () => {
     }
   }
 
-  // ── Create view ──────────────────────────────────────────────────────
-  if (view === "create") {
-    return (
-      <div className="space-y-6">
-        {/* Header + breadcrumb */}
-        <div>
-          <h1 className="font-display text-2xl font-bold">Create Transaction</h1>
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
-            <Home className="h-3.5 w-3.5" />
-            <ChevronRight className="h-3 w-3" />
-            <button onClick={() => setView("list")} className="hover:text-foreground transition-colors">
-              Transactions
-            </button>
-            <ChevronRight className="h-3 w-3" />
-            <span className="text-foreground">Create Transaction</span>
-          </div>
-        </div>
+  const fields = [
+    {
+      key: "player",
+      icon: User,
+      label: "Player",
+      content: (
+        <Input
+          placeholder="Username or ID"
+          value={form.username}
+          onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
+          className="h-8 text-sm bg-background/60"
+          autoFocus
+        />
+      ),
+    },
+    {
+      key: "product",
+      icon: Package,
+      label: "Product",
+      content: (
+        <select
+          value={form.product_id}
+          onChange={(e) => setForm((f) => ({ ...f, product_id: e.target.value }))}
+          className="w-full h-8 rounded-md border border-input bg-background/60 px-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+        >
+          <option value="">Choose a product…</option>
+          {products.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.name} — ${Number(p.price).toFixed(2)}
+            </option>
+          ))}
+        </select>
+      ),
+    },
+    {
+      key: "quantity",
+      icon: Hash,
+      label: "Quantity",
+      content: (
+        <Input
+          type="number"
+          min="1"
+          placeholder="1"
+          value={form.quantity}
+          onChange={(e) => setForm((f) => ({ ...f, quantity: e.target.value }))}
+          className="h-8 text-sm bg-background/60"
+        />
+      ),
+    },
+    {
+      key: "delivery",
+      icon: Truck,
+      label: "Delivery Status",
+      content: (
+        <select
+          value={form.delivery_status}
+          onChange={(e) => setForm((f) => ({ ...f, delivery_status: e.target.value }))}
+          className="w-full h-8 rounded-md border border-input bg-background/60 px-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+        >
+          <option value="waiting">Waiting on user</option>
+          <option value="complete">Complete</option>
+        </select>
+      ),
+    },
+  ]
 
-        {/* Form card */}
-        <div className="rounded-lg border border-border bg-card p-6 space-y-6">
-          <p className="text-sm text-muted-foreground">Create a new purchase / transaction</p>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {/* Player */}
-            <div className="space-y-2">
-              <Label>Player</Label>
-              <Input
-                placeholder="Username or ID"
-                value={form.username}
-                onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
-              />
-              <p className="text-xs text-muted-foreground">The username or ID of the player.</p>
-            </div>
-
-            {/* Product */}
-            <div className="space-y-2">
-              <Label>Product</Label>
-              <select
-                value={form.product_id}
-                onChange={(e) => setForm((f) => ({ ...f, product_id: e.target.value }))}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-              >
-                <option value="">Choose the product you wish to give to the user.</option>
-                {products.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} — ${Number(p.price).toFixed(2)}
-                  </option>
-                ))}
-              </select>
-              {products.length === 0 && (
-                <p className="text-xs text-muted-foreground">No products found for this server.</p>
-              )}
-            </div>
-
-            {/* Quantity */}
-            <div className="space-y-2">
-              <Label>Quantity</Label>
-              <Input
-                type="number"
-                min="1"
-                placeholder="Quantity"
-                value={form.quantity}
-                onChange={(e) => setForm((f) => ({ ...f, quantity: e.target.value }))}
-              />
-              <p className="text-xs text-muted-foreground">The amount to give to the player.</p>
-            </div>
-
-            {/* Delivery Status */}
-            <div className="space-y-2">
-              <Label>Delivery Status</Label>
-              <select
-                value={form.delivery_status}
-                onChange={(e) => setForm((f) => ({ ...f, delivery_status: e.target.value }))}
-                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-              >
-                <option value="waiting">Waiting on user</option>
-                <option value="complete">Complete</option>
-              </select>
-              <p className="text-xs text-muted-foreground">
-                {form.delivery_status === "complete"
-                  ? "Complete means that you have already given the product to the user."
-                  : "\"Waiting on user\" means that you want our system to handle that for you."}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-center">
-          <Button variant="hero" className="px-10 rounded-full" onClick={handleSubmit} disabled={creating}>
-            {creating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Submit
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
-  // ── List view ────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold">Transactions</h1>
           <p className="text-sm text-muted-foreground">Manage pending transactions and payment records</p>
         </div>
-        <Button onClick={() => setView("create")} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Create Transaction
-        </Button>
+
+        {/* Button + dropdown container */}
+        <div className="relative">
+          <Button
+            ref={buttonRef}
+            onClick={() => setOpen((v) => !v)}
+            className="gap-2"
+          >
+            <motion.div
+              animate={{ rotate: open ? 45 : 0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            >
+              <Plus className="h-4 w-4" />
+            </motion.div>
+            Create Transaction
+          </Button>
+
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                ref={popoverRef}
+                variants={dropdownVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="absolute right-0 top-full mt-2 z-50 w-80 rounded-xl border border-border bg-card shadow-2xl shadow-black/20 overflow-hidden"
+              >
+                {/* Header bar */}
+                <div className="px-4 py-3 border-b border-border/60 bg-secondary/30">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">New Transaction</p>
+                </div>
+
+                {/* Staggered fields */}
+                <motion.div
+                  className="p-4 space-y-3"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                >
+                  {fields.map(({ key, icon: Icon, label, content }) => (
+                    <motion.div key={key} variants={fieldVariants} className="space-y-1">
+                      <Label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <Icon className="h-3 w-3" />
+                        {label}
+                      </Label>
+                      {content}
+                    </motion.div>
+                  ))}
+
+                  {/* Total preview */}
+                  {selectedProduct && (
+                    <motion.div
+                      variants={fieldVariants}
+                      className="flex items-center justify-between rounded-lg bg-primary/5 border border-primary/15 px-3 py-2"
+                    >
+                      <span className="text-xs text-muted-foreground">Total</span>
+                      <span className="text-sm font-bold text-primary">
+                        ${(Number(selectedProduct.price) * (parseInt(form.quantity) || 1)).toFixed(2)}
+                      </span>
+                    </motion.div>
+                  )}
+
+                  {/* Submit */}
+                  <motion.div variants={fieldVariants} className="pt-1">
+                    <Button
+                      className="w-full h-8 text-sm"
+                      onClick={handleSubmit}
+                      disabled={creating}
+                    >
+                      {creating
+                        ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />
+                        : <Plus className="h-3.5 w-3.5 mr-2" />
+                      }
+                      {creating ? "Creating…" : "Submit"}
+                    </Button>
+                  </motion.div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
+      {/* Table */}
       {loading ? (
         <div className="flex justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -245,7 +324,7 @@ const Transactions = () => {
             </thead>
             <tbody>
               {transactions.map((tx) => {
-                const cfg = statusConfig[tx.status] ?? statusConfig.pending
+                const cfg  = statusConfig[tx.status] ?? statusConfig.pending
                 const Icon = cfg.icon
                 const isDelivered = tx.claimed || tx.status === "claimed"
                 return (
