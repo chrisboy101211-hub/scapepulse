@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { dataService } from "@/lib/data"
 import { Logo } from "@/components/Logo"
-import { Loader2, Search, Skull } from "lucide-react"
+import { Loader2, Search } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import type { Server } from "@/lib/mock-data"
 
@@ -34,32 +34,7 @@ const formatXP = (xp: number) => {
   return xp.toLocaleString()
 }
 
-const OVERALL_ICON = "https://oldschool.runescape.wiki/images/Stats_icon.png"
-
-const hexToRgba = (hex: string, alpha: number) => {
-  const clean = hex.replace("#", "")
-  const r = parseInt(clean.slice(0, 2), 16) || 0
-  const g = parseInt(clean.slice(2, 4), 16) || 0
-  const b = parseInt(clean.slice(4, 6), 16) || 0
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
-
-// XP mode badge colors
-const XP_MODE_COLORS: Record<string, string> = {
-  NORMAL: "bg-gray-700 text-gray-300",
-  "5X": "bg-blue-900/60 text-blue-300",
-  "10X": "bg-green-900/60 text-green-300",
-  "50X": "bg-purple-900/60 text-purple-300",
-  "100X": "bg-red-900/60 text-red-300",
-}
-
-// Game mode icons
-const GAME_MODE_ICONS: Record<string, string> = {
-  IRONMAN: "⚔️",
-  ULTIMATE_IRONMAN: "💀",
-  HCIM: "❤️",
-  HARDCORE_IRONMAN: "❤️",
-}
+const OVERALL_ICON = "https://oldschool.runescape.wiki/images/Overall_icon.png"
 
 export default function Hiscores() {
   const paramsSlug = useParams()
@@ -96,7 +71,6 @@ export default function Hiscores() {
       setSkills(skillsData)
       setGameModes(gameModeData)
 
-      // Load boss list
       const { data: bossData } = await supabase
         .from("hiscores_bosses")
         .select("*")
@@ -155,238 +129,234 @@ export default function Hiscores() {
   const activeSkillObj = displaySkills.find(s => s.name === activeSkill)
   const activeBossObj = bosses.find(b => b.name === activeBoss)
 
-  const accent = (server as any)?.theme_hiscores_accent ?? "#f59e0b"
-  const pageBg = (server as any)?.theme_hiscores_bg ?? "#0f0f0f"
-
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#0f0f0f" }}>
-      <Loader2 className="h-8 w-8 animate-spin" style={{ color: "#f59e0b" }} />
+    <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f]">
+      <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
     </div>
   )
   if (!server) return (
-    <div className="min-h-screen flex items-center justify-center text-white" style={{ backgroundColor: "#0f0f0f" }}>
+    <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f] text-white">
       <div className="text-center"><h1 className="text-2xl font-bold">Server not found</h1></div>
     </div>
   )
 
   return (
-    <div className="min-h-screen text-white" style={{ backgroundColor: pageBg }}>
+    <div className="min-h-screen bg-[#0f0f0f] text-white">
       {/* Nav */}
-      <nav className="sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl" style={{ backgroundColor: pageBg + "f2" }}>
-        <div className="container mx-auto flex h-14 items-center justify-between px-6">
+      <nav className="sticky top-0 z-50 border-b border-gray-800/50 bg-gray-900/80 backdrop-blur-xl">
+        <div className="container mx-auto flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-3">
             <Link to="/"><Logo size="sm" /></Link>
             <span className="font-display font-bold text-white">{server.name}</span>
-            <span className="rounded px-2 py-0.5 text-xs font-medium" style={{ backgroundColor: hexToRgba(accent, 0.2), color: accent }}>HISCORES</span>
           </div>
           <div className="flex items-center gap-4 text-sm">
             <Link to={`/store/${server.slug}`} className="text-gray-400 hover:text-white transition-colors">Store</Link>
-            <Link to={`/hiscores/${server.slug}`} className="font-medium" style={{ color: accent }}>Hiscores</Link>
+            <Link to={`/hiscores/${server.slug}`} className="font-medium text-orange-400">Hiscores</Link>
           </div>
         </div>
       </nav>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="max-w-7xl mx-auto px-4 py-8">
 
         {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="font-display text-4xl font-bold text-white mb-1">{server.name}</h1>
-          <p className="font-semibold text-lg tracking-wide uppercase" style={{ color: accent }}>Hiscores</p>
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-400 via-amber-400 to-amber-500 bg-clip-text text-transparent">Hiscores</h1>
         </div>
 
         {/* Main tabs */}
-        <div className="flex gap-1 mb-6 border-b border-white/10">
-          {(["skills", "bosses"] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setMainTab(tab)}
-              className={`px-6 py-2.5 text-sm font-semibold transition-all border-b-2 -mb-px ${
-                mainTab === tab
-                  ? "border-transparent"
-                  : "border-transparent text-gray-400 hover:text-white"
-              }`}
-              style={mainTab === tab ? { borderBottomColor: accent, color: accent } : {}}
-            >
-              {tab === "skills" ? "Skills Hiscores" : "Boss Hiscores"}
-            </button>
-          ))}
+        <div className="flex gap-1 mb-4 border-b border-gray-800">
+          <button
+            onClick={() => setMainTab("skills")}
+            className={`px-6 py-2.5 text-sm font-semibold capitalize transition-colors border-b-2 -mb-px ${
+              mainTab === "skills" ? "border-orange-500 text-orange-400" : "border-transparent text-gray-400 hover:text-white"
+            }`}
+          >
+            Skills Hiscores
+          </button>
+          <button
+            onClick={() => setMainTab("bosses")}
+            className={`px-6 py-2.5 text-sm font-semibold capitalize transition-colors border-b-2 -mb-px ${
+              mainTab === "bosses" ? "border-orange-500 text-orange-400" : "border-transparent text-gray-400 hover:text-white"
+            }`}
+          >
+            Boss Hiscores
+          </button>
         </div>
 
         {/* Game mode filters */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-5">
           {[{ name: "ALL", display_name: "All" }, ...gameModes].map(gm => (
             <button
               key={gm.name}
               onClick={() => setActiveGameMode(gm.name)}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all border ${
+              className={`px-5 py-1.5 rounded text-sm font-semibold border transition-colors ${
                 activeGameMode === gm.name
-                  ? "text-black"
-                  : "bg-white/5 border-white/10 text-gray-400 hover:text-white hover:border-white/30"
+                  ? "bg-orange-500 border-orange-400 text-white"
+                  : "bg-gray-900 border-gray-700 text-gray-300 hover:border-orange-500/60"
               }`}
-              style={activeGameMode === gm.name ? { backgroundColor: accent, borderColor: accent } : {}}
             >
-              {GAME_MODE_ICONS[gm.name] ? `${GAME_MODE_ICONS[gm.name]} ` : ""}{gm.display_name}
+              {gm.display_name}
             </button>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
-
-          {/* Left: skill/boss grid */}
-          <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
-            <div className="px-4 py-3 border-b border-white/10 bg-white/5">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                {mainTab === "skills" ? "Select Skill" : "Select Boss"}
-              </p>
-            </div>
-            <div className="p-3 grid grid-cols-4 gap-1.5 max-h-[520px] overflow-y-auto">
-              {mainTab === "skills"
-                ? displaySkills.map(skill => (
+        {/* Content layout - OblivionPK style */}
+        <div className="flex gap-4">
+          {/* Left sidebar - Skills/Bosses list */}
+          <div className="w-44 flex-shrink-0">
+            <div className="bg-gray-900 border border-gray-800 rounded overflow-hidden">
+              <div className="bg-orange-600/20 border-b border-orange-500/30 px-3 py-2">
+                <span className="text-orange-400 text-xs font-bold uppercase tracking-wider">
+                  {mainTab === "skills" ? "Skills" : "Bosses"}
+                </span>
+              </div>
+              <div className="divide-y divide-gray-800 max-h-[600px] overflow-y-auto">
+                {mainTab === "skills" ? (
+                  displaySkills.map(skill => (
                     <button
                       key={skill.name}
                       onClick={() => setActiveSkill(skill.name)}
-                      title={skill.display_name}
-                      className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all border ${
-                        activeSkill === skill.name ? "" : "border-transparent hover:bg-white/10"
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
+                        activeSkill === skill.name
+                          ? "bg-orange-500/20 text-orange-400"
+                          : "text-gray-300 hover:bg-gray-800 hover:text-white"
                       }`}
-                      style={activeSkill === skill.name ? { backgroundColor: hexToRgba(accent, 0.2), borderColor: hexToRgba(accent, 0.5) } : {}}
                     >
-                      {skill.icon_url
-                        ? <img src={skill.icon_url} alt={skill.display_name} className="w-8 h-8 object-contain" onError={e => { (e.target as HTMLImageElement).style.display = "none" }} />
-                        : <div className="w-8 h-8 rounded flex items-center justify-center text-xs font-bold" style={{ backgroundColor: hexToRgba(accent, 0.2), color: accent }}>{skill.display_name[0]}</div>
-                      }
-                      <span className="text-[10px] text-gray-400 text-center leading-tight truncate w-full">{skill.display_name}</span>
+                      <img
+                        src={skill.icon_url}
+                        alt={skill.display_name}
+                        className="w-5 h-5 flex-shrink-0 object-contain"
+                        onError={e => { (e.target as HTMLImageElement).style.display = "none" }}
+                      />
+                      <span>{skill.display_name}</span>
                     </button>
                   ))
-                : bosses.map(boss => (
+                ) : (
+                  bosses.map(boss => (
                     <button
                       key={boss.name}
                       onClick={() => setActiveBoss(boss.name)}
-                      title={boss.display_name}
-                      className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all border ${
-                        activeBoss === boss.name ? "" : "border-transparent hover:bg-white/10"
+                      className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
+                        activeBoss === boss.name
+                          ? "bg-orange-500/20 text-orange-400"
+                          : "text-gray-300 hover:bg-gray-800 hover:text-white"
                       }`}
-                      style={activeBoss === boss.name ? { backgroundColor: hexToRgba(accent, 0.2), borderColor: hexToRgba(accent, 0.5) } : {}}
                     >
-                      {boss.icon_url
-                        ? <img src={boss.icon_url} alt={boss.display_name} className="w-8 h-8 object-contain" onError={e => { (e.target as HTMLImageElement).src = "" }} />
-                        : <Skull className="w-6 h-6" style={{ color: accent }} />
-                      }
-                      <span className="text-[10px] text-gray-400 text-center leading-tight truncate w-full">{boss.display_name}</span>
+                      {boss.icon_url ? (
+                        <img
+                          src={boss.icon_url}
+                          alt={boss.display_name}
+                          className="w-5 h-5 flex-shrink-0 object-contain"
+                          onError={e => { (e.target as HTMLImageElement).style.display = "none" }}
+                        />
+                      ) : (
+                        <div className="w-5 h-5 flex-shrink-0 bg-gray-700 rounded" />
+                      )}
+                      <span className="truncate">{boss.display_name}</span>
                     </button>
                   ))
-              }
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Right: leaderboard */}
-          <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
-            {/* Table header bar */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-white/5">
-              <div className="flex items-center gap-2">
+          {/* Right content - Leaderboard table */}
+          <div className="flex-1 min-w-0">
+            {/* Search bar */}
+            <div className="flex gap-2 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                <input
+                  type="text"
+                  placeholder="Search player..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-gray-900 border border-gray-700 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-500"
+                />
+              </div>
+              <button className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded transition-colors">
+                Search
+              </button>
+            </div>
+
+            {/* Table */}
+            <div className="bg-gray-900 border border-gray-800 rounded overflow-hidden">
+              <div className="bg-orange-600/10 border-b border-orange-500/20 px-3 py-2 flex items-center gap-2">
                 {mainTab === "skills" && activeSkillObj?.icon_url && (
                   <img src={activeSkillObj.icon_url} alt="" className="w-5 h-5 object-contain" />
                 )}
                 {mainTab === "bosses" && activeBossObj?.icon_url && (
                   <img src={activeBossObj.icon_url} alt="" className="w-5 h-5 object-contain" />
                 )}
-                <span className="font-semibold text-sm">
-                  {mainTab === "skills" ? activeSkillObj?.display_name ?? "Overall" : activeBossObj?.display_name ?? ""}
+                <span className="text-orange-400 text-sm font-bold">
+                  {mainTab === "skills" ? (activeSkillObj?.display_name ?? "Overall") : (activeBossObj?.display_name ?? "")} Hiscores
                 </span>
-                <span className="text-xs text-gray-500">Leaderboard</span>
+                <span className="ml-auto text-gray-500 text-xs">{hiscores.length} players</span>
               </div>
-              {/* Search */}
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500" />
-                <input
-                  type="text"
-                  placeholder="Search player..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="pl-8 pr-3 py-1.5 rounded-lg border border-white/10 bg-white/5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50 w-48"
-                />
-              </div>
+
+              {tableLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+                </div>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-800 text-gray-400 text-xs uppercase">
+                      <th className="text-left px-3 py-2 w-14">Rank</th>
+                      <th className="text-left px-3 py-2">Username</th>
+                      {mainTab === "skills" && <th className="text-right px-3 py-2 w-24">Total Level</th>}
+                      <th className="text-right px-3 py-2 w-36">{mainTab === "skills" ? "XP" : "Kill Count"}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.length === 0 ? (
+                      <tr>
+                        <td colSpan={mainTab === "skills" ? 4 : 3} className="text-center py-12 text-gray-500">
+                          No players found
+                        </td>
+                      </tr>
+                    ) : (
+                      filtered.map((player, i) => {
+                        const rank = i + 1
+                        return (
+                          <tr
+                            key={player.id}
+                            className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors"
+                          >
+                            <td className="px-3 py-2">
+                              <span className="text-gray-500 font-mono">{rank}</span>
+                            </td>
+                            <td className="px-3 py-2">
+                              <span className="font-medium text-white">{player.username}</span>
+                            </td>
+                            {mainTab === "skills" && (
+                              <td className="px-3 py-2 text-right font-mono text-gray-300">
+                                {getSkillLevel(player)}
+                              </td>
+                            )}
+                            <td className="px-3 py-2 text-right font-mono">
+                              <span className="font-semibold text-orange-400">
+                                {mainTab === "skills"
+                                  ? formatXP(getSkillXP(player))
+                                  : Number(player.kill_count ?? 0).toLocaleString()
+                                }
+                              </span>
+                            </td>
+                          </tr>
+                        )
+                      })
+                    )}
+                  </tbody>
+                </table>
+              )}
             </div>
 
-            {tableLoading ? (
-              <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-6 w-6 animate-spin" style={{ color: accent }} />
-              </div>
-            ) : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-white/10 text-xs text-gray-500 uppercase tracking-wider">
-                    <th className="px-4 py-3 text-left w-14">Rank</th>
-                    <th className="px-4 py-3 text-left">Username</th>
-                    {mainTab === "skills" && <th className="px-4 py-3 text-right">Total Level</th>}
-                    <th className="px-4 py-3 text-right">{mainTab === "skills" ? "XP" : "Kill Count"}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.length === 0 ? (
-                    <tr>
-                      <td colSpan={mainTab === "skills" ? 4 : 3} className="px-4 py-16 text-center text-gray-500">
-                        No players found
-                      </td>
-                    </tr>
-                  ) : (
-                    filtered.map((player, i) => {
-                      const rank = i + 1
-                      const xpModeKey = (player.xp_mode ?? "NORMAL").toUpperCase()
-                      const xpModeBadgeColor = XP_MODE_COLORS[xpModeKey] ?? "bg-gray-700 text-gray-300"
-                      const xpModeLabel = player.xp_mode && player.xp_mode !== "NORMAL"
-                        ? player.xp_mode.replace("_", "") : null
-                      const gameModeIcon = GAME_MODE_ICONS[player.game_mode?.toUpperCase()] ?? ""
-
-                      return (
-                        <tr
-                          key={player.id}
-                          className={`border-b border-white/5 transition-colors hover:bg-white/5 ${
-                            rank === 1 ? "bg-yellow-500/5" :
-                            rank === 2 ? "bg-gray-400/5" :
-                            rank === 3 ? "bg-amber-700/5" : ""
-                          }`}
-                        >
-                          <td className="px-4 py-3">
-                            {rank <= 3 ? (
-                              <span className={`text-lg ${rank === 1 ? "text-yellow-400" : rank === 2 ? "text-gray-300" : "text-amber-600"}`}>
-                                {rank === 1 ? "🥇" : rank === 2 ? "🥈" : "🥉"}
-                              </span>
-                            ) : (
-                              <span className="text-gray-500 font-mono">{rank}</span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              {gameModeIcon && <span title={player.game_mode}>{gameModeIcon}</span>}
-                              <span className="font-medium text-white">{player.username}</span>
-                              {xpModeLabel && (
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${xpModeBadgeColor}`}>
-                                  {xpModeLabel}
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          {mainTab === "skills" && (
-                            <td className="px-4 py-3 text-right font-mono text-gray-300">
-                              {getSkillLevel(player)}
-                            </td>
-                          )}
-                          <td className="px-4 py-3 text-right font-mono">
-                            <span className="font-semibold" style={{ color: accent }}>
-                              {mainTab === "skills"
-                                ? formatXP(getSkillXP(player))
-                                : Number(player.kill_count ?? 0).toLocaleString()
-                              }
-                            </span>
-                          </td>
-                        </tr>
-                      )
-                    })
-                  )}
-                </tbody>
-              </table>
-            )}
+            {/* Compare link */}
+            <div className="mt-3 text-right">
+              <Link to={`/hiscores/${server.slug}/compare`} className="text-sm text-orange-400 hover:text-amber-300 hover:underline">
+                Compare players →
+              </Link>
+            </div>
           </div>
         </div>
       </div>
