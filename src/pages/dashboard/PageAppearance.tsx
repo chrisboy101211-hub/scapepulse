@@ -8,7 +8,6 @@ import { dataService } from "@/lib/data";
 import { supabase } from "@/lib/supabase";
 import { useServers } from "@/lib/server-context";
 import { useAuth } from "@/lib/auth";
-import { toplistDataService } from "@/lib/toplist-data";
 
 interface Theme {
   theme_hiscores_accent: string;
@@ -103,8 +102,12 @@ const PageAppearance = () => {
   const checkPremiumStatus = async () => {
     if (!user) return;
     try {
-      const server = await toplistDataService.getUserServer(user.id);
-      setIsPremium(server?.is_premium ?? false);
+      const { data } = await supabase
+        .from("users")
+        .select("is_premium")
+        .eq("id", user.id)
+        .single();
+      setIsPremium(data?.is_premium ?? false);
     } catch {
       setIsPremium(false);
     }
