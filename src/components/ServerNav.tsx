@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom"
+import { Logo } from "@/components/Logo"
 
 interface ServerNavProps {
   serverName: string
@@ -37,22 +38,30 @@ export function ServerNav({
       style={{ backgroundColor: navBg }}
     >
       <div className="container mx-auto flex h-full items-center justify-between px-6">
-        {/* Left - Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          {logoUrl && isPremium ? (
-            <img 
-              src={logoUrl} 
-              alt={serverName} 
-              className="h-8 w-auto max-w-[120px] object-contain"
-            />
-          ) : (
-            <img 
-              src="/favicon.svg" 
-              alt="ScapePulse" 
-              className="w-8 h-8" 
-            />
-          )}
-        </Link>
+        {/* Left - Main Logo + Mini Home Icon */}
+        <div className="flex items-center gap-3">
+          {/* Main Logo - Server logo if premium, otherwise ScapePulse logo */}
+          <Link to="/" className="flex items-center">
+            {logoUrl && isPremium ? (
+              <img 
+                src={logoUrl} 
+                alt={serverName} 
+                className="h-8 w-auto max-w-[120px] object-contain"
+              />
+            ) : (
+              <Logo size="sm" />
+            )}
+          </Link>
+
+          {/* Mini Home Icon - links to main ScapePulse page */}
+          <Link
+            to="/"
+            className="electric-border flex items-center justify-center w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 transition-all"
+            title="Home"
+          >
+            <img src="/favicon.svg" alt="Home" className="w-5 h-5" />
+          </Link>
+        </div>
 
         {/* Center - Pill Navigation */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 p-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
@@ -107,7 +116,7 @@ export function ServerNav({
           {showCart && (
             <button 
               onClick={onCartClick}
-              className="relative flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all"
+              className="relative flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all hover:bg-white/10"
               style={{ color: "#9ca3af" }}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
