@@ -1,5 +1,4 @@
 import { Link, useLocation } from "react-router-dom"
-import { Logo } from "@/components/Logo"
 
 interface ServerNavProps {
   serverName: string
@@ -38,77 +37,131 @@ export function ServerNav({
       style={{ backgroundColor: navBg }}
     >
       <div className="container mx-auto flex h-full items-center justify-between px-6">
-        {/* Left - Main Logo + Mini Home Icon */}
-        <div className="flex items-center gap-3">
-          {/* Main Logo - Server logo if premium, otherwise ScapePulse logo */}
-          <Link to="/" className="flex items-center">
-            {logoUrl && isPremium ? (
-              <img 
-                src={logoUrl} 
-                alt={serverName} 
-                className="h-8 w-auto max-w-[120px] object-contain"
-              />
-            ) : (
-              <Logo size="sm" />
-            )}
-          </Link>
+        {/* Left - Logo */}
+        <Link to="/" className="flex items-center gap-2">
+          {logoUrl && isPremium ? (
+            <img 
+              src={logoUrl} 
+              alt={serverName} 
+              className="h-8 w-auto max-w-[120px] object-contain"
+            />
+          ) : (
+            <svg width="140" height="32" viewBox="0 0 140 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 16L14 4L18 12L22 4L30 16L22 28L18 20L14 28L6 16Z" fill="url(#paint0_linear)" stroke="url(#paint1_linear)" strokeWidth="1"/>
+              <defs>
+                <linearGradient id="paint0_linear" x1="6" y1="16" x2="30" y2="16" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#38bdf8"/>
+                  <stop offset="1" stopColor="#818cf8"/>
+                </linearGradient>
+                <linearGradient id="paint1_linear" x1="6" y1="16" x2="30" y2="16" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#0ea5e9"/>
+                  <stop offset="1" stopColor="#6366f1"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          )}
+        </Link>
 
-          {/* Mini Home Icon - links to main ScapePulse page */}
+        {/* Center - Pill Navigation */}
+        <div className="flex items-center gap-2">
+          {/* Mini Zap Icon - Home button */}
           <Link
             to="/"
-            className="electric-border flex items-center justify-center w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 transition-all"
+            className="electric-border flex items-center justify-center w-9 h-9 rounded-full bg-white/5 transition-all hover:bg-white/10"
             title="Home"
           >
             <img src="/favicon.svg" alt="Home" className="w-5 h-5" />
           </Link>
-        </div>
 
-        {/* Center - Pill Navigation */}
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 p-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
-          {/* Store */}
-          <Link
-            to={`/store/${serverSlug}`}
-            className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all hover:text-white"
-            style={{ color: isStore ? accentColor : "#9ca3af" }}
-          >
-            Store
-            {isStore && (
-              <div 
-                className="absolute inset-0 rounded-full -z-10 pointer-events-none"
-                style={{ backgroundColor: `${accentColor}20`, border: `1px solid ${accentColor}50` }}
-              />
-            )}
-          </Link>
+          {/* Pill Container */}
+          <div className="flex items-center gap-1 p-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+            {/* Store */}
+            <Link
+              to={`/store/${serverSlug}`}
+              className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all"
+              style={{ 
+                color: isStore ? accentColor : "#9ca3af",
+              }}
+              onMouseEnter={(e) => {
+                if (!isStore) {
+                  e.currentTarget.style.color = "#ffffff"
+                  e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)"
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isStore) {
+                  e.currentTarget.style.color = "#9ca3af"
+                  e.currentTarget.style.backgroundColor = "transparent"
+                }
+              }}
+            >
+              Store
+              {isStore && (
+                <div 
+                  className="absolute inset-0 rounded-full -z-10"
+                  style={{ backgroundColor: `${accentColor}20`, border: `1px solid ${accentColor}50` }}
+                />
+              )}
+            </Link>
 
-          {/* Vote */}
-          <Link
-            to={`/vote/${serverSlug}`}
-            className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all hover:text-white"
-            style={{ color: isVote ? accentColor : "#9ca3af" }}
-          >
-            Vote
-            {isVote && (
-              <div 
-                className="absolute inset-0 rounded-full -z-10 pointer-events-none"
-                style={{ backgroundColor: `${accentColor}20`, border: `1px solid ${accentColor}50` }}
-              />
-            )}
-          </Link>
+            {/* Vote */}
+            <Link
+              to={`/vote/${serverSlug}`}
+              className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all"
+              style={{ 
+                color: isVote ? accentColor : "#9ca3af",
+              }}
+              onMouseEnter={(e) => {
+                if (!isVote) {
+                  e.currentTarget.style.color = "#ffffff"
+                  e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)"
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isVote) {
+                  e.currentTarget.style.color = "#9ca3af"
+                  e.currentTarget.style.backgroundColor = "transparent"
+                }
+              }}
+            >
+              Vote
+              {isVote && (
+                <div 
+                  className="absolute inset-0 rounded-full -z-10"
+                  style={{ backgroundColor: `${accentColor}20`, border: `1px solid ${accentColor}50` }}
+                />
+              )}
+            </Link>
 
-          {/* Hiscores */}
-          <Link
-            to={`/hiscores/${serverSlug}`}
-            className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all hover:text-white"
-            style={{ color: isHiscores ? accentColor : "#9ca3af" }}
-          >
-            Hiscores
-            {isHiscores && (
-              <div 
-                className="absolute inset-0 rounded-full -z-10 pointer-events-none"
-                style={{ backgroundColor: `${accentColor}20`, border: `1px solid ${accentColor}50` }}
-              />
-            )}
-          </Link>
+            {/* Hiscores */}
+            <Link
+              to={`/hiscores/${serverSlug}`}
+              className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all"
+              style={{ 
+                color: isHiscores ? accentColor : "#9ca3af",
+              }}
+              onMouseEnter={(e) => {
+                if (!isHiscores) {
+                  e.currentTarget.style.color = "#ffffff"
+                  e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)"
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isHiscores) {
+                  e.currentTarget.style.color = "#9ca3af"
+                  e.currentTarget.style.backgroundColor = "transparent"
+                }
+              }}
+            >
+              Hiscores
+              {isHiscores && (
+                <div 
+                  className="absolute inset-0 rounded-full -z-10"
+                  style={{ backgroundColor: `${accentColor}20`, border: `1px solid ${accentColor}50` }}
+                />
+              )}
+            </Link>
+          </div>
         </div>
 
         {/* Right - Cart */}
