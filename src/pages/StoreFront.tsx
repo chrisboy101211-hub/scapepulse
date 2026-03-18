@@ -281,22 +281,30 @@ const StoreFront = () => {
 
         {/* Categories */}
         <div className="mb-6 flex flex-wrap gap-2">
-          <Button
-            variant={selectedCategory === null ? "default" : "outline"}
-            size="sm"
+          <button
             onClick={() => setSelectedCategory(null)}
+            className="px-4 py-1.5 rounded text-sm font-medium border transition-all"
+            style={{
+              backgroundColor: selectedCategory === null ? storeAccent : "transparent",
+              borderColor: storeAccent,
+              color: selectedCategory === null ? "white" : storeAccent,
+            }}
           >
             All
-          </Button>
+          </button>
           {categories.map((cat) => (
-            <Button
+            <button
               key={cat.id}
-              variant={selectedCategory === cat.id ? "default" : "outline"}
-              size="sm"
               onClick={() => setSelectedCategory(cat.id)}
+              className="px-4 py-1.5 rounded text-sm font-medium border transition-all"
+              style={{
+                backgroundColor: selectedCategory === cat.id ? storeAccent : "transparent",
+                borderColor: storeAccent,
+                color: selectedCategory === cat.id ? "white" : storeAccent,
+              }}
             >
               {cat.name}
-            </Button>
+            </button>
           ))}
         </div>
 
@@ -315,9 +323,13 @@ const StoreFront = () => {
               <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{product.description}</p>
               <div className="mt-4 flex items-center justify-between">
                 <span className="font-display text-xl font-bold" style={{ color: storeAccent }}>${Number(product.price).toFixed(2)}</span>
-                <Button variant="hero" size="sm" onClick={() => addToCart(product)}>
+                <button 
+                  onClick={() => addToCart(product)}
+                  className="px-4 py-1.5 rounded text-sm font-semibold text-white transition-all hover:opacity-90"
+                  style={{ backgroundColor: storeAccent }}
+                >
                   Add to Cart
-                </Button>
+                </button>
               </div>
             </motion.div>
           ))}
@@ -387,13 +399,13 @@ const StoreFront = () => {
                     <div className="text-xs text-muted-foreground text-center px-2">
                       A 5% platform fee is included. <span className="text-destructive font-medium">Non-Refundable.</span>
                     </div>
-                    <Button
-                      variant="hero"
-                      className="w-full"
+                    <button
+                      className="w-full py-2.5 rounded-lg font-semibold text-white transition-all hover:opacity-90"
+                      style={{ backgroundColor: storeAccent }}
                       onClick={() => setCheckoutOpen(true)}
                     >
                       Checkout — ${cartTotal.toFixed(2)}
-                    </Button>
+                    </button>
                   </div>
                 )}
               </div>
