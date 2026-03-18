@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { dataService } from "@/lib/data";
 import { supabase } from "@/lib/supabase";
-import { Logo } from "@/components/Logo";
+import { ServerNav } from "@/components/ServerNav";
 import { ShoppingCart, X, Plus, Minus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -38,7 +38,6 @@ const getSubdomain = () => {
 
 const StoreFront = () => {
   const paramsSlug = useParams();
-  const location = useLocation();
   const slugFromParams = paramsSlug.slug;
   const [server, setServer] = useState<Server | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -47,6 +46,8 @@ const StoreFront = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [storeAccent, setStoreAccent] = useState("#22c55e");
+  const [storeBg, setStoreBg] = useState<string | null>(null);
 
   // Checkout state
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -79,12 +80,20 @@ const StoreFront = () => {
       setServer(serverData);
 
       if (serverData) {
-        const [categoriesData, productsData] = await Promise.all([
+        const [categoriesData, productsData, themeData] = await Promise.all([
           dataService.getCategories(serverData.id),
-          dataService.getProducts(serverData.id)
+          dataService.getProducts(serverData.id),
+          dataService.getServerTheme(serverData.id),
         ]);
         setCategories(categoriesData);
         setProducts(productsData);
+        if (themeData) {
+          setStoreAccent(themeData.theme_store_accent || "#22c55e");
+          setStoreBg(themeData.theme_store_bg || null);
+          if (themeData.logo_url) {
+            setServer(s => s ? { ...s, logo_url: themeData.logo_url } : s);
+          }
+        }
       }
     } catch (error) {
       console.error("Failed to load store data:", error);
@@ -180,9 +189,6 @@ const StoreFront = () => {
     }
   };
 
-  const storeAccent = (server as any)?.theme_store_accent ?? "#22c55e";
-  const storeBg = (server as any)?.theme_store_bg ?? null; // null = use CSS bg-background
-
   const hexToRgba = (hex: string, alpha: number) => {
     const clean = hex.replace("#", "");
     const r = parseInt(clean.slice(0, 2), 16) || 0;
@@ -238,28 +244,16 @@ const StoreFront = () => {
   return (
     <div className="min-h-screen bg-background" style={storeBg ? { backgroundColor: storeBg } : {}}>
       {/* Store Nav */}
-      <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
-        <div className="container mx-auto flex h-14 items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            <Link to="/" className="flex items-center gap-2">
-              <Logo size="sm" />
-            </Link>
-            <span className="font-display font-bold">{server.name}</span>
-            <span className="rounded-md bg-secondary px-2 py-0.5 text-xs uppercase text-secondary-foreground">{server.game_type}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => setCartOpen(true)} className="relative gap-2">
-              <ShoppingCart className="h-4 w-4" />
-              Cart
-              {cartCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-black" style={{ backgroundColor: storeAccent }}>
-                  {cartCount}
-                </span>
-              )}
-            </Button>
-          </div>
-        </div>
-      </nav>
+      <ServerNav
+        serverName={server.name}
+        serverSlug={server.slug}
+        logoUrl={server.logo_url}
+        accentColor={storeAccent}
+        bgColor={storeBg}
+        showCart={true}
+        cartCount={cartCount}
+        onCartClick={() => setCartOpen(true)}
+      />
 
       <div className="container mx-auto px-6 py-8">
         {/* Hero */}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { dataService } from "@/lib/data"
-import { Logo } from "@/components/Logo"
+import { ServerNav } from "@/components/ServerNav"
 import { Loader2, Search } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import type { Server } from "@/lib/mock-data"
@@ -165,18 +165,13 @@ export default function Hiscores() {
   return (
     <div className="min-h-screen text-white" style={{ backgroundColor: theme.bg }}>
       {/* Nav */}
-      <nav className="sticky top-0 z-50 border-b border-gray-800/50 bg-gray-900/80 backdrop-blur-xl">
-        <div className="container mx-auto flex h-14 items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <Link to="/"><Logo size="sm" /></Link>
-            <span className="font-display font-bold text-white">{server.name}</span>
-          </div>
-          <div className="flex items-center gap-4 text-sm">
-            <Link to={`/store/${server.slug}`} className="text-gray-400 hover:text-white transition-colors">Store</Link>
-            <Link to={`/hiscores/${server.slug}`} className="font-medium" style={{ color: theme.accent }}>Hiscores</Link>
-          </div>
-        </div>
-      </nav>
+      <ServerNav
+        serverName={server.name}
+        serverSlug={server.slug}
+        logoUrl={server.logo_url}
+        accentColor={theme.accent}
+        bgColor={theme.bg}
+      />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
 

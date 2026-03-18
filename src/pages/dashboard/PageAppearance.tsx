@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, RotateCcw } from "lucide-react";
+import { Loader2, RotateCcw, Upload, X, Star, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { dataService } from "@/lib/data";
+import { supabase } from "@/lib/supabase";
 import { useServers } from "@/lib/server-context";
+import { useAuth } from "@/lib/auth";
+import { toplistDataService } from "@/lib/toplist-data";
 
 interface Theme {
   theme_hiscores_accent: string;
@@ -14,6 +17,7 @@ interface Theme {
   theme_store_bg: string;
   theme_vote_accent: string;
   theme_vote_bg: string;
+  logo_url: string | null;
 }
 
 const DEFAULTS: Theme = {
@@ -23,6 +27,7 @@ const DEFAULTS: Theme = {
   theme_store_bg: "#0a0a0f",
   theme_vote_accent: "#a855f7",
   theme_vote_bg: "#0f0f0f",
+  logo_url: null,
 };
 
 function ColorField({
@@ -80,13 +85,30 @@ function PagePreview({ accent, bg, label }: { accent: string; bg: string; label:
 
 const PageAppearance = () => {
   const { selectedServer } = useServers();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [theme, setTheme] = useState<Theme>({ ...DEFAULTS });
+  const [isPremium, setIsPremium] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (selectedServer) loadTheme();
+    if (selectedServer) {
+      loadTheme();
+      checkPremiumStatus();
+    }
   }, [selectedServer]);
+
+  const checkPremiumStatus = async () => {
+    if (!user) return;
+    try {
+      const server = await toplistDataService.getUserServer(user.id);
+      setIsPremium(server?.is_premium ?? false);
+    } catch {
+      setIsPremium(false);
+    }
+  };
 
   const loadTheme = async () => {
     if (!selectedServer) return;
@@ -101,6 +123,7 @@ const PageAppearance = () => {
           theme_store_bg: data.theme_store_bg ?? DEFAULTS.theme_store_bg,
           theme_vote_accent: data.theme_vote_accent ?? DEFAULTS.theme_vote_accent,
           theme_vote_bg: data.theme_vote_bg ?? DEFAULTS.theme_vote_bg,
+          logo_url: data.logo_url ?? null,
         });
       }
     } catch {
@@ -115,12 +138,55 @@ const PageAppearance = () => {
     setSaving(true);
     try {
       await dataService.updateServerTheme(selectedServer.id, theme);
-      toast.success("Page colours saved");
+      toast.success("Page appearance saved");
     } catch (e: any) {
-      toast.error(e.message || "Failed to save colours");
+      toast.error(e.message || "Failed to save");
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!selectedServer || !e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+    
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image must be less than 2MB");
+      return;
+    }
+    
+    setUploadingLogo(true);
+    
+    try {
+      const fileName = `logos/${selectedServer.id}/${Date.now()}-${file.name}`;
+      const { data, error } = await supabase.storage
+        .from("product-images")
+        .upload(fileName, file, { upsert: true });
+      
+      if (error) throw error;
+      
+      const { data: urlData } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(fileName);
+      
+      setTheme(t => ({ ...t, logo_url: urlData.publicUrl }));
+      toast.success("Logo uploaded");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload logo");
+    } finally {
+      setUploadingLogo(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    setTheme(t => ({ ...t, logo_url: null }));
   };
 
   const resetPage = (page: "hiscores" | "store" | "vote") => {
@@ -145,8 +211,100 @@ const PageAppearance = () => {
     <div className="space-y-6 max-w-3xl">
       <div>
         <h1 className="font-display text-2xl font-bold">Page Appearance</h1>
-        <p className="text-sm text-muted-foreground">Customise colours for your public pages</p>
+        <p className="text-sm text-muted-foreground">Customise colours and branding for your public pages</p>
       </div>
+
+      {/* Branding - Logo Upload (Premium Only) */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              Custom Logo
+              {!isPremium && (
+                <span className="flex items-center gap-1 text-xs bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded-full">
+                  <Lock className="h-3 w-3" />
+                  Premium
+                </span>
+              )}
+            </CardTitle>
+            {isPremium && theme.logo_url && (
+              <Button variant="ghost" size="sm" onClick={handleRemoveLogo} className="text-destructive gap-1.5">
+                <X className="h-3.5 w-3.5" />
+                Remove
+              </Button>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isPremium ? (
+            <div className="space-y-4">
+              {theme.logo_url ? (
+                <div className="flex items-center gap-4">
+                  <div className="w-32 h-16 rounded-lg border border-border overflow-hidden bg-muted">
+                    <img src={theme.logo_url} alt="Logo preview" className="w-full h-full object-contain" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground mb-2">Current logo</p>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      className="hidden"
+                      id="logo-upload"
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingLogo}
+                      className="gap-1.5"
+                    >
+                      {uploadingLogo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                      Change Logo
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                    id="logo-upload"
+                  />
+                  <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground mb-3">Upload your server logo</p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingLogo}
+                    className="gap-1.5"
+                  >
+                    {uploadingLogo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    {uploadingLogo ? "Uploading..." : "Choose Image"}
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2">Max 2MB, recommended 300x80px</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8 bg-muted/50 rounded-lg">
+              <Star className="h-8 w-8 mx-auto text-yellow-500 mb-2" />
+              <p className="text-sm font-medium mb-1">Premium Feature</p>
+              <p className="text-xs text-muted-foreground">Upgrade to Premium to upload your own custom logo</p>
+              <Button variant="hero" size="sm" className="mt-3" asChild>
+                <a href="/dashboard/toplist" className="gap-1.5">
+                  <Star className="h-4 w-4" />
+                  Upgrade Now
+                </a>
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Hiscores */}
       <Card>
@@ -260,7 +418,7 @@ const PageAppearance = () => {
 
       <Button variant="hero" onClick={handleSave} disabled={saving}>
         {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-        Save Colours
+        Save Changes
       </Button>
     </div>
   );

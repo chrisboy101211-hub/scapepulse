@@ -11,6 +11,8 @@ export interface Server {
   status: "online" | "offline";
   players_online: number;
   hiscores_enabled?: boolean;
+  logo_url?: string | null;
+  is_premium?: boolean;
 }
 
 export interface Category {
