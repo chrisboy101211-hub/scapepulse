@@ -327,7 +327,14 @@ export default function Hiscores() {
                               <span className="text-gray-500 font-mono">{rank}</span>
                             </td>
                             <td className="px-3 py-2">
-                              <span className="font-medium text-white">{player.username}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-white">{player.username}</span>
+                                {player.xp_mode && player.xp_mode !== "NORMAL" && (
+                                  <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-blue-900/60 text-blue-300">
+                                    {player.xp_mode.replace("_", "").replace("X", "x")}
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             {mainTab === "skills" && (
                               <td className="px-3 py-2 text-right font-mono text-gray-300">
