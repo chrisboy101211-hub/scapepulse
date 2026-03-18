@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { dataService } from "@/lib/data"
 import { useServers } from "@/lib/server-context"
-import type { PendingTransaction } from "@/lib/mock-data"
+import type { PendingTransaction, Product } from "@/lib/mock-data"
 import { Loader2, Plus, Trash2, CheckCircle, Clock, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -26,20 +26,27 @@ const Transactions = () => {
   const { selectedServer } = useServers()
   const { toast } = useToast()
   const [transactions, setTransactions] = useState<PendingTransaction[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
   const [creating, setCreating] = useState(false)
   const [form, setForm] = useState({
     username: "",
-    product_name: "",
+    product_id: "",   // selected product UUID
     quantity: "1",
-    price: "",
     transaction_id: "",
   })
 
   useEffect(() => {
     loadTransactions()
   }, [selectedServer])
+
+  // Load products whenever the dialog opens
+  useEffect(() => {
+    if (createOpen && selectedServer) {
+      dataService.getAllProducts(selectedServer.id).then(setProducts).catch(() => setProducts([]))
+    }
+  }, [createOpen, selectedServer])
 
   const loadTransactions = async () => {
     setLoading(true)
@@ -53,32 +60,49 @@ const Transactions = () => {
     }
   }
 
+  const selectedProduct = products.find((p) => p.id === form.product_id) ?? null
+
   const handleCreate = async () => {
     if (!selectedServer) return
-    if (!form.username || !form.product_name || !form.price || !form.transaction_id) {
-      toast({ title: "Missing fields", description: "Please fill in all required fields.", variant: "destructive" })
+    if (!form.username.trim()) {
+      toast({ title: "Missing field", description: "Player username is required.", variant: "destructive" })
       return
     }
+    if (!form.product_id || !selectedProduct) {
+      toast({ title: "Missing field", description: "Please select a product.", variant: "destructive" })
+      return
+    }
+
     setCreating(true)
     try {
-      const qty = parseInt(form.quantity) || 1
-      const price = parseFloat(form.price)
+      const qty = Math.max(1, parseInt(form.quantity) || 1)
+      const price = Number(selectedProduct.price)
+      const total = price * qty
+      const txId = form.transaction_id.trim() || `manual-${Date.now()}`
+
       await dataService.createPendingTransaction({
         server_id: selectedServer.id,
-        username: form.username,
-        cart_items: [{ product_id: "", product_name: form.product_name, quantity: qty, price }],
-        total: price * qty,
-        transaction_id: form.transaction_id,
-        status: "pending",
+        username: form.username.trim(),
+        // cart_items uses `id` = numeric_id so store-claims can look up the product
+        cart_items: [{
+          id: selectedProduct.numeric_id ?? selectedProduct.id,
+          product_id: selectedProduct.id,
+          product_name: selectedProduct.name,
+          quantity: qty,
+          price,
+        }] as any,
+        total,
+        transaction_id: txId,
+        status: "paid",   // set to paid so the Java plugin can claim it immediately
         claimed: false,
       })
-      toast({ title: "Transaction created" })
+      toast({ title: "Transaction created", description: `${selectedProduct.name} ×${qty} — ready to claim` })
       setCreateOpen(false)
-      setForm({ username: "", product_name: "", quantity: "1", price: "", transaction_id: "" })
+      setForm({ username: "", product_id: "", quantity: "1", transaction_id: "" })
       loadTransactions()
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to create transaction"
-      toast({ title: "Error", description: message, variant: "destructive" })
+      const msg = err instanceof Error ? err.message : "Unknown error"
+      toast({ title: "Failed to create transaction", description: msg, variant: "destructive" })
     } finally {
       setCreating(false)
     }
@@ -192,14 +216,33 @@ const Transactions = () => {
                 onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
               />
             </div>
+
             <div className="space-y-1.5">
-              <Label>Product / Item Name *</Label>
-              <Input
-                placeholder="e.g. VIP Rank"
-                value={form.product_name}
-                onChange={(e) => setForm((f) => ({ ...f, product_name: e.target.value }))}
-              />
+              <Label>Product *</Label>
+              <select
+                value={form.product_id}
+                onChange={(e) => setForm((f) => ({ ...f, product_id: e.target.value }))}
+                className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="">— Select a product —</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} — ${Number(p.price).toFixed(2)}
+                  </option>
+                ))}
+              </select>
+              {products.length === 0 && (
+                <p className="text-xs text-muted-foreground">No products found for this server.</p>
+              )}
             </div>
+
+            {selectedProduct && (
+              <div className="rounded-md bg-secondary/40 px-3 py-2 text-xs text-muted-foreground">
+                Price: <span className="font-semibold text-foreground">${Number(selectedProduct.price).toFixed(2)}</span>
+                {selectedProduct.description && <span className="ml-2">— {selectedProduct.description}</span>}
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Quantity</Label>
@@ -211,25 +254,30 @@ const Transactions = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label>Price (USD) *</Label>
+                <Label>Total</Label>
                 <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  placeholder="9.99"
-                  value={form.price}
-                  onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+                  readOnly
+                  value={selectedProduct
+                    ? `$${(Number(selectedProduct.price) * (parseInt(form.quantity) || 1)).toFixed(2)}`
+                    : "—"
+                  }
+                  className="bg-muted cursor-default"
                 />
               </div>
             </div>
+
             <div className="space-y-1.5">
-              <Label>Transaction ID *</Label>
+              <Label>Transaction ID <span className="text-muted-foreground">(optional — auto-generated if blank)</span></Label>
               <Input
                 placeholder="e.g. PAYID-abc123"
                 value={form.transaction_id}
                 onChange={(e) => setForm((f) => ({ ...f, transaction_id: e.target.value }))}
               />
             </div>
+
+            <p className="text-xs text-muted-foreground bg-primary/5 border border-primary/20 rounded-md px-3 py-2">
+              Transactions created here are marked as <strong>Paid</strong> and can be immediately claimed by the player using the <code>::claim</code> command.
+            </p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
