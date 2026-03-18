@@ -27,3 +27,6 @@ dist-ssr
 ./memories
 ./images
 api/
+
+# Java plugin
+java-code/

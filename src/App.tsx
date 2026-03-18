@@ -36,6 +36,7 @@ import VideoHubWatch from "./pages/video-hub/VideoHubWatch.tsx";
 import ProfilePage from "./pages/profile/ProfilePage.tsx";
 import ProfileSettings from "./pages/dashboard/ProfileSettings.tsx";
 import PaymentMethods from "./pages/dashboard/PaymentMethods.tsx";
+import PageAppearance from "./pages/dashboard/PageAppearance.tsx";
 
 const queryClient = new QueryClient();
 
@@ -91,6 +92,7 @@ const App = () => (
               <Route path="video-hub" element={<VideoHubAnalytics />} />
               <Route path="profile" element={<ProfileSettings />} />
               <Route path="payment-methods" element={<PaymentMethods />} />
+              <Route path="page-appearance" element={<PageAppearance />} />
             </Route>
             <Route path="/store/:slug" element={<StoreFront />} />
             <Route path="/hiscores/:slug" element={<Hiscores />} />

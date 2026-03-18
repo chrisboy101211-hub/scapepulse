@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Plus, Trash2, GripVertical } from "lucide-react";
+import { Loader2, Plus, Trash2, GripVertical, Skull } from "lucide-react";
 import { toast } from "sonner";
 import { dataService } from "@/lib/data";
 import { useServers } from "@/lib/server-context";
@@ -36,15 +36,27 @@ interface Skill {
   enabled: boolean;
 }
 
+interface Boss {
+  id: string;
+  name: string;
+  display_name: string;
+  icon_url: string;
+  ordinal: number;
+  enabled: boolean;
+}
+
 const HiscoresSettings = () => {
   const { selectedServer } = useServers();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+
   const [gameModes, setGameModes] = useState<GameMode[]>([]);
   const [xpModes, setXpModes] = useState<XpMode[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
-  
+  const [bosses, setBosses] = useState<Boss[]>([]);
+  const [seedingBosses, setSeedingBosses] = useState(false);
+  const [seedingSkills, setSeedingSkills] = useState(false);
+
   const [newGameMode, setNewGameMode] = useState({ name: "", display_name: "" });
   const [newXpMode, setNewXpMode] = useState({ name: "", display_name: "", xp_multiplier: "1" });
   const [newSkill, setNewSkill] = useState({ name: "", display_name: "", icon_url: "", ordinal: 0 });
@@ -59,14 +71,16 @@ const HiscoresSettings = () => {
     if (!selectedServer) return;
     setLoading(true);
     try {
-      const [gmData, xmData, skData] = await Promise.all([
+      const [gmData, xmData, skData, bossData] = await Promise.all([
         dataService.getHiscoresGameModes(selectedServer.id),
         dataService.getHiscoresXpModes(selectedServer.id),
         dataService.getHiscoresSkills(selectedServer.id),
+        dataService.getBossesForServer(selectedServer.id),
       ]);
       setGameModes(gmData);
       setXpModes(xmData);
       setSkills(skData);
+      setBosses(bossData);
     } catch (error) {
       console.error("Failed to load hiscores data:", error);
     } finally {
@@ -182,6 +196,45 @@ const HiscoresSettings = () => {
     }
   };
 
+  const handleToggleBoss = async (id: string, enabled: boolean) => {
+    try {
+      await dataService.updateBoss(id, { enabled });
+      setBosses(bosses.map(b => b.id === id ? { ...b, enabled } : b));
+    } catch (error) {
+      toast.error("Failed to update boss");
+    }
+  };
+
+  const handleSeedSkills = async () => {
+    if (!selectedServer) return;
+    setSeedingSkills(true);
+    try {
+      await dataService.seedSkillDefaults(selectedServer.id);
+      const skData = await dataService.getHiscoresSkills(selectedServer.id);
+      setSkills(skData);
+      toast.success("Default OSRS skills seeded successfully");
+    } catch (error) {
+      toast.error("Failed to seed default skills");
+    } finally {
+      setSeedingSkills(false);
+    }
+  };
+
+  const handleSeedBosses = async () => {
+    if (!selectedServer) return;
+    setSeedingBosses(true);
+    try {
+      await dataService.seedBossDefaults(selectedServer.id);
+      const bossData = await dataService.getBossesForServer(selectedServer.id);
+      setBosses(bossData);
+      toast.success("Default bosses seeded successfully");
+    } catch (error) {
+      toast.error("Failed to seed default bosses");
+    } finally {
+      setSeedingBosses(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -222,7 +275,8 @@ const HiscoresSettings = () => {
           <TabsTrigger value="game-modes">Game Modes ({gameModes.length})</TabsTrigger>
           <TabsTrigger value="xp-modes">XP Modes ({xpModes.length})</TabsTrigger>
           <TabsTrigger value="skills">Skills ({skills.length})</TabsTrigger>
-          </TabsList>
+          <TabsTrigger value="bosses">Bosses ({bosses.length})</TabsTrigger>
+        </TabsList>
 
           <TabsContent value="game-modes" className="space-y-4">
             <Card>
@@ -330,7 +384,13 @@ const HiscoresSettings = () => {
           <TabsContent value="skills" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>Skills</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Skills</CardTitle>
+                  <Button variant={skills.length === 0 ? "hero" : "outline"} size="sm" onClick={handleSeedSkills} disabled={seedingSkills}>
+                    {seedingSkills ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Plus className="h-3 w-3 mr-1" />}
+                    {skills.length === 0 ? "Seed Default OSRS Skills" : "Re-seed Defaults"}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {skills.map((skill) => (
@@ -357,7 +417,7 @@ const HiscoresSettings = () => {
                     </div>
                   </div>
                 ))}
-                
+
                 <div className="flex gap-2 pt-2">
                   <Input
                     placeholder="Name (e.g., smithing)"
@@ -381,6 +441,60 @@ const HiscoresSettings = () => {
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="bosses" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Bosses</CardTitle>
+                  {bosses.length === 0 && (
+                    <Button variant="hero" onClick={handleSeedBosses} disabled={seedingBosses}>
+                      {seedingBosses ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+                      Seed Default Bosses
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {bosses.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Skull className="h-8 w-8 mx-auto mb-3 opacity-40" />
+                    <p className="text-sm">No bosses configured yet.</p>
+                    <p className="text-xs mt-1">Click "Seed Default Bosses" to add 40 common OSRS bosses.</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm text-muted-foreground">{bosses.filter(b => b.enabled).length} of {bosses.length} bosses enabled</p>
+                      <Button variant="outline" size="sm" onClick={handleSeedBosses} disabled={seedingBosses}>
+                        {seedingBosses ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : null}
+                        Re-seed Defaults
+                      </Button>
+                    </div>
+                    {bosses.map((boss) => (
+                      <div key={boss.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          {boss.icon_url ? (
+                            <img src={boss.icon_url} alt={boss.display_name} className="w-6 h-6 object-contain" onError={e => { (e.target as HTMLImageElement).style.display = "none" }} />
+                          ) : (
+                            <Skull className="h-4 w-4 text-muted-foreground" />
+                          )}
+                          <div>
+                            <p className="font-medium">{boss.display_name}</p>
+                            <p className="text-xs text-muted-foreground">{boss.name}</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={boss.enabled}
+                          onCheckedChange={(enabled) => handleToggleBoss(boss.id, enabled)}
+                        />
+                      </div>
+                    ))}
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

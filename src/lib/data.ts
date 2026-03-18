@@ -200,18 +200,112 @@ export const dataService = {
     return data?.[0] || null;
   },
 
-  async getHiscores(serverId: string, skill?: string) {
+  async getHiscores(serverId: string, skill?: string, gameMode?: string) {
     let query = supabase.from("hiscores").select("*").eq("server_id", serverId);
-    
+
+    if (gameMode) query = query.eq("game_mode", gameMode);
+
     if (skill && skill !== "overall") {
-      query = query.order(`${skill}_xp`, { ascending: false });
+      query = query.order(`skill_xp->>${skill}` as any, { ascending: false });
     } else {
       query = query.order("total_xp", { ascending: false });
     }
-    
+
     const { data, error } = await query.limit(100);
     if (error) throw error;
     return data || [];
+  },
+
+  async getBossHiscores(serverId: string, bossName: string, gameMode?: string) {
+    const { data, error } = await supabase.rpc("get_boss_leaderboard", {
+      p_server_id: serverId,
+      p_boss_name: bossName,
+      p_game_mode: gameMode ?? null,
+      p_limit: 50,
+    });
+    if (error) throw error;
+    return data || [];
+  },
+
+  async getHiscoresBosses(serverId: string) {
+    const { data, error } = await supabase
+      .from("hiscores_bosses")
+      .select("*")
+      .eq("server_id", serverId)
+      .eq("enabled", true)
+      .order("ordinal");
+    if (error) throw error;
+    return data || [];
+  },
+
+  async getBossesForServer(serverId: string) {
+    const { data } = await supabase.from("hiscores_bosses").select("*").eq("server_id", serverId).order("ordinal");
+    return data || [];
+  },
+
+  async updateBoss(id: string, updates: { enabled?: boolean; display_name?: string }) {
+    const { error } = await supabase.from("hiscores_bosses").update(updates).eq("id", id);
+    if (error) throw error;
+  },
+
+  async seedBossDefaults(serverId: string) {
+    const bosses = [
+      { name: "zulrah", display_name: "Zulrah", icon_url: "https://oldschool.runescape.wiki/images/Zulrah.png", ordinal: 1 },
+      { name: "vorkath", display_name: "Vorkath", icon_url: "https://oldschool.runescape.wiki/images/Vorkath.png", ordinal: 2 },
+      { name: "theatre_of_blood", display_name: "Theatre of Blood", icon_url: "https://oldschool.runescape.wiki/images/Theatre_of_Blood_logo.png", ordinal: 3 },
+      { name: "tombs_of_amascut", display_name: "Tombs of Amascut", icon_url: "https://oldschool.runescape.wiki/images/Tombs_of_Amascut_logo.png", ordinal: 4 },
+      { name: "nex", display_name: "Nex", icon_url: "https://oldschool.runescape.wiki/images/Nex.png", ordinal: 5 },
+      { name: "nightmare", display_name: "The Nightmare", icon_url: "https://oldschool.runescape.wiki/images/The_Nightmare.png", ordinal: 6 },
+      { name: "corporeal_beast", display_name: "Corporeal Beast", icon_url: "https://oldschool.runescape.wiki/images/Corporeal_Beast.png", ordinal: 7 },
+      { name: "king_black_dragon", display_name: "King Black Dragon", icon_url: "https://oldschool.runescape.wiki/images/King_Black_Dragon.png", ordinal: 8 },
+      { name: "kalphite_queen", display_name: "Kalphite Queen", icon_url: "https://oldschool.runescape.wiki/images/Kalphite_Queen.png", ordinal: 9 },
+      { name: "general_graardor", display_name: "General Graardor", icon_url: "https://oldschool.runescape.wiki/images/General_Graardor.png", ordinal: 10 },
+      { name: "commander_zilyana", display_name: "Commander Zilyana", icon_url: "https://oldschool.runescape.wiki/images/Commander_Zilyana.png", ordinal: 11 },
+      { name: "kreearra", display_name: "Kree'arra", icon_url: "https://oldschool.runescape.wiki/images/Kree%27arra.png", ordinal: 12 },
+      { name: "kril_tsutsaroth", display_name: "K'ril Tsutsaroth", icon_url: "https://oldschool.runescape.wiki/images/K%27ril_Tsutsaroth.png", ordinal: 13 },
+      { name: "cerberus", display_name: "Cerberus", icon_url: "https://oldschool.runescape.wiki/images/Cerberus.png", ordinal: 14 },
+      { name: "alchemical_hydra", display_name: "Alchemical Hydra", icon_url: "https://oldschool.runescape.wiki/images/Alchemical_Hydra.png", ordinal: 15 },
+      { name: "kraken", display_name: "Kraken", icon_url: "https://oldschool.runescape.wiki/images/Kraken.png", ordinal: 16 },
+      { name: "dagannoth_prime", display_name: "Dagannoth Prime", icon_url: "https://oldschool.runescape.wiki/images/Dagannoth_Prime.png", ordinal: 17 },
+      { name: "dagannoth_rex", display_name: "Dagannoth Rex", icon_url: "https://oldschool.runescape.wiki/images/Dagannoth_Rex.png", ordinal: 18 },
+      { name: "dagannoth_supreme", display_name: "Dagannoth Supreme", icon_url: "https://oldschool.runescape.wiki/images/Dagannoth_Supreme.png", ordinal: 19 },
+      { name: "abyssal_sire", display_name: "Abyssal Sire", icon_url: "https://oldschool.runescape.wiki/images/Abyssal_Sire.png", ordinal: 20 },
+      { name: "chaos_elemental", display_name: "Chaos Elemental", icon_url: "https://oldschool.runescape.wiki/images/Chaos_Elemental.png", ordinal: 21 },
+      { name: "giant_mole", display_name: "Giant Mole", icon_url: "https://oldschool.runescape.wiki/images/Giant_Mole.png", ordinal: 22 },
+      { name: "grotesque_guardians", display_name: "Grotesque Guardians", icon_url: "https://oldschool.runescape.wiki/images/Grotesque_Guardians.png", ordinal: 23 },
+      { name: "sarachnis", display_name: "Sarachnis", icon_url: "https://oldschool.runescape.wiki/images/Sarachnis.png", ordinal: 24 },
+      { name: "scorpia", display_name: "Scorpia", icon_url: "https://oldschool.runescape.wiki/images/Scorpia.png", ordinal: 25 },
+      { name: "skotizo", display_name: "Skotizo", icon_url: "https://oldschool.runescape.wiki/images/Skotizo.png", ordinal: 26 },
+      { name: "tzkal_zuk", display_name: "TzKal-Zuk", icon_url: "https://oldschool.runescape.wiki/images/TzKal-Zuk.png", ordinal: 27 },
+      { name: "tztok_jad", display_name: "TzTok-Jad", icon_url: "https://oldschool.runescape.wiki/images/TzTok-Jad.png", ordinal: 28 },
+      { name: "venenatis", display_name: "Venenatis", icon_url: "https://oldschool.runescape.wiki/images/Venenatis.png", ordinal: 29 },
+      { name: "vetion", display_name: "Vet'ion", icon_url: "https://oldschool.runescape.wiki/images/Vet%27ion.png", ordinal: 30 },
+      { name: "callisto", display_name: "Callisto", icon_url: "https://oldschool.runescape.wiki/images/Callisto.png", ordinal: 31 },
+      { name: "barrows", display_name: "Barrows Chests", icon_url: "https://oldschool.runescape.wiki/images/Barrows_icon.png", ordinal: 32 },
+      { name: "thermonuclear_smoke_devil", display_name: "Thermonuclear Smoke Devil", icon_url: "https://oldschool.runescape.wiki/images/Thermonuclear_Smoke_Devil.png", ordinal: 33 },
+      { name: "vardorvis", display_name: "Vardorvis", icon_url: "https://oldschool.runescape.wiki/images/Vardorvis.png", ordinal: 34 },
+      { name: "duke_sucellus", display_name: "Duke Sucellus", icon_url: "https://oldschool.runescape.wiki/images/Duke_Sucellus.png", ordinal: 35 },
+      { name: "whisperer", display_name: "The Whisperer", icon_url: "https://oldschool.runescape.wiki/images/The_Whisperer.png", ordinal: 36 },
+      { name: "leviathan", display_name: "The Leviathan", icon_url: "https://oldschool.runescape.wiki/images/The_Leviathan.png", ordinal: 37 },
+      { name: "phantom_muspah", display_name: "Phantom Muspah", icon_url: "https://oldschool.runescape.wiki/images/Phantom_Muspah.png", ordinal: 38 },
+      { name: "tempoross", display_name: "Tempoross", icon_url: "https://oldschool.runescape.wiki/images/Tempoross.png", ordinal: 39 },
+      { name: "wintertodt", display_name: "Wintertodt", icon_url: "https://oldschool.runescape.wiki/images/Wintertodt.png", ordinal: 40 },
+    ];
+    const ts = Date.now();
+    const rows = bosses.map((b, i) => ({
+      id: `boss-${serverId}-${b.name}-${ts}-${i}`,
+      server_id: serverId,
+      name: b.name,
+      display_name: b.display_name,
+      icon_url: b.icon_url,
+      ordinal: b.ordinal,
+      enabled: true,
+    }));
+    // upsert — if boss already exists for this server, skip it
+    const { error } = await supabase
+      .from("hiscores_bosses")
+      .upsert(rows, { onConflict: "server_id,name", ignoreDuplicates: true });
+    if (error) throw error;
   },
 
   async getPlayerHiscores(serverId: string, username: string) {
@@ -344,6 +438,48 @@ export const dataService = {
     if (error) throw error;
   },
 
+  async seedSkillDefaults(serverId: string) {
+    const defaultSkills = [
+      { name: "attack", display_name: "Attack", icon_url: "https://oldschool.runescape.wiki/images/Attack_icon.png?3ec1e", ordinal: 1 },
+      { name: "strength", display_name: "Strength", icon_url: "https://oldschool.runescape.wiki/images/Strength_icon.png?a45b7", ordinal: 2 },
+      { name: "defence", display_name: "Defence", icon_url: "https://oldschool.runescape.wiki/images/Defence_icon.png?3ec1e", ordinal: 3 },
+      { name: "hitpoints", display_name: "Hitpoints", icon_url: "https://oldschool.runescape.wiki/images/Hitpoints_icon.png?3ec1e", ordinal: 4 },
+      { name: "ranged", display_name: "Ranged", icon_url: "https://oldschool.runescape.wiki/images/Ranged_icon.png?3ec1e", ordinal: 5 },
+      { name: "prayer", display_name: "Prayer", icon_url: "https://oldschool.runescape.wiki/images/Prayer_icon.png?3ec1e", ordinal: 6 },
+      { name: "magic", display_name: "Magic", icon_url: "https://oldschool.runescape.wiki/images/Magic_icon.png?3ec1e", ordinal: 7 },
+      { name: "cooking", display_name: "Cooking", icon_url: "https://oldschool.runescape.wiki/images/Cooking_icon.png?3ec1e", ordinal: 8 },
+      { name: "woodcutting", display_name: "Woodcutting", icon_url: "https://oldschool.runescape.wiki/images/Woodcutting_icon.png?3ec1e", ordinal: 9 },
+      { name: "fletching", display_name: "Fletching", icon_url: "https://oldschool.runescape.wiki/images/Fletching_icon.png?3ec1e", ordinal: 10 },
+      { name: "fishing", display_name: "Fishing", icon_url: "https://oldschool.runescape.wiki/images/Fishing_icon.png?3ec1e", ordinal: 11 },
+      { name: "firemaking", display_name: "Firemaking", icon_url: "https://oldschool.runescape.wiki/images/Firemaking_icon.png?3ec1e", ordinal: 12 },
+      { name: "crafting", display_name: "Crafting", icon_url: "https://oldschool.runescape.wiki/images/Crafting_icon.png?3ec1e", ordinal: 13 },
+      { name: "smithing", display_name: "Smithing", icon_url: "https://oldschool.runescape.wiki/images/Smithing_icon.png?3ec1e", ordinal: 14 },
+      { name: "mining", display_name: "Mining", icon_url: "https://oldschool.runescape.wiki/images/Mining_icon.png?3ec1e", ordinal: 15 },
+      { name: "herblore", display_name: "Herblore", icon_url: "https://oldschool.runescape.wiki/images/Herblore_icon.png?3ec1e", ordinal: 16 },
+      { name: "agility", display_name: "Agility", icon_url: "https://oldschool.runescape.wiki/images/Agility_icon.png?3ec1e", ordinal: 17 },
+      { name: "thieving", display_name: "Thieving", icon_url: "https://oldschool.runescape.wiki/images/Thieving_icon.png?3ec1e", ordinal: 18 },
+      { name: "slayer", display_name: "Slayer", icon_url: "https://oldschool.runescape.wiki/images/Slayer_icon.png?3ec1e", ordinal: 19 },
+      { name: "farming", display_name: "Farming", icon_url: "https://oldschool.runescape.wiki/images/Farming_icon.png?3ec1e", ordinal: 20 },
+      { name: "runecraft", display_name: "Runecraft", icon_url: "https://oldschool.runescape.wiki/images/Runecraft_icon.png?3ec1e", ordinal: 21 },
+      { name: "hunter", display_name: "Hunter", icon_url: "https://oldschool.runescape.wiki/images/Hunter_icon.png?3ec1e", ordinal: 22 },
+      { name: "construction", display_name: "Construction", icon_url: "https://oldschool.runescape.wiki/images/Construction_icon.png?3ec1e", ordinal: 23 },
+    ];
+    const ts = Date.now();
+    const rows = defaultSkills.map((sk, i) => ({
+      id: `sk-${serverId}-${sk.name}-${ts}-${i}`,
+      server_id: serverId,
+      name: sk.name,
+      display_name: sk.display_name,
+      icon_url: sk.icon_url,
+      ordinal: sk.ordinal,
+      enabled: true,
+    }));
+    const { error } = await supabase
+      .from("hiscores_skills")
+      .upsert(rows, { onConflict: "server_id,name", ignoreDuplicates: true });
+    if (error) throw error;
+  },
+
   async seedHiscoresDefaults(serverId: string) {
     const defaultGameModes = [
       { name: "REGULAR", display_name: "Regular", is_default: true, ordinal: 1 },
@@ -436,6 +572,29 @@ export const dataService = {
       return { total_servers: 0, total_revenue: 0, total_transactions: 0, uptime_percentage: 99.9 };
     }
     return data;
+  },
+
+  async getServerTheme(serverId: string) {
+    const { data, error } = await supabase
+      .from("servers")
+      .select("theme_hiscores_accent, theme_hiscores_bg, theme_store_accent, theme_store_bg, theme_vote_accent, theme_vote_bg")
+      .eq("id", serverId)
+      .single();
+    if (error) return null;
+    return data;
+  },
+
+  async updateServerTheme(serverId: string, theme: {
+    theme_hiscores_accent?: string;
+    theme_hiscores_bg?: string;
+    theme_store_accent?: string;
+    theme_store_bg?: string;
+    theme_vote_accent?: string;
+    theme_vote_bg?: string;
+  }) {
+    const { data, error } = await supabase.from("servers").update(theme).eq("id", serverId).select();
+    if (error) throw error;
+    return data?.[0] || null;
   },
 
   async getServerPaymentGateway(serverId: string, provider = "paypal") {

@@ -63,6 +63,9 @@ Deno.serve(async (req) => {
       if (!playerName?.trim()) {
         return json({ status: "ERROR", message: "playerName is required" }, 400);
       }
+      if (!/^[a-zA-Z0-9_ -]{1,30}$/.test(playerName.trim())) {
+        return json({ status: "ERROR", message: "Invalid player name" }, 400);
+      }
 
       const record = {
         id:           `hs-${server.id}-${playerName.toLowerCase().replace(/\s+/g, "_")}`,
@@ -128,6 +131,60 @@ Deno.serve(async (req) => {
       if (error) throw error;
 
       return json({ status: "SUCCESS", data: data ?? [] });
+    }
+
+    // ── Action: bossLeaderboard ───────────────────────────────────────────
+    if (action === "bossLeaderboard") {
+      const bossName: string | undefined = body.bossName;
+      if (!bossName?.trim()) {
+        return json({ status: "ERROR", message: "bossName is required" }, 400);
+      }
+      const limit = Math.min(Math.max(parseInt(body.limit ?? "50"), 1), 100);
+      const gameMode: string | undefined = body.gameMode;
+
+      const { data, error } = await supabase.rpc("get_boss_leaderboard", {
+        p_server_id: server.id,
+        p_boss_name: bossName.trim(),
+        p_game_mode: gameMode ?? null,
+        p_limit: limit,
+      });
+
+      if (error) throw error;
+      return json({ status: "SUCCESS", data: data ?? [] });
+    }
+
+    // ── Action: syncBoss ─────────────────────────────────────────────────
+    if (action === "syncBoss") {
+      const playerName: string | undefined = body.playerName;
+      if (!playerName?.trim()) {
+        return json({ status: "ERROR", message: "playerName is required" }, 400);
+      }
+      if (!body.bossKills || typeof body.bossKills !== "object") {
+        return json({ status: "ERROR", message: "bossKills object is required" }, 400);
+      }
+
+      // Merge boss kills with existing record
+      const { data: existing } = await supabase
+        .from("hiscores")
+        .select("boss_kills")
+        .eq("server_id", server.id)
+        .ilike("username", playerName.trim())
+        .maybeSingle();
+
+      const mergedKills = { ...(existing?.boss_kills ?? {}), ...body.bossKills };
+
+      const { error } = await supabase
+        .from("hiscores")
+        .upsert({
+          id: `hs-${server.id}-${playerName.toLowerCase().replace(/\s+/g, "_")}`,
+          server_id: server.id,
+          username: playerName.trim(),
+          boss_kills: mergedKills,
+          last_updated: new Date().toISOString(),
+        }, { onConflict: "server_id,username" });
+
+      if (error) throw error;
+      return json({ status: "SUCCESS", message: "Boss kills updated." });
     }
 
     return json({ status: "ERROR", message: `Unknown action: ${action}` }, 400);

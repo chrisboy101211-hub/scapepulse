@@ -21,6 +21,7 @@ import {
   ThumbsUp,
   Clapperboard,
   User,
+  Palette,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Logo } from "@/components/Logo";
@@ -57,6 +58,7 @@ const webstoreItems = [
   { title: "Payment Methods", url: "/dashboard/payment-methods", icon: CreditCard },
   { title: "Customers", url: "/dashboard/customers", icon: Users, comingSoon: true },
   { title: "Orders", url: "/dashboard/orders", icon: Receipt },
+  { title: "Page Appearance", url: "/dashboard/page-appearance", icon: Palette },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 
@@ -67,7 +69,7 @@ const voteItems = [
 
 const hiscoresItems = [
   { title: "Manage Hiscores", url: "/dashboard/hiscores-settings", icon: BarChart3 },
-  { title: "Settings", url: "/dashboard/hiscores-settings", icon: Settings },
+  { title: "Page Appearance", url: "/dashboard/page-appearance", icon: Palette },
 ];
 
 const toplistItems = [

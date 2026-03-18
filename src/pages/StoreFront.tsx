@@ -180,6 +180,17 @@ const StoreFront = () => {
     }
   };
 
+  const storeAccent = (server as any)?.theme_store_accent ?? "#22c55e";
+  const storeBg = (server as any)?.theme_store_bg ?? null; // null = use CSS bg-background
+
+  const hexToRgba = (hex: string, alpha: number) => {
+    const clean = hex.replace("#", "");
+    const r = parseInt(clean.slice(0, 2), 16) || 0;
+    const g = parseInt(clean.slice(2, 4), 16) || 0;
+    const b = parseInt(clean.slice(4, 6), 16) || 0;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -225,7 +236,7 @@ const StoreFront = () => {
   const cartCount = cart.reduce((sum, i) => sum + i.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={storeBg ? { backgroundColor: storeBg } : {}}>
       {/* Store Nav */}
       <nav className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-xl">
         <div className="container mx-auto flex h-14 items-center justify-between px-6">
@@ -241,7 +252,7 @@ const StoreFront = () => {
               <ShoppingCart className="h-4 w-4" />
               Cart
               {cartCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-black" style={{ backgroundColor: storeAccent }}>
                   {cartCount}
                 </span>
               )}
@@ -256,8 +267,8 @@ const StoreFront = () => {
           <h1 className="font-display text-3xl font-bold">{server.name} Store</h1>
           <p className="mt-2 text-muted-foreground">{server.description}</p>
           <div className="mt-3 flex items-center justify-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-neon-green animate-pulse-glow" />
-            <span className="text-sm text-neon-green">{server.players_online} players online</span>
+            <div className="h-2 w-2 rounded-full animate-pulse-glow" style={{ backgroundColor: storeAccent }} />
+            <span className="text-sm" style={{ color: storeAccent }}>{server.players_online} players online</span>
           </div>
         </div>
 
@@ -296,7 +307,7 @@ const StoreFront = () => {
               <h3 className="font-display font-semibold">{product.name}</h3>
               <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{product.description}</p>
               <div className="mt-4 flex items-center justify-between">
-                <span className="font-display text-xl font-bold text-primary">${Number(product.price).toFixed(2)}</span>
+                <span className="font-display text-xl font-bold" style={{ color: storeAccent }}>${Number(product.price).toFixed(2)}</span>
                 <Button variant="hero" size="sm" onClick={() => addToCart(product)}>
                   Add to Cart
                 </Button>
