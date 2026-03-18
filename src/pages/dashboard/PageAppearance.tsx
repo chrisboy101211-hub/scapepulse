@@ -209,42 +209,84 @@ const PageAppearance = () => {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <div>
-        <h1 className="font-display text-2xl font-bold">Page Appearance</h1>
-        <p className="text-sm text-muted-foreground">Customise colours and branding for your public pages</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold">Page Appearance</h1>
+          <p className="text-sm text-muted-foreground">Customise colours and branding for your public pages</p>
+        </div>
+        {!isPremium && (
+          <div className="flex items-center gap-2 text-xs bg-yellow-500/20 text-yellow-500 px-3 py-1.5 rounded-full">
+            <Lock className="h-3 w-3" />
+            Premium Feature
+          </div>
+        )}
       </div>
 
-      {/* Branding - Logo Upload (Premium Only) */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              Custom Logo
-              {!isPremium && (
-                <span className="flex items-center gap-1 text-xs bg-yellow-500/20 text-yellow-500 px-2 py-0.5 rounded-full">
-                  <Lock className="h-3 w-3" />
-                  Premium
-                </span>
-              )}
-            </CardTitle>
-            {isPremium && theme.logo_url && (
-              <Button variant="ghost" size="sm" onClick={handleRemoveLogo} className="text-destructive gap-1.5">
-                <X className="h-3.5 w-3.5" />
-                Remove
+      {!isPremium ? (
+        <Card>
+          <CardContent className="py-16">
+            <div className="text-center">
+              <Star className="h-12 w-12 mx-auto text-yellow-500 mb-4" />
+              <h2 className="text-xl font-bold mb-2">Page Appearance is a Premium Feature</h2>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                Unlock the ability to customise colours and branding for your server's public pages.
+                Stand out with a unique look that matches your server's identity.
+              </p>
+              <Button variant="hero" size="lg" asChild>
+                <a href="/dashboard/toplist" className="gap-2">
+                  <Star className="h-4 w-4" />
+                  Upgrade to Premium
+                </a>
               </Button>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isPremium ? (
-            <div className="space-y-4">
-              {theme.logo_url ? (
-                <div className="flex items-center gap-4">
-                  <div className="w-32 h-16 rounded-lg border border-border overflow-hidden bg-muted">
-                    <img src={theme.logo_url} alt="Logo preview" className="w-full h-full object-contain" />
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* Branding - Logo Upload */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Custom Logo</CardTitle>
+                {theme.logo_url && (
+                  <Button variant="ghost" size="sm" onClick={handleRemoveLogo} className="text-destructive gap-1.5">
+                    <X className="h-3.5 w-3.5" />
+                    Remove
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {theme.logo_url ? (
+                  <div className="flex items-center gap-4">
+                    <div className="w-32 h-16 rounded-lg border border-border overflow-hidden bg-muted">
+                      <img src={theme.logo_url} alt="Logo preview" className="w-full h-full object-contain" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground mb-2">Current logo</p>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                        id="logo-upload"
+                      />
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingLogo}
+                        className="gap-1.5"
+                      >
+                        {uploadingLogo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                        Change Logo
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm text-muted-foreground mb-2">Current logo</p>
+                ) : (
+                  <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -253,173 +295,140 @@ const PageAppearance = () => {
                       className="hidden"
                       id="logo-upload"
                     />
+                    <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground mb-3">Upload your server logo</p>
                     <Button 
                       variant="outline" 
-                      size="sm"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploadingLogo}
                       className="gap-1.5"
                     >
                       {uploadingLogo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                      Change Logo
+                      {uploadingLogo ? "Uploading..." : "Choose Image"}
                     </Button>
+                    <p className="text-xs text-muted-foreground mt-2">Max 2MB, recommended 300x80px</p>
                   </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 border-2 border-dashed border-border rounded-lg">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoUpload}
-                    className="hidden"
-                    id="logo-upload"
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Hiscores */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Hiscores Page</CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => resetPage("hiscores")} className="text-muted-foreground gap-1.5">
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reset
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] gap-6">
+                <div className="space-y-4">
+                  <ColorField
+                    label="Accent colour"
+                    value={theme.theme_hiscores_accent}
+                    onChange={(v) => setTheme(t => ({ ...t, theme_hiscores_accent: v }))}
                   />
-                  <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground mb-3">Upload your server logo</p>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadingLogo}
-                    className="gap-1.5"
-                  >
-                    {uploadingLogo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                    {uploadingLogo ? "Uploading..." : "Choose Image"}
-                  </Button>
-                  <p className="text-xs text-muted-foreground mt-2">Max 2MB, recommended 300x80px</p>
+                  <ColorField
+                    label="Background colour"
+                    value={theme.theme_hiscores_bg}
+                    onChange={(v) => setTheme(t => ({ ...t, theme_hiscores_bg: v }))}
+                  />
+                  {selectedServer && (
+                    <a
+                      href={`/hiscores/${selectedServer.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary hover:underline"
+                    >
+                      View hiscores page →
+                    </a>
+                  )}
                 </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-8 bg-muted/50 rounded-lg">
-              <Star className="h-8 w-8 mx-auto text-yellow-500 mb-2" />
-              <p className="text-sm font-medium mb-1">Premium Feature</p>
-              <p className="text-xs text-muted-foreground">Upgrade to Premium to upload your own custom logo</p>
-              <Button variant="hero" size="sm" className="mt-3" asChild>
-                <a href="/dashboard/toplist" className="gap-1.5">
-                  <Star className="h-4 w-4" />
-                  Upgrade Now
-                </a>
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                <PagePreview accent={theme.theme_hiscores_accent} bg={theme.theme_hiscores_bg} label="Hiscores" />
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Hiscores */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Hiscores Page</CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => resetPage("hiscores")} className="text-muted-foreground gap-1.5">
-              <RotateCcw className="h-3.5 w-3.5" />
-              Reset
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] gap-6">
-            <div className="space-y-4">
-              <ColorField
-                label="Accent colour"
-                value={theme.theme_hiscores_accent}
-                onChange={(v) => setTheme(t => ({ ...t, theme_hiscores_accent: v }))}
-              />
-              <ColorField
-                label="Background colour"
-                value={theme.theme_hiscores_bg}
-                onChange={(v) => setTheme(t => ({ ...t, theme_hiscores_bg: v }))}
-              />
-              {selectedServer && (
-                <a
-                  href={`/hiscores/${selectedServer.slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline"
-                >
-                  View hiscores page →
-                </a>
-              )}
-            </div>
-            <PagePreview accent={theme.theme_hiscores_accent} bg={theme.theme_hiscores_bg} label="Hiscores" />
-          </div>
-        </CardContent>
-      </Card>
+          {/* Store */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Store Page</CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => resetPage("store")} className="text-muted-foreground gap-1.5">
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reset
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] gap-6">
+                <div className="space-y-4">
+                  <ColorField
+                    label="Accent colour"
+                    value={theme.theme_store_accent}
+                    onChange={(v) => setTheme(t => ({ ...t, theme_store_accent: v }))}
+                  />
+                  <ColorField
+                    label="Background colour"
+                    value={theme.theme_store_bg}
+                    onChange={(v) => setTheme(t => ({ ...t, theme_store_bg: v }))}
+                  />
+                  {selectedServer && (
+                    <a
+                      href={`/store/${selectedServer.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary hover:underline"
+                    >
+                      View store page →
+                    </a>
+                  )}
+                </div>
+                <PagePreview accent={theme.theme_store_accent} bg={theme.theme_store_bg} label="Store" />
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Store */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Store Page</CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => resetPage("store")} className="text-muted-foreground gap-1.5">
-              <RotateCcw className="h-3.5 w-3.5" />
-              Reset
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] gap-6">
-            <div className="space-y-4">
-              <ColorField
-                label="Accent colour"
-                value={theme.theme_store_accent}
-                onChange={(v) => setTheme(t => ({ ...t, theme_store_accent: v }))}
-              />
-              <ColorField
-                label="Background colour"
-                value={theme.theme_store_bg}
-                onChange={(v) => setTheme(t => ({ ...t, theme_store_bg: v }))}
-              />
-              {selectedServer && (
-                <a
-                  href={`/store/${selectedServer.slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-primary hover:underline"
-                >
-                  View store page →
-                </a>
-              )}
-            </div>
-            <PagePreview accent={theme.theme_store_accent} bg={theme.theme_store_bg} label="Store" />
-          </div>
-        </CardContent>
-      </Card>
+          {/* Vote */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Vote Page</CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => resetPage("vote")} className="text-muted-foreground gap-1.5">
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Reset
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] gap-6">
+                <div className="space-y-4">
+                  <ColorField
+                    label="Accent colour"
+                    value={theme.theme_vote_accent}
+                    onChange={(v) => setTheme(t => ({ ...t, theme_vote_accent: v }))}
+                  />
+                  <ColorField
+                    label="Background colour"
+                    value={theme.theme_vote_bg}
+                    onChange={(v) => setTheme(t => ({ ...t, theme_vote_bg: v }))}
+                  />
+                </div>
+                <PagePreview accent={theme.theme_vote_accent} bg={theme.theme_vote_bg} label="Vote" />
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Vote */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Vote Page</CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => resetPage("vote")} className="text-muted-foreground gap-1.5">
-              <RotateCcw className="h-3.5 w-3.5" />
-              Reset
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] gap-6">
-            <div className="space-y-4">
-              <ColorField
-                label="Accent colour"
-                value={theme.theme_vote_accent}
-                onChange={(v) => setTheme(t => ({ ...t, theme_vote_accent: v }))}
-              />
-              <ColorField
-                label="Background colour"
-                value={theme.theme_vote_bg}
-                onChange={(v) => setTheme(t => ({ ...t, theme_vote_bg: v }))}
-              />
-            </div>
-            <PagePreview accent={theme.theme_vote_accent} bg={theme.theme_vote_bg} label="Vote" />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Button variant="hero" onClick={handleSave} disabled={saving}>
-        {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-        Save Changes
-      </Button>
+          <Button variant="hero" onClick={handleSave} disabled={saving}>
+            {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            Save Changes
+          </Button>
+        </>
+      )}
     </div>
   );
 };

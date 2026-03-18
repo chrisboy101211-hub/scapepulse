@@ -37,7 +37,7 @@ export function ServerNav({
       className="h-16 border-b border-white/10 backdrop-blur-sm"
       style={{ backgroundColor: navBg }}
     >
-      <div className="container mx-auto flex h-full items-center justify-between px-6">
+      <div className="container mx-auto flex h-full items-center px-6 relative">
         {/* Left - Logo */}
         <Link to="/" className="flex items-center">
           {logoUrl && isPremium ? (
@@ -51,8 +51,8 @@ export function ServerNav({
           )}
         </Link>
 
-        {/* Center - Pill Navigation */}
-        <div className="flex items-center gap-2">
+        {/* Center - Pill Navigation (absolutely centered) */}
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
           {/* Mini Zap Icon - Home button */}
           <Link
             to="/"
@@ -154,7 +154,7 @@ export function ServerNav({
         </div>
 
         {/* Right - Cart */}
-        <div className="flex items-center">
+        <div className="ml-auto flex items-center">
           {showCart && (
             <button 
               onClick={onCartClick}
