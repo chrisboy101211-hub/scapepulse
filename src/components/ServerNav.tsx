@@ -53,13 +53,17 @@ export function ServerNav({
 
         {/* Center - Pill Navigation (absolutely centered) */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
-          {/* Mini Zap Icon - Home button */}
+          {/* Mini Zap Icon - Home button (shows custom logo if premium, otherwise favicon) */}
           <Link
             to="/"
             className="electric-border flex items-center justify-center w-9 h-9 rounded-full bg-white/5 transition-all hover:bg-white/10"
             title="Home"
           >
-            <img src="/favicon.svg" alt="Home" className="w-5 h-5" />
+            {logoUrl && isPremium ? (
+              <img src={logoUrl} alt="Home" className="w-6 h-6 object-contain" />
+            ) : (
+              <img src="/favicon.svg" alt="Home" className="w-5 h-5" />
+            )}
           </Link>
 
           {/* Pill Container */}
