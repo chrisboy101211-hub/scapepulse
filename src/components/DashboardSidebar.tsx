@@ -58,7 +58,6 @@ const webstoreItems = [
   { title: "Payment Methods", url: "/dashboard/payment-methods", icon: CreditCard },
   { title: "Customers", url: "/dashboard/customers", icon: Users, comingSoon: true },
   { title: "Orders", url: "/dashboard/orders", icon: Receipt },
-  { title: "Page Appearance", url: "/dashboard/page-appearance", icon: Palette },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 
@@ -69,7 +68,6 @@ const voteItems = [
 
 const hiscoresItems = [
   { title: "Manage Hiscores", url: "/dashboard/hiscores-settings", icon: BarChart3 },
-  { title: "Page Appearance", url: "/dashboard/page-appearance", icon: Palette },
 ];
 
 const toplistItems = [
@@ -82,6 +80,7 @@ const videoHubItems = [
 
 const systemItems = [
   { title: "API Keys", url: "/dashboard/api", icon: Key },
+  { title: "Page Appearance", url: "/dashboard/page-appearance", icon: Palette },
 ];
 
 const profileItems = [

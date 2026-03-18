@@ -36,9 +36,23 @@ const formatXP = (xp: number) => {
 
 const OVERALL_ICON = "https://oldschool.runescape.wiki/images/Stats_icon.png"
 
+interface ThemeColors {
+  accent: string;
+  bg: string;
+}
+
+const hexToRgba = (hex: string, alpha: number) => {
+  const clean = hex.replace("#", "")
+  const r = parseInt(clean.slice(0, 2), 16) || 0
+  const g = parseInt(clean.slice(2, 4), 16) || 0
+  const b = parseInt(clean.slice(4, 6), 16) || 0
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
 export default function Hiscores() {
   const paramsSlug = useParams()
   const [server, setServer] = useState<Server | null>(null)
+  const [theme, setTheme] = useState<ThemeColors>({ accent: "#f59e0b", bg: "#0f0f0f" })
   const [skills, setSkills] = useState<Skill[]>([])
   const [bosses, setBosses] = useState<Boss[]>([])
   const [gameModes, setGameModes] = useState<GameMode[]>([])
@@ -64,12 +78,20 @@ export default function Hiscores() {
       if (!serverData) return
       setServer(serverData)
 
-      const [skillsData, gameModeData] = await Promise.all([
+      const [skillsData, gameModeData, themeData] = await Promise.all([
         dataService.getHiscoresSkills(serverData.id),
         dataService.getHiscoresGameModes(serverData.id),
+        dataService.getServerTheme(serverData.id),
       ])
       setSkills(skillsData)
       setGameModes(gameModeData)
+      
+      if (themeData) {
+        setTheme({
+          accent: themeData.theme_hiscores_accent || "#f59e0b",
+          bg: themeData.theme_hiscores_bg || "#0f0f0f",
+        })
+      }
 
       const { data: bossData } = await supabase
         .from("hiscores_bosses")
@@ -130,18 +152,18 @@ export default function Hiscores() {
   const activeBossObj = bosses.find(b => b.name === activeBoss)
 
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f]">
-      <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: theme.bg }}>
+      <Loader2 className="h-8 w-8 animate-spin" style={{ color: theme.accent }} />
     </div>
   )
   if (!server) return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f] text-white">
+    <div className="min-h-screen flex items-center justify-center text-white" style={{ backgroundColor: theme.bg }}>
       <div className="text-center"><h1 className="text-2xl font-bold">Server not found</h1></div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white">
+    <div className="min-h-screen text-white" style={{ backgroundColor: theme.bg }}>
       {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-gray-800/50 bg-gray-900/80 backdrop-blur-xl">
         <div className="container mx-auto flex h-14 items-center justify-between px-4">
@@ -151,7 +173,7 @@ export default function Hiscores() {
           </div>
           <div className="flex items-center gap-4 text-sm">
             <Link to={`/store/${server.slug}`} className="text-gray-400 hover:text-white transition-colors">Store</Link>
-            <Link to={`/hiscores/${server.slug}`} className="font-medium text-orange-400">Hiscores</Link>
+            <Link to={`/hiscores/${server.slug}`} className="font-medium" style={{ color: theme.accent }}>Hiscores</Link>
           </div>
         </div>
       </nav>
@@ -160,7 +182,7 @@ export default function Hiscores() {
 
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-400 via-amber-400 to-amber-500 bg-clip-text text-transparent">Hiscores</h1>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-400 via-amber-400 to-amber-500 bg-clip-text text-transparent" style={{ color: theme.accent }}>Hiscores</h1>
         </div>
 
         {/* Main tabs */}
@@ -168,16 +190,18 @@ export default function Hiscores() {
           <button
             onClick={() => setMainTab("skills")}
             className={`px-6 py-2.5 text-sm font-semibold capitalize transition-colors border-b-2 -mb-px ${
-              mainTab === "skills" ? "border-orange-500 text-orange-400" : "border-transparent text-gray-400 hover:text-white"
+              mainTab === "skills" ? "border-transparent text-gray-400 hover:text-white" : "border-transparent text-gray-400 hover:text-white"
             }`}
+            style={mainTab === "skills" ? { borderBottomColor: theme.accent, color: theme.accent } : {}}
           >
             Skills Hiscores
           </button>
           <button
             onClick={() => setMainTab("bosses")}
             className={`px-6 py-2.5 text-sm font-semibold capitalize transition-colors border-b-2 -mb-px ${
-              mainTab === "bosses" ? "border-orange-500 text-orange-400" : "border-transparent text-gray-400 hover:text-white"
+              mainTab === "bosses" ? "border-transparent text-gray-400 hover:text-white" : "border-transparent text-gray-400 hover:text-white"
             }`}
+            style={mainTab === "bosses" ? { borderBottomColor: theme.accent, color: theme.accent } : {}}
           >
             Boss Hiscores
           </button>
@@ -191,9 +215,10 @@ export default function Hiscores() {
               onClick={() => setActiveGameMode(gm.name)}
               className={`px-5 py-1.5 rounded text-sm font-semibold border transition-colors ${
                 activeGameMode === gm.name
-                  ? "bg-orange-500 border-orange-400 text-white"
-                  : "bg-gray-900 border-gray-700 text-gray-300 hover:border-orange-500/60"
+                  ? "text-black"
+                  : "bg-gray-900 border-gray-700 text-gray-300"
               }`}
+              style={activeGameMode === gm.name ? { backgroundColor: theme.accent, borderColor: theme.accent } : {}}
             >
               {gm.display_name}
             </button>
@@ -205,8 +230,8 @@ export default function Hiscores() {
           {/* Left sidebar - Skills/Bosses list */}
           <div className="w-44 flex-shrink-0">
             <div className="bg-gray-900 border border-gray-800 rounded overflow-hidden">
-              <div className="bg-orange-600/20 border-b border-orange-500/30 px-3 py-2">
-                <span className="text-orange-400 text-xs font-bold uppercase tracking-wider">
+              <div className="border-b px-3 py-2" style={{ backgroundColor: hexToRgba(theme.accent, 0.15), borderColor: hexToRgba(theme.accent, 0.3) }}>
+                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: theme.accent }}>
                   {mainTab === "skills" ? "Skills" : "Bosses"}
                 </span>
               </div>
@@ -218,9 +243,10 @@ export default function Hiscores() {
                       onClick={() => setActiveSkill(skill.name)}
                       className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
                         activeSkill === skill.name
-                          ? "bg-orange-500/20 text-orange-400"
+                          ? ""
                           : "text-gray-300 hover:bg-gray-800 hover:text-white"
                       }`}
+                      style={activeSkill === skill.name ? { backgroundColor: hexToRgba(theme.accent, 0.2), color: theme.accent } : {}}
                     >
                       <img
                         src={skill.icon_url}
@@ -238,9 +264,10 @@ export default function Hiscores() {
                       onClick={() => setActiveBoss(boss.name)}
                       className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
                         activeBoss === boss.name
-                          ? "bg-orange-500/20 text-orange-400"
+                          ? ""
                           : "text-gray-300 hover:bg-gray-800 hover:text-white"
                       }`}
+                      style={activeBoss === boss.name ? { backgroundColor: hexToRgba(theme.accent, 0.2), color: theme.accent } : {}}
                     >
                       {boss.icon_url ? (
                         <img
@@ -271,24 +298,26 @@ export default function Hiscores() {
                   placeholder="Search player..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-gray-900 border border-gray-700 rounded text-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-500"
+                  className="w-full pl-9 pr-3 py-2 bg-gray-900 border border-gray-700 rounded text-sm text-white placeholder-gray-500 focus:outline-none"
+                  style={{ borderColor: theme.accent }}
+                  onFocus={(e) => e.target.style.borderColor = theme.accent}
                 />
               </div>
-              <button className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded transition-colors">
+              <button className="px-4 py-2 text-white text-sm font-semibold rounded transition-colors" style={{ backgroundColor: theme.accent }}>
                 Search
               </button>
             </div>
 
             {/* Table */}
             <div className="bg-gray-900 border border-gray-800 rounded overflow-hidden">
-              <div className="bg-orange-600/10 border-b border-orange-500/20 px-3 py-2 flex items-center gap-2">
+              <div className="border-b px-3 py-2 flex items-center gap-2" style={{ backgroundColor: hexToRgba(theme.accent, 0.1), borderColor: hexToRgba(theme.accent, 0.2) }}>
                 {mainTab === "skills" && activeSkillObj?.icon_url && (
                   <img src={activeSkillObj.icon_url} alt="" className="w-5 h-5 object-contain" />
                 )}
                 {mainTab === "bosses" && activeBossObj?.icon_url && (
                   <img src={activeBossObj.icon_url} alt="" className="w-5 h-5 object-contain" />
                 )}
-                <span className="text-orange-400 text-sm font-bold">
+                <span className="text-sm font-bold" style={{ color: theme.accent }}>
                   {mainTab === "skills" ? (activeSkillObj?.display_name ?? "Overall") : (activeBossObj?.display_name ?? "")} Hiscores
                 </span>
                 <span className="ml-auto text-gray-500 text-xs">{hiscores.length} players</span>
@@ -296,7 +325,7 @@ export default function Hiscores() {
 
               {tableLoading ? (
                 <div className="flex items-center justify-center py-20">
-                  <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+                  <Loader2 className="h-6 w-6 animate-spin" style={{ color: theme.accent }} />
                 </div>
               ) : (
                 <table className="w-full text-sm">
@@ -342,7 +371,7 @@ export default function Hiscores() {
                               </td>
                             )}
                             <td className="px-3 py-2 text-right font-mono">
-                              <span className="font-semibold text-orange-400">
+                              <span className="font-semibold" style={{ color: theme.accent }}>
                                 {mainTab === "skills"
                                   ? formatXP(getSkillXP(player))
                                   : Number(player.kill_count ?? 0).toLocaleString()
@@ -360,7 +389,7 @@ export default function Hiscores() {
 
             {/* Compare link */}
             <div className="mt-3 text-right">
-              <Link to={`/hiscores/${server.slug}/compare`} className="text-sm text-orange-400 hover:text-amber-300 hover:underline">
+              <Link to={`/hiscores/${server.slug}/compare`} className="text-sm hover:underline" style={{ color: theme.accent }}>
                 Compare players →
               </Link>
             </div>
