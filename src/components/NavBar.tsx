@@ -116,6 +116,9 @@ const NavBar = () => {
           {user ? (
             <>
               <Button variant="outline" size="sm" asChild>
+                <Link to="/profile">Profile</Link>
+              </Button>
+              <Button variant="outline" size="sm" asChild>
                 <Link to="/dashboard">Dashboard</Link>
               </Button>
               <Button variant="hero" size="sm" onClick={handleSignOut}>
