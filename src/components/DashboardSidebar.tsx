@@ -81,9 +81,6 @@ const videoHubItems = [
 const systemItems = [
   { title: "API Keys", url: "/dashboard/api", icon: Key },
   { title: "Page Appearance", url: "/dashboard/page-appearance", icon: Palette },
-];
-
-const profileItems = [
   { title: "Profile Settings", url: "/dashboard/profile", icon: User },
 ];
 
@@ -236,15 +233,6 @@ export function DashboardSidebar() {
           items={hiscoresItems}
           collapsed={collapsed}
           defaultOpen={hiscoresItems.some((i) => location.pathname === i.url)}
-        />
-
-        {/* PROFILE */}
-        <CollapsibleSection
-          label="My Profile"
-          icon={User}
-          items={profileItems}
-          collapsed={collapsed}
-          defaultOpen={profileItems.some((i) => location.pathname === i.url)}
         />
 
         {/* TOPLIST */}
