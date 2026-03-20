@@ -274,4 +274,14 @@ export const toplistDataService = {
     if (!res.ok) throw new Error(data?.error || "Vote failed")
     return { newVoteCount: data.newVoteCount }
   },
+
+  async getSponsoredServers(): Promise<ToplistServer[]> {
+    const { data } = await supabase
+      .from("toplist_servers")
+      .select("*")
+      .eq("is_active", true)
+      .eq("is_sponsor", true)
+      .limit(10)
+    return (data as ToplistServer[]) || []
+  },
 }
