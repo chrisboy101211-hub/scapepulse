@@ -104,6 +104,7 @@ const App = () => (
             <Route path="/video-hub/submit" element={<ProtectedRoute><VideoHubSubmit /></ProtectedRoute>} />
             <Route path="/video-hub/:id" element={<VideoHubWatch />} />
             <Route path="/u/:username" element={<ProfilePage />} />
+            <Route path="/profile" element={<ProfileSettings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
