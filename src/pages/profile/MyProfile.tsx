@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "@/lib/auth"
-import { profileService } from "@/lib/profile-data"
+import { supabase } from "@/lib/supabase"
 
 export default function MyProfile() {
   const { user } = useAuth()
@@ -13,11 +13,19 @@ export default function MyProfile() {
         navigate("/login")
         return
       }
-      const profile = await profileService.getById(user.id)
+      
+      // Try to get the user's profile by their auth ID
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .single()
+      
       if (profile?.username) {
         navigate(`/u/${profile.username}`, { replace: true })
       } else {
-        navigate("/")
+        // No profile found, redirect to settings to create one
+        navigate("/dashboard/profile", { replace: true })
       }
     }
     loadProfile()
