@@ -34,6 +34,7 @@ import VideoHubHome from "./pages/video-hub/VideoHubHome.tsx";
 import VideoHubSubmit from "./pages/video-hub/VideoHubSubmit.tsx";
 import VideoHubWatch from "./pages/video-hub/VideoHubWatch.tsx";
 import ProfilePage from "./pages/profile/ProfilePage.tsx";
+import MyProfile from "./pages/profile/MyProfile.tsx";
 import ProfileSettings from "./pages/dashboard/ProfileSettings.tsx";
 import PaymentMethods from "./pages/dashboard/PaymentMethods.tsx";
 import PageAppearance from "./pages/dashboard/PageAppearance.tsx";
@@ -103,8 +104,8 @@ const App = () => (
             <Route path="/video-hub" element={<VideoHubHome />} />
             <Route path="/video-hub/submit" element={<ProtectedRoute><VideoHubSubmit /></ProtectedRoute>} />
             <Route path="/video-hub/:id" element={<VideoHubWatch />} />
+            <Route path="/profile" element={<MyProfile />} />
             <Route path="/u/:username" element={<ProfilePage />} />
-            <Route path="/profile" element={<ProfileSettings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

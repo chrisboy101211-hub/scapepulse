@@ -116,7 +116,7 @@ const NavBar = () => {
           {user ? (
             <>
               <Button variant="outline" size="sm" asChild>
-                <Link to="/profile">Profile</Link>
+                <Link to="/dashboard/profile">Profile</Link>
               </Button>
               <Button variant="outline" size="sm" asChild>
                 <Link to="/dashboard">Dashboard</Link>
