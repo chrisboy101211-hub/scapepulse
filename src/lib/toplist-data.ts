@@ -26,6 +26,8 @@ export interface ToplistServer {
   is_premium: boolean
   is_top10: boolean
   is_sponsor: boolean
+  sponsored: boolean
+  sponsor_banner_url: string | null
   is_active: boolean
   created_at: string
   updated_at: string
@@ -280,7 +282,7 @@ export const toplistDataService = {
       .from("toplist_servers")
       .select("*")
       .eq("is_active", true)
-      .eq("is_sponsor", true)
+      .eq("sponsored", true)
       .limit(10)
     return (data as ToplistServer[]) || []
   },
