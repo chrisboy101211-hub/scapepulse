@@ -20,7 +20,6 @@ export default function VideoHubSubmit() {
     youtube_url: "",
     channel_name: "",
     channel_url: "",
-    duration: "",
     category: "GENERAL",
     tags: "",
   })
@@ -36,7 +35,7 @@ export default function VideoHubSubmit() {
     try {
       await videoHubService.submitVideo(form, user.id)
       setSuccess(true)
-      setForm({ title: "", description: "", youtube_url: "", channel_name: "", channel_url: "", duration: "", category: "GENERAL", tags: "" })
+      setForm({ title: "", description: "", youtube_url: "", channel_name: "", channel_url: "", category: "GENERAL", tags: "" })
     } catch (e: any) {
       setError(e?.message || "Failed to submit video. The URL may already be submitted.")
     } finally {
@@ -120,27 +119,16 @@ export default function VideoHubSubmit() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Category *</label>
-                  <select
-                    name="category" required value={form.category} onChange={set}
-                    className="w-full px-3 py-2.5 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm"
-                  >
-                    {SUBMIT_CATEGORIES.map((c) => (
-                      <option key={c.value} value={c.value}>{c.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1.5">Duration</label>
-                  <input
-                    type="text" name="duration" value={form.duration} onChange={set}
-                    placeholder="10:30"
-                    className="w-full px-3 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">MM:SS or HH:MM:SS</p>
-                </div>
+              <div className="max-w-xs">
+                <label className="block text-sm font-medium text-foreground mb-1.5">Category *</label>
+                <select
+                  name="category" required value={form.category} onChange={set}
+                  className="w-full px-3 py-2.5 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm"
+                >
+                  {SUBMIT_CATEGORIES.map((c) => (
+                    <option key={c.value} value={c.value}>{c.label}</option>
+                  ))}
+                </select>
               </div>
             </div>
 

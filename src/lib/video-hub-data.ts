@@ -193,7 +193,7 @@ export const videoHubService = {
     youtube_url: string
     channel_name: string
     channel_url: string
-    duration: string
+    duration?: string
     category: string
     tags: string
   }, userId: string) {
@@ -208,6 +208,7 @@ export const videoHubService = {
     const { data, error } = await supabase
       .from("videos")
       .insert({
+        id: crypto.randomUUID(),
         submitter_id: userId,
         title: video.title,
         description: video.description || null,
@@ -215,7 +216,7 @@ export const videoHubService = {
         thumbnail_url,
         channel_name: video.channel_name,
         channel_url: video.channel_url || null,
-        duration: video.duration || null,
+        ...(video.duration ? { duration: video.duration } : {}),
         category: video.category,
         tags,
         is_approved: true,
