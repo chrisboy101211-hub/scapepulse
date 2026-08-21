@@ -37,7 +37,7 @@ export function ToplistStatsWidget() {
   ]
 
   return (
-    <section className="min-h-[328px] border border-primary/45 bg-card/70 shadow-lg shadow-black/10">
+    <section className="min-h-[248px] border border-primary/45 bg-card/70 shadow-lg shadow-black/10">
       <h2 className="bg-primary/80 px-3 py-2.5 text-center text-sm font-bold tracking-wide text-primary-foreground">Toplist Stats</h2>
       <dl className="px-3">
         {rows.map(({ label, value, icon: Icon }, index) => (
