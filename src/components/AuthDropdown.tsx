@@ -182,7 +182,7 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
         .from("servers")
         .select("id")
         .eq("slug", slug)
-        .single()
+        .maybeSingle()
 
       if (existingServer) {
         toast.error("This server name is already taken")
@@ -197,6 +197,13 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
       })
 
       if (authError) throw authError
+
+      if (!authData.session) {
+        toast.success("Account created! Verify your email, then sign in to finish setting up your server.")
+        onSuccess()
+        navigate("/login")
+        return
+      }
 
       if (authData.user) {
         const userId = authData.user.id

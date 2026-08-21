@@ -29,20 +29,20 @@ export default function ToplistHome() {
         </div>
 
         {/* Three monthly banner placements above the toplist. */}
-        <div className="mb-8 grid gap-3 md:grid-cols-3">
-          {slotsForPlacement("top-banner").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} className="h-24" />)}
+        <div className="mb-8 grid justify-items-center gap-3 md:grid-cols-3">
+          {slotsForPlacement("top-banner").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} className="h-auto w-full max-w-[728px] aspect-[728/90]" />)}
         </div>
 
         {/* Top five sponsored advertisement placements. */}
         <div className="mb-8 space-y-3">
           <div className="flex items-center justify-between"><h2 className="font-display text-lg font-bold">Top 5 Sponsored</h2><span className="text-xs text-muted-foreground">Monthly placements</span></div>
-          {slotsForPlacement("sponsored").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} variant="sponsored" className="h-20" />)}
+          {slotsForPlacement("sponsored").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} variant="sponsored" className="mx-auto h-auto w-full max-w-[765px] aspect-[765/503]" />)}
         </div>
 
         {/* Only the ranked toplist is flanked by the two side placements. */}
-        <div className="grid gap-6 xl:grid-cols-[150px_minmax(0,1fr)_150px]">
+        <div className="grid gap-6 xl:grid-cols-[160px_minmax(0,1fr)_160px]">
           <aside className="hidden xl:block">
-            {slotsForPlacement("side-banner").filter((slot) => slot.id === "side-left-1").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} className="sticky top-6 h-[420px]" />)}
+            {slotsForPlacement("side-banner").filter((slot) => slot.id === "side-left-1").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} className="sticky top-6 h-[600px] w-[160px]" />)}
           </aside>
           <div className="min-w-0">
             <Top10ServersList />
@@ -50,7 +50,7 @@ export default function ToplistHome() {
             <ServerList filters={filters} />
           </div>
           <aside className="hidden xl:block">
-            {slotsForPlacement("side-banner").filter((slot) => slot.id === "side-right-1").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} className="sticky top-6 h-[420px]" />)}
+            {slotsForPlacement("side-banner").filter((slot) => slot.id === "side-right-1").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} className="sticky top-6 h-[600px] w-[160px]" />)}
           </aside>
         </div>
       </div>
