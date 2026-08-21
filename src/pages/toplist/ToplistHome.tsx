@@ -59,7 +59,7 @@ export default function ToplistHome() {
 
         {/* Three monthly banner placements above the toplist. */}
         <div className="mb-8 grid justify-items-center gap-3 md:grid-cols-3">
-          {slotsForPlacement("top-banner").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} className="h-auto w-full max-w-[728px] aspect-[728/90]" />)}
+          {slotsForPlacement("top-banner").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} className="h-auto w-full max-w-[728px] aspect-[728/90] border-2 border-black shadow-[0_0_0_1px_rgba(0,0,0,0.9)]" />)}
         </div>
 
         {/* Server discovery panels fill the space alongside sponsored placements. */}
