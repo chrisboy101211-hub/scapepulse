@@ -34,24 +34,22 @@ export const advertisementSlots: AdvertisementSlot[] = [
     availableOn: position === 1 ? "Renews 1 Sep 2026" : "Available now",
     ...(position === 1 ? { bannerUrl: MYTHOS_BANNER_URL, serverName: "Mythos - OSRS 50 Online !" } : {}),
   })),
-  ...[1, 2].flatMap((position) => [
-    {
-      id: `side-left-${position}`,
-      name: `Left side banner ${position}`,
-      placement: "side-banner" as const,
-      cadence: "Monthly" as const,
-      status: "available" as const,
-      availableOn: "Available now",
-    },
-    {
-      id: `side-right-${position}`,
-      name: `Right side banner ${position}`,
-      placement: "side-banner" as const,
-      cadence: "Monthly" as const,
-      status: "available" as const,
-      availableOn: "Available now",
-    },
-  ]),
+  {
+    id: "side-left-1",
+    name: "Left side banner",
+    placement: "side-banner",
+    cadence: "Monthly",
+    status: "available",
+    availableOn: "Available now",
+  },
+  {
+    id: "side-right-1",
+    name: "Right side banner",
+    placement: "side-banner",
+    cadence: "Monthly",
+    status: "available",
+    availableOn: "Available now",
+  },
 ]
 
 export function slotsForPlacement(placement: AdvertisementSlot["placement"]) {

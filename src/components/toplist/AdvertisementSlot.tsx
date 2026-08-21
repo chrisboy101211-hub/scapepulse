@@ -20,21 +20,21 @@ export function AdvertisementSlot({ slot, className = "", variant = "standard" }
       className={`group relative block overflow-hidden rounded-xl border transition-all hover:-translate-y-0.5 ${
         available
           ? sponsored
-            ? "border-violet-400/70 bg-violet-500/10 shadow-[0_0_24px_rgba(139,92,246,0.28)] hover:border-fuchsia-300 hover:shadow-[0_0_34px_rgba(168,85,247,0.48)]"
-            : "border-primary/35 hover:border-primary/70 hover:shadow-[0_0_28px_hsl(var(--primary)/0.18)]"
+            ? "border-violet-400/45 bg-violet-500/5 hover:border-violet-300/65"
+            : "border-border/70 bg-card/50 hover:border-primary/40"
           : "border-muted-foreground/30 opacity-75"
       } ${className}`}
     >
       <img
         src={slot.bannerUrl || "/images/ad-slot-placeholder-bg.png"}
         alt=""
-        className={`absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 ${hasBookedBanner ? "opacity-100" : "opacity-65"}`}
+        className={`absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02] ${hasBookedBanner ? "opacity-100" : "opacity-25"}`}
       />
-      <div className={`absolute inset-0 ${hasBookedBanner ? "bg-black/20" : sponsored ? "bg-gradient-to-r from-[#160d2c]/95 via-[#25134b]/80 to-fuchsia-500/25" : "bg-gradient-to-r from-background/95 via-background/75 to-primary/20"}`} />
+      <div className={`absolute inset-0 ${hasBookedBanner ? "bg-black/20" : sponsored ? "bg-gradient-to-r from-[#161125]/95 via-[#1b1528]/92 to-violet-950/70" : "bg-gradient-to-r from-background/95 via-card/92 to-background/80"}`} />
       {!hasBookedBanner && (
         <>
-          <div className="absolute left-0 top-0 h-3 w-1/3 border-l border-t border-primary/60" />
-          <div className="absolute right-0 bottom-0 h-3 w-1/3 border-b border-r border-primary/60" />
+          <div className="absolute left-0 top-0 h-2 w-1/4 border-l border-t border-primary/30" />
+          <div className="absolute right-0 bottom-0 h-2 w-1/4 border-b border-r border-primary/30" />
         </>
       )}
       <div className={`relative flex h-full items-center justify-center gap-3 px-4 text-center ${hasBookedBanner ? "flex-col opacity-0 transition-opacity group-hover:opacity-100" : ""}`}>
@@ -47,14 +47,14 @@ export function AdvertisementSlot({ slot, className = "", variant = "standard" }
           </>
         ) : (
           <>
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-primary/40 bg-background/70 shadow-[0_0_16px_hsl(var(--primary)/0.3)]">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-background/70">
               <img src="/favicon.svg" alt="ScapePulse" className="h-6 w-6" />
             </span>
             <span className="min-w-0 text-left">
               <span className={`block text-[9px] font-bold uppercase tracking-[0.18em] ${sponsored ? "text-violet-200" : "text-primary"}`}>ScapePulse advertisement</span>
               <span className="block truncate font-display text-sm font-bold text-foreground sm:text-base">Your Server Here</span>
             </span>
-            <span className="hidden rounded-md border border-primary/50 bg-primary/15 px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-primary sm:inline">Reserve spot</span>
+            <span className="hidden rounded-md border border-primary/30 bg-primary/10 px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-primary sm:inline">Reserve spot</span>
           </>
         )}
         <span className={`absolute bottom-1.5 right-2 inline-flex items-center gap-1 text-[9px] font-medium ${available ? "text-emerald-300" : "text-amber-300"}`}>
