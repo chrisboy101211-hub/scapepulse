@@ -3,8 +3,11 @@ import { Link, useNavigate } from "react-router-dom"
 import NavBar from "@/components/NavBar"
 import { ToplistFooter } from "@/components/toplist/ToplistFooter"
 import { VideoLikeButton } from "@/components/VideoLikeButton"
+import { AdvertisementSlot } from "@/components/toplist/AdvertisementSlot"
+import { VideoHubSidePanel } from "@/components/video-hub/VideoHubSidePanel"
 import { videoHubService, VIDEO_CATEGORIES, getYouTubeVideoId, formatViews, formatTimeAgo, type Video } from "@/lib/video-hub-data"
 import { useAuth } from "@/lib/auth"
+import { slotsForPlacement } from "@/lib/advertising"
 
 export default function VideoHubHome() {
   const { user } = useAuth()
@@ -43,7 +46,18 @@ export default function VideoHubHome() {
     <div className="min-h-screen bg-background">
       <NavBar />
 
-      <div className="container mx-auto px-6 py-8 max-w-6xl">
+      <div className="container mx-auto max-w-[1440px] px-6 py-8">
+        <div className="mb-8 grid justify-items-center gap-3 md:grid-cols-3">
+          {slotsForPlacement("top-banner").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} className="h-auto w-full max-w-[728px] aspect-[728/90] border-2 border-black shadow-[0_0_0_1px_rgba(0,0,0,0.9)]" />)}
+        </div>
+
+        <div className="grid gap-6 xl:grid-cols-[210px_minmax(0,1fr)_210px]">
+          <aside className="space-y-3 xl:border-r xl:border-violet-400/55 xl:pr-6 xl:shadow-[14px_0_22px_-20px_rgba(167,139,250,0.9)]">
+            <VideoHubSidePanel kind="likes" />
+            {slotsForPlacement("side-banner").filter((slot) => slot.id === "side-left-1").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} orientation="vertical" className="mx-auto h-[600px] w-[160px]" />)}
+          </aside>
+
+          <main className="min-w-0">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -244,6 +258,13 @@ export default function VideoHubHome() {
             )}
           </>
         )}
+          </main>
+
+          <aside className="space-y-3 xl:border-l xl:border-violet-400/55 xl:pl-6 xl:shadow-[-14px_0_22px_-20px_rgba(167,139,250,0.9)]">
+            <VideoHubSidePanel kind="latest" />
+            {slotsForPlacement("side-banner").filter((slot) => slot.id === "side-right-1").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} orientation="vertical" className="mx-auto h-[600px] w-[160px]" />)}
+          </aside>
+        </div>
       </div>
 
       <ToplistFooter />

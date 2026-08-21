@@ -136,6 +136,21 @@ export const videoHubService = {
     }
   },
 
+  async getSidebarVideos(sort: "latest" | "likes", limit = 5): Promise<Video[]> {
+    let query = supabase
+      .from("videos")
+      .select("*")
+      .eq("is_approved", true)
+
+    query = sort === "likes"
+      ? query.order("likes", { ascending: false }).order("created_at", { ascending: false })
+      : query.order("created_at", { ascending: false })
+
+    const { data, error } = await query.limit(limit)
+    if (error) throw error
+    return (data ?? []) as Video[]
+  },
+
   async getRelatedVideos(excludeId: string, limit = 15): Promise<Video[]> {
     const { data } = await supabase
       .from("videos")

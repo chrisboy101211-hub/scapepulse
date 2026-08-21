@@ -200,7 +200,7 @@ export const toplistDataService = {
       .from("toplist_servers")
       .select("*")
       .eq("user_id", userId)
-      .single()
+      .maybeSingle()
     return data as ToplistServer | null
   },
 
