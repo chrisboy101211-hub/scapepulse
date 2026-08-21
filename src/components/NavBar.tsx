@@ -60,13 +60,13 @@ const NavBar = () => {
             Discord
           </a>
 
-          {/* StoreFront - Purple */}
+          {/* Storefronts - Purple */}
           <Link
             to="/storefront"
             className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium text-purple-500 hover:bg-purple-500/10 transition-all"
           >
             <BarChart3 className="w-3.5 h-3.5" />
-            StoreFront
+            Storefronts
             {activePill.startsWith("/storefront") && (
               <div
                 ref={pillRef}
@@ -103,7 +103,7 @@ const NavBar = () => {
               <DropdownMenuItem asChild className="cursor-pointer rounded-lg p-0 focus:bg-muted">
                 <Link to="/pricing" className="flex w-full items-start gap-3 px-3 py-2.5">
                   <Megaphone className="mt-0.5 h-4 w-4 text-primary" />
-                  <span><span className="block font-medium">Storefront pricing</span><span className="block text-xs text-muted-foreground">Plans and storefront fees</span></span>
+                  <span><span className="block font-medium">Storefronts pricing</span><span className="block text-xs text-muted-foreground">Plans and fees for storefronts</span></span>
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>

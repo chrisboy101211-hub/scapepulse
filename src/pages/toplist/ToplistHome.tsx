@@ -31,7 +31,7 @@ export default function ToplistHome() {
           </p>
         </div>
 
-        <div className="mb-5 flex justify-end">
+        <div className="mb-5 flex justify-center">
           <ServerOfTheMonth />
         </div>
 
@@ -46,7 +46,7 @@ export default function ToplistHome() {
             </div>
             <div className="flex flex-wrap gap-2 md:flex-col md:items-stretch">
               <Link to="/storefront" className="inline-flex items-center justify-center gap-2 border border-violet-400/30 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-200 transition-colors hover:bg-violet-500/20">
-                <ShoppingBag className="h-4 w-4" /> Storefront
+                <ShoppingBag className="h-4 w-4" /> Storefronts
               </Link>
               <Link to="/toplist" className="inline-flex items-center justify-center gap-2 border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20">
                 <ListOrdered className="h-4 w-4" /> Toplist
@@ -74,6 +74,15 @@ export default function ToplistHome() {
             <ToplistSidePanel kind="newest" />
             <ServerOfTheDayWidget />
           </div>
+        </div>
+
+        <div className="mb-6 flex items-center gap-4" aria-label="Toplist starts here">
+          <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/45" />
+          <div className="flex items-center gap-2 border border-primary/35 bg-primary/10 px-4 py-2 text-sm font-bold uppercase tracking-[0.16em] text-primary">
+            <ListOrdered className="h-4 w-4" /> Toplist
+            <span className="text-[10px] font-medium tracking-[0.1em] text-muted-foreground">Rankings begin</span>
+          </div>
+          <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/45" />
         </div>
 
         {/* Only the ranked toplist is flanked by the two side placements. */}

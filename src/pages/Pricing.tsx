@@ -12,7 +12,7 @@ const Pricing = () => {
       description: "Perfect for getting started",
       features: [
         "1 Game Server",
-        "Basic Storefront",
+        "Basic Storefronts",
         "Voting Support",
         "Standard API Access",
         "5% Platform Fee",

@@ -25,8 +25,8 @@ import {
 const features = [
   {
     icon: ShoppingCart,
-    title: "Custom Storefront",
-    description: "A branded storefront on your own subdomain. Sell ranks, items, keys, and bundles that match your server.",
+    title: "Custom Storefronts",
+    description: "Branded storefronts on your own subdomain. Sell ranks, items, keys, and bundles that match your server.",
   },
   {
     icon: Zap,
@@ -84,7 +84,7 @@ const pricingPlans = [
     price: "$0",
     period: "/forever",
     description: "Perfect for getting started",
-    features: ["1 Game Server", "Basic Storefront", "Voting System", "API Access", "5% Platform Fee"],
+    features: ["1 Game Server", "Basic Storefronts", "Voting System", "API Access", "5% Platform Fee"],
     cta: "Get Started",
     highlighted: false,
   },
