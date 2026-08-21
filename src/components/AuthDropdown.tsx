@@ -33,9 +33,19 @@ export function AuthDropdown({ defaultView = "login", trigger }: AuthDropdownPro
     return () => document.removeEventListener("mousedown", handleClick)
   }, [])
 
+  const toggleMenu = () => {
+    setOpen((currentlyOpen) => {
+      const willOpen = !currentlyOpen
+      if (willOpen) setView(defaultView)
+      return willOpen
+    })
+  }
+
   return (
     <div ref={ref} className="relative">
-      <div onClick={() => setOpen(!open)}>{trigger}</div>
+      {/* Keep the click handler on the trigger only. Putting it on this parent
+          makes every click inside the form bubble up and close the dropdown. */}
+      <div onClick={toggleMenu}>{trigger}</div>
       {open && (
         <div className="absolute right-0 top-full mt-2 w-[380px] rounded-xl border border-border/60 bg-card shadow-2xl z-50 p-5">
           {view === "login" ? (

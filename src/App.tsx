@@ -25,6 +25,7 @@ import StoreFront from "./pages/StoreFront.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Docs from "./pages/Docs.tsx";
 import Pricing from "./pages/Pricing.tsx";
+import Advertising from "./pages/Advertising.tsx";
 import Hiscores from "./pages/Hiscores.tsx";
 import ToplistHome from "./pages/toplist/ToplistHome.tsx";
 import ToplistServerDetail from "./pages/toplist/ToplistServerDetail.tsx";
@@ -73,6 +74,7 @@ const App = () => (
             <Route path="/register" element={<Register />} />
             <Route path="/docs" element={<Docs />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/advertising" element={<Advertising />} />
             <Route path="/dashboard" element={
               <ProtectedRoute>
                 <ServerProvider>

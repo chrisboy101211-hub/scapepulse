@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button"
 import { Logo } from "@/components/Logo"
 import { useState, useEffect, useRef } from "react"
 import { useAuth } from "@/lib/auth"
-import { BarChart3 } from "lucide-react"
+import { BarChart3, ChevronDown, Crown, Megaphone } from "lucide-react"
 import { AuthDropdown } from "@/components/AuthDropdown"
-
-const navItems = [
-  { href: "/docs", label: "Docs" },
-  { href: "/pricing", label: "Pricing" },
-]
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const NavBar = () => {
   const location = useLocation()
@@ -88,27 +89,25 @@ const NavBar = () => {
             )}
           </Link>
 
-          {/* Docs */}
-          <Link
-            to="/docs"
-            className="relative px-4 py-1.5 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-          >
-            Docs
-            {activePill === "/docs" && (
-              <div className="absolute inset-0 rounded-full bg-muted border border-border -z-10" />
-            )}
-          </Link>
-
-          {/* Pricing */}
-          <Link
-            to="/pricing"
-            className="relative px-4 py-1.5 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-          >
-            Pricing
-            {activePill === "/pricing" && (
-              <div className="absolute inset-0 rounded-full bg-muted border border-border -z-10" />
-            )}
-          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger className={`relative flex items-center gap-1 px-4 py-1.5 rounded-full text-sm font-medium transition-all outline-none ${activePill === "/pricing" || activePill === "/advertising" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}>
+              Advertisement <ChevronDown className="h-3.5 w-3.5" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="center" className="w-60 rounded-xl border-border/70 bg-card p-1.5">
+              <DropdownMenuItem asChild className="cursor-pointer rounded-lg p-0 focus:bg-muted">
+                <Link to="/advertising" className="flex w-full items-start gap-3 px-3 py-2.5">
+                  <Crown className="mt-0.5 h-4 w-4 text-violet-300" />
+                  <span><span className="block font-medium">Toplist Premium & spots</span><span className="block text-xs text-muted-foreground">Premium glow and banner availability</span></span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="cursor-pointer rounded-lg p-0 focus:bg-muted">
+                <Link to="/pricing" className="flex w-full items-start gap-3 px-3 py-2.5">
+                  <Megaphone className="mt-0.5 h-4 w-4 text-primary" />
+                  <span><span className="block font-medium">Storefront pricing</span><span className="block text-xs text-muted-foreground">Plans and storefront fees</span></span>
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         </div>
 

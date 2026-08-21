@@ -1,4 +1,5 @@
 import { supabase } from "./supabase"
+import { featuredToplistServer } from "./featured-toplist-server"
 
 export interface ToplistServer {
   id: number
@@ -126,11 +127,14 @@ export const toplistDataService = {
       .eq("is_top10", true)
       .order("votes", { ascending: false })
       .limit(10)
-    if (error) throw error
-    return data || []
+    // Keep the first ScapePulse listing visible even before the remote database
+    // is seeded, and do not duplicate it after it is added there.
+    const databaseServers = error ? [] : (data || []) as ToplistServer[]
+    return [featuredToplistServer, ...databaseServers.filter((server) => server.id !== featuredToplistServer.id)].slice(0, 10)
   },
 
   async getServer(id: number) {
+    if (id === featuredToplistServer.id) return featuredToplistServer
     const { data, error } = await supabase
       .from("toplist_servers")
       .select("*")
@@ -284,6 +288,7 @@ export const toplistDataService = {
       .eq("is_active", true)
       .eq("sponsored", true)
       .limit(10)
-    return (data as ToplistServer[]) || []
+    const databaseServers = (data as ToplistServer[]) || []
+    return [featuredToplistServer, ...databaseServers.filter((server) => server.id !== featuredToplistServer.id)]
   },
 }
