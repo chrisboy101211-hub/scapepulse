@@ -49,7 +49,7 @@ const NavBar = () => {
         <div className="flex items-center gap-1 p-1 rounded-full bg-muted/50 border border-border/50">
           {/* Discord - Blue */}
           <a 
-            href="https://discord.gg/cVhguuca3X" 
+            href="https://discord.gg/h2h8RSa2sr"
             target="_blank" 
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium text-blue-500 hover:bg-blue-500/10 transition-all"

@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { ListOrdered, ShoppingBag } from "lucide-react"
+import { ListOrdered, MessageCircle, ShoppingBag } from "lucide-react"
 import { ToplistHeader } from "@/components/toplist/ToplistHeader"
 import { ToplistFooter } from "@/components/toplist/ToplistFooter"
 import { ServerList } from "@/components/toplist/ServerList"
@@ -41,11 +41,14 @@ export default function ToplistHome() {
             </div>
             <div className="flex flex-wrap gap-2 md:flex-col md:items-stretch">
               <Link to="/storefront" className="inline-flex items-center justify-center gap-2 rounded-lg border border-violet-400/30 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-200 transition-colors hover:bg-violet-500/20">
-                <ShoppingBag className="h-4 w-4" /> Marketplace
+                <ShoppingBag className="h-4 w-4" /> Storefront
               </Link>
               <Link to="/toplist" className="inline-flex items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20">
                 <ListOrdered className="h-4 w-4" /> Toplist
               </Link>
+              <a href="https://discord.gg/h2h8RSa2sr" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-lg border border-blue-400/30 bg-blue-500/10 px-4 py-2.5 text-sm font-semibold text-blue-200 transition-colors hover:bg-blue-500/20">
+                <MessageCircle className="h-4 w-4" /> Discord
+              </a>
             </div>
           </div>
         </section>
