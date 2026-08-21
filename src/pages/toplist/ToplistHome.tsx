@@ -6,6 +6,7 @@ import { SearchAndFilters } from "@/components/toplist/SearchAndFilters"
 import { Ticker } from "@/components/toplist/Ticker"
 import { Logo } from "@/components/Logo"
 import { AdvertisementSlot } from "@/components/toplist/AdvertisementSlot"
+import { ToplistSidePanel } from "@/components/toplist/ToplistSidePanel"
 import { slotsForPlacement } from "@/lib/advertising"
 
 export default function ToplistHome() {
@@ -32,10 +33,14 @@ export default function ToplistHome() {
           {slotsForPlacement("top-banner").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} className="h-auto w-full max-w-[728px] aspect-[728/90]" />)}
         </div>
 
-        {/* Top five sponsored advertisement placements. */}
-        <div className="mb-8 space-y-3">
-          <div className="flex items-center justify-between"><h2 className="font-display text-lg font-bold">Top 5 Sponsored</h2><span className="text-xs text-muted-foreground">Monthly placements</span></div>
-          {slotsForPlacement("sponsored").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} variant="sponsored" className="mx-auto h-auto w-full max-w-[728px] aspect-[728/90]" />)}
+        {/* Server discovery panels fill the space alongside sponsored placements. */}
+        <div className="mb-8 grid items-start gap-6 xl:grid-cols-[170px_minmax(0,1fr)_170px]">
+          <ToplistSidePanel kind="votes" />
+          <div className="space-y-3">
+            <h2 className="font-display text-lg font-bold">Top 5 Sponsored</h2>
+            {slotsForPlacement("sponsored").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} variant="sponsored" className="mx-auto h-auto w-full max-w-[728px] aspect-[728/90]" />)}
+          </div>
+          <ToplistSidePanel kind="newest" />
         </div>
 
         {/* Only the ranked toplist is flanked by the two side placements. */}

@@ -72,7 +72,7 @@ export function AdvertisementSlot({ slot, className = "", variant = "standard", 
           )
         )}
         <span className={`absolute bottom-2 inline-flex items-center gap-1 text-[9px] font-medium ${vertical ? "left-0 right-0 justify-center" : "right-2"} ${available ? "text-emerald-300" : "text-amber-300"}`}>
-          <CalendarClock className="h-2.5 w-2.5" /> {slot.availableOn} · Monthly
+          <CalendarClock className="h-2.5 w-2.5" /> {slot.availableOn}
         </span>
       </div>
     </Link>

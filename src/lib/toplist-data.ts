@@ -146,6 +146,34 @@ export const toplistDataService = {
     return [featuredToplistServer, ...databaseServers.filter((server) => server.id !== featuredToplistServer.id)].slice(0, 10)
   },
 
+  async getMostVotedServers(limit = 5) {
+    const { data, error } = await supabase
+      .from("toplist_servers")
+      .select("*")
+      .eq("is_active", true)
+      .order("votes", { ascending: false })
+      .limit(limit)
+
+    const databaseServers = error ? [] : (data || []) as ToplistServer[]
+    return [featuredToplistServer, ...databaseServers.filter((server) => server.id !== featuredToplistServer.id)]
+      .sort((a, b) => b.votes - a.votes)
+      .slice(0, limit)
+  },
+
+  async getNewestServers(limit = 5) {
+    const { data, error } = await supabase
+      .from("toplist_servers")
+      .select("*")
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(limit)
+
+    const databaseServers = error ? [] : (data || []) as ToplistServer[]
+    return [featuredToplistServer, ...databaseServers.filter((server) => server.id !== featuredToplistServer.id)]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, limit)
+  },
+
   async getServer(id: number) {
     if (id === featuredToplistServer.id) return featuredToplistServer
     const { data, error } = await supabase
