@@ -3,8 +3,10 @@ import { useParams, Link } from "react-router-dom"
 import { useNavigate } from "react-router-dom"
 import { ToplistHeader } from "@/components/toplist/ToplistHeader"
 import { ToplistFooter } from "@/components/toplist/ToplistFooter"
+import { AdvertisementSlot } from "@/components/toplist/AdvertisementSlot"
 import { toplistDataService, type ToplistServer, type ToplistReview } from "@/lib/toplist-data"
 import { useAuth } from "@/lib/auth"
+import { slotsForPlacement } from "@/lib/advertising"
 
 function StarRating({ rating, readonly = false, size = "sm", onChange }: {
   rating: number
@@ -133,7 +135,12 @@ export default function ToplistServerDetail() {
   return (
     <div className="min-h-screen bg-background">
       <ToplistHeader />
-      <div className="container mx-auto px-6 py-8 max-w-6xl">
+      <div className="container mx-auto max-w-[1440px] px-6 py-8">
+        <div className="grid gap-6 xl:grid-cols-[160px_minmax(0,1fr)_160px]">
+          <aside className="hidden xl:block">
+            {slotsForPlacement("side-banner").filter((slot) => slot.id === "side-left-1").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} orientation="vertical" className="sticky top-28 h-[600px] w-[160px]" />)}
+          </aside>
+          <main className="min-w-0">
         {/* Server Header */}
         <div className={`mb-8 rounded-2xl border shadow-xl relative overflow-hidden ${
           server.is_sponsor ? "bg-gradient-to-r from-purple-50/10 to-violet-50/10 border-purple-400/50 sponsor-glow" :
@@ -417,6 +424,10 @@ export default function ToplistServerDetail() {
               </div>
             </div>
           )}
+          </main>
+          <aside className="hidden xl:block">
+            {slotsForPlacement("side-banner").filter((slot) => slot.id === "side-right-1").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} orientation="vertical" className="sticky top-28 h-[600px] w-[160px]" />)}
+          </aside>
         </div>
       </div>
       <ToplistFooter />
