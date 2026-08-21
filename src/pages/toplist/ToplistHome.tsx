@@ -34,7 +34,7 @@ export default function ToplistHome() {
         </div>
 
         {/* Server discovery panels fill the space alongside sponsored placements. */}
-        <div className="mb-8 grid items-start gap-6 xl:grid-cols-[170px_minmax(0,1fr)_170px]">
+        <div className="mb-8 grid items-center gap-6 xl:grid-cols-[200px_minmax(0,1fr)_200px]">
           <ToplistSidePanel kind="votes" />
           <div className="space-y-3">
             <h2 className="font-display text-lg font-bold">Top 5 Sponsored</h2>
