@@ -137,6 +137,18 @@
 .ticker-scroll { animation: ticker-scroll 30s linear infinite; }
 .ticker-scroll:hover { animation-play-state: paused; }
 
+@keyframes latest-servers-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.latest-servers-scroll { animation: latest-servers-scroll 28s linear infinite; }
+.latest-servers-scroll:hover { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .latest-servers-scroll { animation: none; }
+}
+
 /* ===== Electric Border (favicon home button) ===== */
 @property --electric-angle {
   inherits: false;

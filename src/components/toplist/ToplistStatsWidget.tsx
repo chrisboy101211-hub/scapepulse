@@ -37,8 +37,8 @@ export function ToplistStatsWidget() {
   ]
 
   return (
-    <section className="min-h-[216px] border border-primary/45 bg-card/70 shadow-lg shadow-black/10">
-      <h2 className="bg-primary/80 px-3 py-2.5 text-center text-sm font-bold tracking-wide text-primary-foreground">Toplist Statistics</h2>
+    <section className="min-h-[328px] border border-primary/45 bg-card/70 shadow-lg shadow-black/10">
+      <h2 className="bg-primary/80 px-3 py-2.5 text-center text-sm font-bold tracking-wide text-primary-foreground">Toplist Stats</h2>
       <dl className="px-3">
         {rows.map(({ label, value, icon: Icon }, index) => (
           <div key={label} className={`flex items-center justify-between gap-2 py-3 ${index < rows.length - 1 ? "border-b border-border/60" : ""}`}>

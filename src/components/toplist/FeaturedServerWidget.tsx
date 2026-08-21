@@ -6,7 +6,7 @@ export function ServerOfTheDayWidget() {
   const server = featuredToplistServer
 
   return (
-    <section className="flex min-h-[216px] flex-col border border-border/70 bg-card/70 p-3 shadow-lg shadow-black/10">
+    <section className="flex min-h-[328px] flex-col border border-border/70 bg-card/70 p-3 shadow-lg shadow-black/10">
       <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-cyan-200">
         <Star className="h-3.5 w-3.5 fill-current" /> Server of the day
       </div>

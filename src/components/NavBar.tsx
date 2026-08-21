@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/auth"
 import { ChevronDown, Crown, Megaphone } from "lucide-react"
 import { AuthDropdown } from "@/components/AuthDropdown"
+import { LatestServersTicker } from "@/components/LatestServersTicker"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,8 +29,8 @@ const NavBar = () => {
   }
 
   return (
-    <nav className="sticky top-0 z-[100] h-16 border-b border-border/50 bg-background/95 backdrop-blur-sm">
-      <div className="container mx-auto flex h-full items-center justify-between px-6">
+    <nav className="sticky top-0 z-[100] border-b border-border/50 bg-background/95 backdrop-blur-sm">
+      <div className="container mx-auto flex h-16 items-center justify-between px-6">
         <Link to="/" className="flex items-center gap-2">
           <Logo size="sm" />
         </Link>
@@ -120,13 +121,14 @@ const NavBar = () => {
               <AuthDropdown
                 defaultView="register"
                 trigger={
-                  <Button variant="hero" size="sm">Get Started</Button>
+                  <Button variant="hero" size="sm" className="bg-violet-600 text-white hover:bg-violet-500">Get Started</Button>
                 }
               />
             </>
           )}
         </div>
       </div>
+      <LatestServersTicker />
     </nav>
   )
 }

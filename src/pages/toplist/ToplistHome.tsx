@@ -5,7 +5,6 @@ import { ToplistHeader } from "@/components/toplist/ToplistHeader"
 import { ToplistFooter } from "@/components/toplist/ToplistFooter"
 import { ServerList } from "@/components/toplist/ServerList"
 import { SearchAndFilters } from "@/components/toplist/SearchAndFilters"
-import { Ticker } from "@/components/toplist/Ticker"
 import { Logo } from "@/components/Logo"
 import { AdvertisementSlot } from "@/components/toplist/AdvertisementSlot"
 import { ToplistSidePanel } from "@/components/toplist/ToplistSidePanel"
@@ -19,7 +18,6 @@ export default function ToplistHome() {
   return (
     <div className="min-h-screen bg-background">
       <ToplistHeader />
-      <Ticker />
 
       <div className="container mx-auto max-w-[1440px] px-6 py-8">
         {/* Logo + tagline */}
