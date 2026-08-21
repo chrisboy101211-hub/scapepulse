@@ -65,8 +65,8 @@ export default function ToplistHome() {
         </div>
 
         {/* Server discovery panels fill the space alongside sponsored placements. */}
-        <div className="mb-8 grid items-center gap-6 xl:grid-cols-[200px_minmax(0,1fr)_200px]">
-          <div className="space-y-3 xl:border-r xl:border-primary/25 xl:pr-6">
+        <div className="mb-8 grid items-center gap-6 xl:grid-cols-[210px_minmax(0,1fr)_210px]">
+          <div className="space-y-3 xl:border-r xl:border-violet-400/55 xl:pr-6 xl:shadow-[14px_0_22px_-20px_rgba(167,139,250,0.9)]">
             <ToplistSidePanel kind="votes" />
             <ToplistStatsWidget />
           </div>
@@ -74,7 +74,7 @@ export default function ToplistHome() {
             <h2 className="font-display text-lg font-bold">Top 5 Sponsored</h2>
             {slotsForPlacement("sponsored").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} variant="sponsored" className="mx-auto h-auto w-full max-w-[728px] aspect-[728/90]" />)}
           </div>
-          <div className="space-y-3 xl:border-l xl:border-primary/25 xl:pl-6">
+          <div className="space-y-3 xl:border-l xl:border-violet-400/55 xl:pl-6 xl:shadow-[-14px_0_22px_-20px_rgba(167,139,250,0.9)]">
             <ToplistSidePanel kind="newest" />
             <ServerOfTheDayWidget />
           </div>

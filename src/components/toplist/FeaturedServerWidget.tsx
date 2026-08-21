@@ -16,14 +16,14 @@ export function ServerOfTheDayWidget() {
         </span>
         <div className="min-w-0">
           <h3 className="truncate text-sm font-bold text-foreground">{server.name}</h3>
-          <p className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-muted-foreground">{server.short_description || server.description}</p>
         </div>
       </div>
+      <p className="mt-2 line-clamp-3 text-[11px] leading-4 text-muted-foreground">{server.description}</p>
       <div className="mt-auto grid grid-cols-2 gap-1.5 pt-3">
-        <Link to={`/toplist/servers/${server.id}`} className="inline-flex items-center justify-center gap-1 border border-primary/40 bg-primary/10 px-2 py-1.5 text-[10px] font-bold text-primary transition-colors hover:bg-primary/20">
+        <Link to={`/toplist/servers/${server.id}`} className="inline-flex items-center justify-center gap-1 whitespace-nowrap border border-primary/40 bg-primary/10 px-1.5 py-1.5 text-[10px] font-bold text-primary transition-colors hover:bg-primary/20">
           <Play className="h-3 w-3 fill-current" /> Play now
         </Link>
-        <a href={server.discord_invite || "#"} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-1 border border-[#5865F2]/40 bg-[#5865F2]/10 px-2 py-1.5 text-[10px] font-bold text-[#aab3ff] transition-colors hover:bg-[#5865F2]/20">
+        <a href={server.discord_invite || "#"} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-1 whitespace-nowrap border border-[#5865F2]/40 bg-[#5865F2]/10 px-1.5 py-1.5 text-[10px] font-bold text-[#aab3ff] transition-colors hover:bg-[#5865F2]/20">
           <MessageCircle className="h-3 w-3" /> Discord
         </a>
       </div>
