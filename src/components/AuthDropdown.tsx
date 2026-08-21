@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { ArrowRight, Loader2, Globe } from "lucide-react"
 import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
+import { isValidUsername, normalizeUsername, signInWithUsername } from "@/lib/username-auth"
 
 const MAIN_DOMAIN = "scapepulse.com"
 
@@ -42,12 +43,12 @@ export function AuthDropdown({ defaultView = "login", trigger }: AuthDropdownPro
   }
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative z-[110]">
       {/* Keep the click handler on the trigger only. Putting it on this parent
           makes every click inside the form bubble up and close the dropdown. */}
       <div onClick={toggleMenu}>{trigger}</div>
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-[380px] rounded-xl border border-border/60 bg-card shadow-2xl z-50 p-5">
+        <div className="absolute right-0 top-full z-[120] mt-2 w-[380px] rounded-xl border border-border/60 bg-card p-5 shadow-2xl">
           {view === "login" ? (
             <LoginForm
               onSwitch={() => setView("register")}
@@ -67,20 +68,23 @@ export function AuthDropdown({ defaultView = "login", trigger }: AuthDropdownPro
 
 function LoginForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess: () => void }) {
   const navigate = useNavigate()
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim() || !password.trim()) {
+    if (!username.trim() || !password.trim()) {
       toast.error("Please fill in all fields")
+      return
+    }
+    if (!isValidUsername(username)) {
+      toast.error("Username must be 3-30 lowercase letters, numbers, or underscores")
       return
     }
     setLoading(true)
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) throw error
+      await signInWithUsername(username, password)
       toast.success("Welcome back!")
       onSuccess()
       navigate("/dashboard")
@@ -97,13 +101,13 @@ function LoginForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess: (
       <p className="text-xs text-muted-foreground mb-4">Sign in to manage your servers</p>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="space-y-1.5">
-          <Label htmlFor="dd-email" className="text-xs">Email</Label>
+          <Label htmlFor="dd-username" className="text-xs">Username</Label>
           <Input
-            id="dd-email"
-            type="email"
-            placeholder="you@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            id="dd-username"
+            autoComplete="username"
+            placeholder="your_username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value.toLowerCase())}
             className="bg-background border-border h-9 text-sm"
           />
         </div>
@@ -112,6 +116,7 @@ function LoginForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess: (
           <Input
             id="dd-password"
             type="password"
+            autoComplete="current-password"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -134,6 +139,7 @@ function LoginForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess: (
 
 function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess: () => void }) {
   const navigate = useNavigate()
+  const [username, setUsername] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -145,8 +151,12 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+    if (!username.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
       toast.error("Please fill in all fields")
+      return
+    }
+    if (!isValidUsername(username)) {
+      toast.error("Username must be 3-30 lowercase letters, numbers, or underscores")
       return
     }
     if (!serverName.trim()) {
@@ -183,6 +193,7 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: { data: { username: normalizeUsername(username) } },
       })
 
       if (authError) throw authError
@@ -221,7 +232,18 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
       <p className="text-xs text-muted-foreground mb-4">Start monetizing your game server</p>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="space-y-1.5">
-          <Label htmlFor="dd-reg-email" className="text-xs">Email</Label>
+          <Label htmlFor="dd-reg-username" className="text-xs">Username</Label>
+          <Input
+            id="dd-reg-username"
+            autoComplete="username"
+            placeholder="your_username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value.toLowerCase())}
+            className="bg-background border-border h-9 text-sm"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="dd-reg-email" className="text-xs">Verification email</Label>
           <Input
             id="dd-reg-email"
             type="email"
@@ -236,6 +258,7 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
           <Input
             id="dd-reg-password"
             type="password"
+            autoComplete="new-password"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -247,6 +270,7 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
           <Input
             id="dd-reg-confirm"
             type="password"
+            autoComplete="new-password"
             placeholder="••••••••"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}

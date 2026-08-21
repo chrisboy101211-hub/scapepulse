@@ -30,12 +30,13 @@ export default function ProfileSettings() {
 
   useEffect(() => {
     if (!user) return
+    const accountUsername = typeof user.user_metadata?.username === "string" ? user.user_metadata.username : ""
     profileService.getById(user.id).then(p => {
       if (p) {
         setProfile(p)
         setForm({
           display_name: p.display_name ?? "",
-          username: p.username ?? "",
+          username: p.username ?? accountUsername,
           bio: p.bio ?? "",
           avatar_url: p.avatar_url ?? "",
           banner_url: p.banner_url ?? "",
@@ -43,6 +44,7 @@ export default function ProfileSettings() {
           profile_color: p.profile_color ?? "#00ffff",
         })
       }
+      else setForm((current) => ({ ...current, username: accountUsername }))
       setLoading(false)
     })
   }, [user])
@@ -147,10 +149,10 @@ export default function ProfileSettings() {
               placeholder="Your display name" className={inputCls} />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">Username <span className="text-muted-foreground font-normal">(URL: /u/username)</span></label>
-            <input type="text" value={form.username} maxLength={30}
-              onChange={e => setForm(p => ({ ...p, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "") }))}
-              placeholder="username" className={inputCls} />
+            <label className="block text-sm font-medium text-foreground mb-1.5">Username <span className="text-muted-foreground font-normal">(sign-in and profile URL)</span></label>
+            <input type="text" value={form.username} readOnly
+              placeholder="username" className={`${inputCls} cursor-not-allowed opacity-80`} />
+            <p className="mt-1 text-xs text-muted-foreground">Your sign-in username is reserved when the account is created.</p>
           </div>
         </div>
 

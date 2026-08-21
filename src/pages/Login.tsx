@@ -5,28 +5,28 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/lib/supabase";
+import { isValidUsername, signInWithUsername } from "@/lib/username-auth";
 import { Logo } from "@/components/Logo";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) {
+    if (!username.trim() || !password.trim()) {
       toast.error("Please fill in all fields");
+      return;
+    }
+    if (!isValidUsername(username)) {
+      toast.error("Username must be 3-30 lowercase letters, numbers, or underscores");
       return;
     }
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) throw error;
+      await signInWithUsername(username, password);
       toast.success("Welcome back!");
       navigate("/dashboard");
     } catch (error: any) {
@@ -50,13 +50,13 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="username">Username</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="username"
+              autoComplete="username"
+              placeholder="your_username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value.toLowerCase())}
               className="bg-card border-border"
             />
           </div>
@@ -65,6 +65,7 @@ const Login = () => {
             <Input
               id="password"
               type="password"
+              autoComplete="current-password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

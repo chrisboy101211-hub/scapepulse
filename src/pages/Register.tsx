@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowRight, Loader2, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
+import { isValidUsername, normalizeUsername } from "@/lib/username-auth";
 import { Logo } from "@/components/Logo";
 
 const MAIN_DOMAIN = "scapepulse.com";
@@ -16,6 +17,7 @@ const generateSlug = (name: string) => {
 
 const Register = () => {
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -28,8 +30,12 @@ const Register = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
+    if (!username.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
       toast.error("Please fill in all fields");
+      return;
+    }
+    if (!isValidUsername(username)) {
+      toast.error("Username must be 3-30 lowercase letters, numbers, or underscores");
       return;
     }
     if (!serverName.trim()) {
@@ -66,6 +72,7 @@ const Register = () => {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: { data: { username: normalizeUsername(username) } },
       });
 
       if (authError) throw authError;
@@ -115,16 +122,22 @@ const Register = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-card border-border" />
+            <Label htmlFor="username">Username</Label>
+            <Input id="username" autoComplete="username" placeholder="your_username" value={username} onChange={(e) => setUsername(e.target.value.toLowerCase())} className="bg-card border-border" />
+            <p className="text-xs text-muted-foreground">Used to sign in and shown on your ScapePulse profile.</p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Verification email</Label>
+            <Input id="email" type="email" autoComplete="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-card border-border" />
+            <p className="text-xs text-muted-foreground">Used for email verification, account recovery, and optional updates.</p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-card border-border" />
+            <Input id="password" type="password" autoComplete="new-password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-card border-border" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <Input id="confirmPassword" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="bg-card border-border" />
+            <Input id="confirmPassword" type="password" autoComplete="new-password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="bg-card border-border" />
           </div>
           
           <div className="border-t border-border pt-4 mt-4">
