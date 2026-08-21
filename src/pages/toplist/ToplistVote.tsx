@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useParams, Link } from "react-router-dom"
+import { useNavigate, useParams, Link } from "react-router-dom"
 import { ServerNav } from "@/components/ServerNav"
 import { dataService } from "@/lib/data"
 import { toplistDataService, type ToplistServer } from "@/lib/toplist-data"
@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react"
 
 export default function ToplistVote() {
   const { id, incentive } = useParams<{ id: string; incentive?: string }>()
+  const navigate = useNavigate()
   const [server, setServer] = useState<ToplistServer | null>(null)
   const [loading, setLoading] = useState(true)
   const [accentColor, setAccentColor] = useState("#a855f7")
@@ -37,6 +38,12 @@ export default function ToplistVote() {
       })
       .finally(() => setLoading(false))
   }, [id])
+
+  useEffect(() => {
+    if (!voteSuccess || !server) return
+    const redirectTimer = window.setTimeout(() => navigate(`/toplist/servers/${server.id}`), 3000)
+    return () => window.clearTimeout(redirectTimer)
+  }, [navigate, server, voteSuccess])
 
   const handleVote = async () => {
     if (!server) return
@@ -126,7 +133,7 @@ export default function ToplistVote() {
           />
 
           {voteError && <p className="mb-3 text-center text-sm text-red-300">{voteError}</p>}
-          {voteSuccess && <p className="mb-3 text-center text-sm text-emerald-300">Vote confirmed. Your server callback has been notified.</p>}
+          {voteSuccess && <p className="mb-3 text-center text-sm text-emerald-300">Vote confirmed. Your server callback has been notified. Returning to the server listing in 3 seconds…</p>}
 
           <button
             onClick={handleVote}
