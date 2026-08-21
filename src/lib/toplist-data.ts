@@ -86,14 +86,18 @@ export const toplistDataService = {
     const page = filters?.page || 1
     const limit = filters?.limit || 35
     const offset = (page - 1) * limit
+    const featuredMatchesFilters =
+      (!filters?.search || `${featuredToplistServer.name} ${featuredToplistServer.description}`.toLowerCase().includes(filters.search.toLowerCase())) &&
+      (!filters?.revision || featuredToplistServer.revision === filters.revision) &&
+      (!filters?.serverType || featuredToplistServer.server_type === filters.serverType)
+    const databaseOffset = page === 1 || !featuredMatchesFilters ? offset : offset - 1
 
     let query = supabase
       .from("toplist_servers")
       .select("*", { count: "exact" })
       .eq("is_active", true)
-      .eq("is_top10", false)
       .order("votes", { ascending: false })
-      .range(offset, offset + limit - 1)
+      .range(databaseOffset, databaseOffset + limit - 1)
 
     if (filters?.search) {
       query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
@@ -108,13 +112,22 @@ export const toplistDataService = {
     const { data, error, count } = await query
     if (error) throw error
 
+    const databaseServers = (data || []) as ToplistServer[]
+    // Mythos remains the first actual toplist entry until its database record
+    // is present, rather than being shown in a separate Top 1 panel.
+    const databaseAlreadyContainsFeatured = databaseServers.some((server) => server.id === featuredToplistServer.id)
+    const servers = page === 1 && featuredMatchesFilters
+      ? [featuredToplistServer, ...databaseServers.filter((server) => server.id !== featuredToplistServer.id)].slice(0, limit)
+      : databaseServers.filter((server) => server.id !== featuredToplistServer.id)
+    const totalCount = Math.max((count || 0) + (!databaseAlreadyContainsFeatured && featuredMatchesFilters ? 1 : 0), servers.length)
+
     return {
-      servers: data || [],
+      servers,
       pagination: {
         page,
         limit,
-        totalCount: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
       },
     }
   },

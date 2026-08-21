@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { ToplistHeader } from "@/components/toplist/ToplistHeader"
 import { ToplistFooter } from "@/components/toplist/ToplistFooter"
-import { Top10ServersList } from "@/components/toplist/Top10ServersList"
 import { ServerList } from "@/components/toplist/ServerList"
 import { SearchAndFilters } from "@/components/toplist/SearchAndFilters"
 import { Ticker } from "@/components/toplist/Ticker"
@@ -42,15 +41,14 @@ export default function ToplistHome() {
         {/* Only the ranked toplist is flanked by the two side placements. */}
         <div className="grid gap-6 xl:grid-cols-[160px_minmax(0,1fr)_160px]">
           <aside className="hidden xl:block">
-            {slotsForPlacement("side-banner").filter((slot) => slot.id === "side-left-1").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} className="sticky top-6 h-[600px] w-[160px]" />)}
+            {slotsForPlacement("side-banner").filter((slot) => slot.id === "side-left-1").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} orientation="vertical" className="sticky top-6 h-[600px] w-[160px]" />)}
           </aside>
           <div className="min-w-0">
-            <Top10ServersList />
             <SearchAndFilters onSearch={setFilters} />
             <ServerList filters={filters} />
           </div>
           <aside className="hidden xl:block">
-            {slotsForPlacement("side-banner").filter((slot) => slot.id === "side-right-1").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} className="sticky top-6 h-[600px] w-[160px]" />)}
+            {slotsForPlacement("side-banner").filter((slot) => slot.id === "side-right-1").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} orientation="vertical" className="sticky top-6 h-[600px] w-[160px]" />)}
           </aside>
         </div>
       </div>
