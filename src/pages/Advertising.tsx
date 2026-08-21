@@ -53,12 +53,16 @@ export default function Advertising() {
           <div><h2 className="font-display text-2xl font-bold">Banner availability</h2><p className="mt-1 text-sm text-muted-foreground">All banner sizes are consistent within each placement type and renew monthly.</p></div>
           {(Object.keys(placementLabels) as Array<keyof typeof placementLabels>).map((placement) => (
             <div key={placement} className="rounded-2xl border border-border/50 bg-card p-6">
-              <h3 className="font-display text-lg font-bold">{placementLabels[placement]}</h3>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h3 className="font-display text-lg font-bold">{placementLabels[placement]}</h3>
+                <span className="border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">${slotsForPlacement(placement)[0]?.priceUsd ?? 0} USD / month</span>
+              </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {slotsForPlacement(placement).map((slot) => {
                   const available = slot.status === "available"
                   return <div key={slot.id} className="rounded-xl border border-border/60 bg-muted/20 p-4">
                     <div className="flex items-start justify-between gap-2"><span className="font-medium">{slot.name}</span><span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${available ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"}`}>{available ? "Available" : "Reserved"}</span></div>
+                    <p className="mt-2 text-lg font-bold text-foreground">${slot.priceUsd} <span className="text-xs font-medium text-muted-foreground">USD / month</span></p>
                     <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground"><CalendarClock className="h-3.5 w-3.5" /> {slot.availableOn} · {slot.cadence}</p>
                   </div>
                 })}
