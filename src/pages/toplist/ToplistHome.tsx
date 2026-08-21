@@ -36,7 +36,7 @@ export default function ToplistHome() {
         {/* Top five sponsored advertisement placements. */}
         <div className="mb-8 space-y-3">
           <div className="flex items-center justify-between"><h2 className="font-display text-lg font-bold">Top 5 Sponsored</h2><span className="text-xs text-muted-foreground">Monthly placements</span></div>
-          {slotsForPlacement("sponsored").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} variant="sponsored" className="mx-auto h-auto w-full max-w-[765px] aspect-[765/503]" />)}
+          {slotsForPlacement("sponsored").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} variant="sponsored" className="mx-auto h-auto w-full max-w-[728px] aspect-[728/90]" />)}
         </div>
 
         {/* Only the ranked toplist is flanked by the two side placements. */}
