@@ -32,6 +32,14 @@ function err(msg: string, status = 400) {
   });
 }
 
+function getIP(req: Request): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    req.headers.get("x-real-ip") ??
+    ""
+  );
+}
+
 /** Fire GET → fallback POST to the server's own callback_url. */
 async function forwardCallback(callbackUrl: string, uid: string): Promise<void> {
   const params = new URLSearchParams({ uid });
@@ -86,51 +94,75 @@ Deno.serve(async (req) => {
 
     if (!uid) return err("Missing uid", 400);
 
-    // ── Load the vote record ───────────────────────────────────────────────────
-    const { data: vote, error: voteErr } = await supabase
+    // ── Load a pre-registered vote record, when one exists ─────────────────────
+    const { data: existingVote } = await supabase
       .from("fx_votes")
       .select("id, server_id, callback_date")
       .eq("uid", uid)
       .single();
 
-    if (voteErr || !vote) return err("Vote not found", 404);
+    const pathServerId = sid && /^\d+$/.test(sid) ? Number(sid) : null;
+    if (sid && !pathServerId) return err("Invalid server ID", 400);
 
     // The public ScapePulse callback URL includes the server ID. Verify that
-    // it matches the vote key before confirming or forwarding a reward.
-    if (sid && (!/^\d+$/.test(sid) || Number(sid) !== vote.server_id)) {
+    // it matches any pre-registered vote key before confirming or forwarding.
+    if (existingVote && pathServerId && pathServerId !== existingVote.server_id) {
       return err("Vote does not belong to this server", 400);
     }
 
     // Idempotent — already confirmed
-    if (vote.callback_date !== null) {
+    if (existingVote?.callback_date !== null && existingVote) {
       return ok({ status: "OK", message: "Already confirmed" });
     }
 
-    // ── Confirm the vote ───────────────────────────────────────────────────────
-    await supabase
-      .from("fx_votes")
-      .update({ callback_date: new Date().toISOString() })
-      .eq("id", vote.id);
+    // A server-issued incentive can arrive without a local fx_votes row. It is
+    // accepted only through the public /toplist/vote/{sid}/{incentive} route,
+    // then stored so the same incentive cannot be confirmed twice.
+    if (!existingVote && !pathServerId) return err("Vote not found", 404);
+    if (!existingVote && !/^[A-Za-z0-9_-]{12,128}$/.test(uid)) {
+      return err("Invalid incentive", 400);
+    }
+
+    const serverId = existingVote?.server_id ?? pathServerId!;
+    const { data: server } = await supabase
+      .from("toplist_servers")
+      .select("votes, monthly_votes, callback_url, is_active")
+      .eq("id", serverId)
+      .single();
+
+    if (!server) return err("Server not found", 404);
+    if (!server.is_active) return err("Server is not active", 400);
+
+    if (existingVote) {
+      await supabase
+        .from("fx_votes")
+        .update({ callback_date: new Date().toISOString() })
+        .eq("id", existingVote.id);
+    } else {
+      const { error: insertError } = await supabase
+        .from("fx_votes")
+        .insert({
+          uid,
+          username: "external-incentive",
+          server_id: serverId,
+          ip_address: getIP(req) || null,
+          started: new Date().toISOString(),
+          callback_date: new Date().toISOString(),
+          claimed: false,
+        });
+
+      if (insertError) return err("Incentive was already used", 409);
+    }
 
     // ── Increment toplist vote counter ─────────────────────────────────────────
-    if (vote.server_id) {
-      const { data: server } = await supabase
-        .from("toplist_servers")
-        .select("votes, monthly_votes, callback_url")
-        .eq("id", vote.server_id)
-        .single();
+    await supabase
+      .from("toplist_servers")
+      .update({ votes: server.votes + 1, monthly_votes: server.monthly_votes + 1 })
+      .eq("id", serverId);
 
-      if (server) {
-        await supabase
-          .from("toplist_servers")
-          .update({ votes: server.votes + 1, monthly_votes: server.monthly_votes + 1 })
-          .eq("id", vote.server_id);
-
-        // ── Forward to the game server's own callback_url ──────────────────────
-        if (server.callback_url) {
-          forwardCallback(server.callback_url, uid).catch(() => {});
-        }
-      }
+    // ── Forward to the game server's own callback_url ──────────────────────────
+    if (server.callback_url) {
+      forwardCallback(server.callback_url, uid).catch(() => {});
     }
 
     console.log(`[sp-toplist-callback] ✅ Confirmed uid=${uid}`);
