@@ -6,7 +6,7 @@ import { toplistDataService, type ToplistServer } from "@/lib/toplist-data"
 import { Loader2 } from "lucide-react"
 
 export default function ToplistVote() {
-  const { id } = useParams<{ id: string }>()
+  const { id, incentive } = useParams<{ id: string; incentive?: string }>()
   const [server, setServer] = useState<ToplistServer | null>(null)
   const [loading, setLoading] = useState(true)
   const [accentColor, setAccentColor] = useState("#a855f7")
@@ -48,7 +48,7 @@ export default function ToplistVote() {
     setSubmitting(true)
     setVoteError("")
     try {
-      await toplistDataService.submitVote(server.id, username)
+      await toplistDataService.submitVote(server.id, username, incentive)
       setVoteSuccess(true)
     } catch (error: any) {
       setVoteError(error?.message || "Vote could not be recorded.")

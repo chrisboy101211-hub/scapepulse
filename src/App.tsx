@@ -103,6 +103,7 @@ const App = () => (
             <Route path="/toplist" element={<ToplistHome />} />
             <Route path="/toplist/servers/:id" element={<ToplistServerDetail />} />
             <Route path="/toplist/vote/:id" element={<ToplistVote />} />
+            <Route path="/toplist/vote/:id/:incentive" element={<ToplistVote />} />
             <Route path="/toplist/submit" element={<ProtectedRoute><ToplistSubmitServer /></ProtectedRoute>} />
             <Route path="/video-hub" element={<VideoHubHome />} />
             <Route path="/video-hub/submit" element={<ProtectedRoute><VideoHubSubmit /></ProtectedRoute>} />

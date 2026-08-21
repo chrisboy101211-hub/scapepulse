@@ -92,6 +92,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => null);
     const serverId: number | undefined = body?.server_id;
     const username: string | undefined = body?.username;
+    const incentive: string | undefined = body?.incentive;
 
     if (!serverId || !username?.trim()) {
       return json({ error: "server_id and username are required" }, 400);
@@ -99,6 +100,9 @@ Deno.serve(async (req) => {
 
     const cleanUsername = username.trim().replace(/[^A-Za-z0-9_ ]/g, "").substring(0, 64);
     if (!cleanUsername) return json({ error: "Invalid username" }, 400);
+    if (incentive && !/^[A-Za-z0-9_-]{12,128}$/.test(incentive)) {
+      return json({ error: "Invalid vote incentive" }, 400);
+    }
 
     const ipAddress = getIP(req);
 
@@ -125,8 +129,31 @@ Deno.serve(async (req) => {
       return json({ error: "You have already voted for this server in the last 12 hours" }, 429);
     }
 
-    // ── Generate vote key ──────────────────────────────────────────────────────
-    const voteKey = crypto.randomUUID().replace(/-/g, "").substring(0, 16);
+    // Use a trusted incoming incentive when the player arrived from an external
+    // vote link. Otherwise generate a ScapePulse vote key for a direct vote.
+    const voteKey = incentive || crypto.randomUUID().replace(/-/g, "").substring(0, 16);
+
+    if (incentive) {
+      const { data: usedIncentive } = await supabase
+        .from("fx_votes")
+        .select("id")
+        .eq("server_id", serverId)
+        .eq("uid", incentive)
+        .maybeSingle();
+      if (usedIncentive) return json({ error: "This vote link has already been used" }, 409);
+    }
+
+    // ── Insert into fx_votes (Java SupabaseVoteProcessor reads this) ───────────
+    const { error: fxVoteError } = await supabase.from("fx_votes").insert({
+      uid: voteKey,
+      username: cleanUsername,
+      server_id: serverId,
+      ip_address: ipAddress,
+      started: new Date().toISOString(),
+      callback_date: new Date().toISOString(), // confirmed immediately — it's a direct toplist vote
+      claimed: 0,
+    });
+    if (fxVoteError) return json({ error: "This vote link has already been used" }, 409);
 
     // ── Record vote in toplist_votes ───────────────────────────────────────────
     await supabase.from("toplist_votes").insert({
@@ -143,17 +170,6 @@ Deno.serve(async (req) => {
         monthly_votes: server.monthly_votes + 1,
       })
       .eq("id", serverId);
-
-    // ── Insert into fx_votes (Java SupabaseVoteProcessor reads this) ───────────
-    await supabase.from("fx_votes").insert({
-      uid: voteKey,
-      username: cleanUsername,
-      server_id: serverId,
-      ip_address: ipAddress,
-      started: new Date().toISOString(),
-      callback_date: new Date().toISOString(), // confirmed immediately — it's a direct toplist vote
-      claimed: 0,
-    });
 
     // ── Fire callback (fire-and-forget, non-blocking) ──────────────────────────
     if (server.callback_url) {
