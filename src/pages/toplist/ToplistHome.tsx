@@ -9,6 +9,7 @@ import { Ticker } from "@/components/toplist/Ticker"
 import { Logo } from "@/components/Logo"
 import { AdvertisementSlot } from "@/components/toplist/AdvertisementSlot"
 import { ToplistSidePanel } from "@/components/toplist/ToplistSidePanel"
+import { ServerOfTheDayWidget, ServerOfTheMonth } from "@/components/toplist/FeaturedServerWidget"
 import { slotsForPlacement } from "@/lib/advertising"
 
 export default function ToplistHome() {
@@ -30,7 +31,11 @@ export default function ToplistHome() {
           </p>
         </div>
 
-        <section className="mb-8 overflow-hidden rounded-2xl border border-border/60 bg-card/55 shadow-lg shadow-black/10 backdrop-blur-sm">
+        <div className="mb-5 flex justify-end">
+          <ServerOfTheMonth />
+        </div>
+
+        <section className="mb-8 overflow-hidden border border-border/60 bg-card/55 shadow-lg shadow-black/10 backdrop-blur-sm">
           <div className="grid gap-6 px-6 py-7 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:px-9">
             <div className="max-w-3xl">
               <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-primary">Welcome to ScapePulse</p>
@@ -40,13 +45,13 @@ export default function ToplistHome() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2 md:flex-col md:items-stretch">
-              <Link to="/storefront" className="inline-flex items-center justify-center gap-2 rounded-lg border border-violet-400/30 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-200 transition-colors hover:bg-violet-500/20">
+              <Link to="/storefront" className="inline-flex items-center justify-center gap-2 border border-violet-400/30 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-200 transition-colors hover:bg-violet-500/20">
                 <ShoppingBag className="h-4 w-4" /> Storefront
               </Link>
-              <Link to="/toplist" className="inline-flex items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20">
+              <Link to="/toplist" className="inline-flex items-center justify-center gap-2 border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20">
                 <ListOrdered className="h-4 w-4" /> Toplist
               </Link>
-              <a href="https://discord.gg/h2h8RSa2sr" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-lg border border-blue-400/30 bg-blue-500/10 px-4 py-2.5 text-sm font-semibold text-blue-200 transition-colors hover:bg-blue-500/20">
+              <a href="https://discord.gg/h2h8RSa2sr" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 border border-blue-400/30 bg-blue-500/10 px-4 py-2.5 text-sm font-semibold text-blue-200 transition-colors hover:bg-blue-500/20">
                 <MessageCircle className="h-4 w-4" /> Discord
               </a>
             </div>
@@ -65,7 +70,10 @@ export default function ToplistHome() {
             <h2 className="font-display text-lg font-bold">Top 5 Sponsored</h2>
             {slotsForPlacement("sponsored").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} variant="sponsored" className="mx-auto h-auto w-full max-w-[728px] aspect-[728/90]" />)}
           </div>
-          <ToplistSidePanel kind="newest" />
+          <div className="space-y-3">
+            <ToplistSidePanel kind="newest" />
+            <ServerOfTheDayWidget />
+          </div>
         </div>
 
         {/* Only the ranked toplist is flanked by the two side placements. */}

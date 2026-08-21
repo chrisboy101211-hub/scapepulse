@@ -47,7 +47,7 @@ export function ToplistServerCard({ server, rank, onVote }: ToplistServerCardPro
   }
 
   return (
-    <div className={`group relative overflow-hidden rounded-lg border transition-all duration-300 hover:shadow-xl ${
+    <div className={`group relative overflow-hidden border transition-all duration-300 hover:shadow-xl ${
       isSponsored
         ? "bg-gradient-to-r from-purple-500/10 to-violet-500/10 border-purple-400/30 sponsor-glow"
         : isPremium
@@ -102,7 +102,7 @@ export function ToplistServerCard({ server, rank, onVote }: ToplistServerCardPro
             </p>
 
             {server.banner_url && (
-              <div className={`mb-2 w-full max-w-[600px] h-[80px] overflow-hidden rounded-lg border-2 ${bannerFrameClass}`}>
+              <div className={`mb-2 h-[80px] w-full max-w-[600px] overflow-hidden border-2 ${bannerFrameClass}`}>
                 <img src={server.banner_url} alt={`${server.name} banner`}
                   className="h-full w-full object-cover"
                   onError={(e) => { e.currentTarget.style.display = "none" }} />

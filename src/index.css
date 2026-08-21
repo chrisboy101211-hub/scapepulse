@@ -34,7 +34,7 @@
     --input: 230 12% 16%;
     --ring: 185 100% 50%;
 
-    --radius: 0.5rem;
+    --radius: 0px;
 
     --sidebar-background: 230 15% 6%;
     --sidebar-foreground: 210 20% 85%;
@@ -73,6 +73,12 @@
 }
 
 @layer utilities {
+  .rounded-xl,
+  .rounded-2xl,
+  .rounded-3xl {
+    border-radius: 0 !important;
+  }
+
   .text-gradient {
     @apply bg-clip-text text-transparent;
     background-image: var(--gradient-primary);

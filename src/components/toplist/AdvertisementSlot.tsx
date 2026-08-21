@@ -19,7 +19,7 @@ export function AdvertisementSlot({ slot, className = "", variant = "standard", 
     <Link
       to="/advertising"
       aria-label={`${slot.name}: ${slot.availableOn}`}
-      className={`group relative block overflow-hidden rounded-xl border transition-all hover:-translate-y-0.5 ${
+      className={`group relative block overflow-hidden border transition-all hover:-translate-y-0.5 ${
         available
           ? sponsored
             ? "border-violet-400/45 bg-violet-500/5 hover:border-violet-300/65"

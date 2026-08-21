@@ -17,7 +17,7 @@ export const featuredToplistServer: ToplistServer = {
   experience_rate: null,
   player_count: "50+",
   tags: ["OSRS", "Economy", "PvM", "Raids", "Nightmare Dungeons"],
-  image_url: null,
+  image_url: "https://rune-t.b-cdn.net/serverData/srv_icon_6a41677ece3ed7.64542083.png",
   banner_url: MYTHOS_BANNER_URL,
   features: "All 23 skills, all three raids, Nightmare Dungeons, boons, corrupted pets, global bosses, and weekly updates.",
   custom_content: "Nightmare Dungeons, boons, perks, corrupted pet variants, and enchantments.",
