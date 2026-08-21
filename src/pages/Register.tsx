@@ -72,7 +72,10 @@ const Register = () => {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { username: normalizeUsername(username) } },
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: { username: normalizeUsername(username) },
+        },
       });
 
       if (authError) throw authError;
