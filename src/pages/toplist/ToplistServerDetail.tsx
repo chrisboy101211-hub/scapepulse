@@ -424,6 +424,7 @@ export default function ToplistServerDetail() {
               </div>
             </div>
           )}
+        </div>
           </main>
           <aside className="hidden xl:block">
             {slotsForPlacement("side-banner").filter((slot) => slot.id === "side-right-1").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} orientation="vertical" className="sticky top-28 h-[600px] w-[160px]" />)}
