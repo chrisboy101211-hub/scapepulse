@@ -25,7 +25,7 @@ export const featuredToplistServer: ToplistServer = {
   rules: null,
   vote_link: null,
   callback_url: null,
-  votes: 2469,
+  votes: 17469,
   monthly_votes: 1477,
   is_premium: true,
   is_top10: true,
