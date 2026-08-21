@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/vote/:sid/:incentive",
+      "destination": "https://xwizxelaczavqkaxmoit.supabase.co/functions/v1/sp-toplist-callback?uid=:incentive&sid=:sid"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

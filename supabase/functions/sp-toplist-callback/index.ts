@@ -71,6 +71,7 @@ Deno.serve(async (req) => {
     // ── Extract uid from GET params or POST body ───────────────────────────────
     const url = new URL(req.url);
     let uid = url.searchParams.get("uid") ?? "";
+    const sid = url.searchParams.get("sid");
 
     if (!uid && req.method === "POST") {
       const ct = req.headers.get("content-type") ?? "";
@@ -93,6 +94,12 @@ Deno.serve(async (req) => {
       .single();
 
     if (voteErr || !vote) return err("Vote not found", 404);
+
+    // The public ScapePulse callback URL includes the server ID. Verify that
+    // it matches the vote key before confirming or forwarding a reward.
+    if (sid && (!/^\d+$/.test(sid) || Number(sid) !== vote.server_id)) {
+      return err("Vote does not belong to this server", 400);
+    }
 
     // Idempotent — already confirmed
     if (vote.callback_date !== null) {
