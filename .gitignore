@@ -23,6 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+.env
+.env.*
 *.sql
 !sql/
 ./memories
@@ -31,3 +33,4 @@ api/
 
 # Java plugin
 java-code/
+.env*

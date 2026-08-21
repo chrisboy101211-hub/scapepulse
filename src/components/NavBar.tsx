@@ -4,6 +4,7 @@ import { Logo } from "@/components/Logo"
 import { useState, useEffect, useRef } from "react"
 import { useAuth } from "@/lib/auth"
 import { BarChart3 } from "lucide-react"
+import { AuthDropdown } from "@/components/AuthDropdown"
 
 const navItems = [
   { href: "/docs", label: "Docs" },
@@ -58,14 +59,14 @@ const NavBar = () => {
             Discord
           </a>
 
-          {/* Toplist - Purple */}
+          {/* StoreFront - Purple */}
           <Link
-            to="/toplist"
+            to="/storefront"
             className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium text-purple-500 hover:bg-purple-500/10 transition-all"
           >
             <BarChart3 className="w-3.5 h-3.5" />
-            Toplist
-            {activePill.startsWith("/toplist") && (
+            StoreFront
+            {activePill.startsWith("/storefront") && (
               <div
                 ref={pillRef}
                 className="absolute inset-0 rounded-full bg-purple-500/20 border border-purple-500/30 -z-10"
@@ -127,12 +128,18 @@ const NavBar = () => {
             </>
           ) : (
             <>
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/login">Login</Link>
-              </Button>
-              <Button variant="hero" size="sm" asChild>
-                <Link to="/register">Get Started</Link>
-              </Button>
+              <AuthDropdown
+                defaultView="login"
+                trigger={
+                  <Button variant="outline" size="sm">Login</Button>
+                }
+              />
+              <AuthDropdown
+                defaultView="register"
+                trigger={
+                  <Button variant="hero" size="sm">Get Started</Button>
+                }
+              />
             </>
           )}
         </div>

@@ -47,14 +47,14 @@ const DashboardNavBar = () => {
             Discord
           </a>
 
-          {/* Toplist - Purple */}
+          {/* StoreFront - Purple */}
           <Link
-            to="/toplist"
+            to="/storefront"
             className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium text-purple-500 hover:bg-purple-500/10 transition-all"
           >
             <BarChart3 className="w-3.5 h-3.5" />
-            Toplist
-            {activePill.startsWith("/toplist") && (
+            StoreFront
+            {activePill.startsWith("/storefront") && (
               <div
                 ref={pillRef}
                 className="absolute inset-0 rounded-full bg-purple-500/20 border border-purple-500/30 -z-10"
