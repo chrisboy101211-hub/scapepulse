@@ -14,6 +14,10 @@ export default function ToplistVote() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [pillLogoUrl, setPillLogoUrl] = useState<string | null>(null)
   const [isPremium, setIsPremium] = useState(false)
+  const [username, setUsername] = useState("")
+  const [submitting, setSubmitting] = useState(false)
+  const [voteError, setVoteError] = useState("")
+  const [voteSuccess, setVoteSuccess] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -34,10 +38,23 @@ export default function ToplistVote() {
       .finally(() => setLoading(false))
   }, [id])
 
-  const handleVote = () => {
+  const handleVote = async () => {
     if (!server) return
-    const voteTarget = server.vote_link || server.website
-    window.open(voteTarget, "_blank", "noopener,noreferrer")
+    if (!username.trim()) {
+      setVoteError("Enter your in-game username to vote.")
+      return
+    }
+
+    setSubmitting(true)
+    setVoteError("")
+    try {
+      await toplistDataService.submitVote(server.id, username)
+      setVoteSuccess(true)
+    } catch (error: any) {
+      setVoteError(error?.message || "Vote could not be recorded.")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (loading) {
@@ -94,20 +111,34 @@ export default function ToplistVote() {
             </div>
           </div>
 
-          <p className="text-gray-400 mb-8 text-center">
-            Clicking Vote Now will take you to the vote page. Your vote will be confirmed automatically once complete.
+          <p className="text-gray-400 mb-5 text-center">
+            Enter your in-game username, then confirm your vote. Your server reward is sent after approval.
           </p>
+
+          <label className="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-400">In-game username</label>
+          <input
+            value={username}
+            onChange={(event) => { setUsername(event.target.value); setVoteError("") }}
+            disabled={submitting || voteSuccess}
+            maxLength={64}
+            placeholder="Your character name"
+            className="mb-3 w-full border border-white/15 bg-black/25 px-4 py-3 text-center text-sm text-white outline-none placeholder:text-gray-500 focus:border-violet-400"
+          />
+
+          {voteError && <p className="mb-3 text-center text-sm text-red-300">{voteError}</p>}
+          {voteSuccess && <p className="mb-3 text-center text-sm text-emerald-300">Vote confirmed. Your server callback has been notified.</p>}
 
           <button
             onClick={handleVote}
-            className="w-full py-4 text-lg font-bold text-white rounded-xl shadow-lg transition-all"
+            disabled={submitting || voteSuccess}
+            className="w-full py-4 text-lg font-bold text-white rounded-xl shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-60"
             style={{ backgroundColor: accentColor }}
           >
-            🗳️ Vote Now
+            {submitting ? "Confirming vote…" : voteSuccess ? "Vote Confirmed" : "🗳️ Vote Now"}
           </button>
 
           <p className="mt-4 text-xs text-gray-500 text-center">
-            You can vote once every 12 hours. In-game rewards are granted automatically after your vote is confirmed.
+            You can vote once every 12 hours. In-game rewards are granted after your vote is confirmed.
           </p>
 
           <div className="mt-6 flex items-center justify-between text-sm text-gray-400">

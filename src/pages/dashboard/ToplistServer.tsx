@@ -198,6 +198,10 @@ export default function DashboardToplistServer() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!server) return
+    if (!form.callback_url.trim()) {
+      setError("A vote callback URL is required so ScapePulse can deliver in-game rewards.")
+      return
+    }
     setSaving(true); setError(""); setSaved(false)
     try {
       await toplistDataService.updateServer(server.id, {
@@ -307,8 +311,8 @@ export default function DashboardToplistServer() {
               className={`w-full max-w-sm ${inputCls}`} />
           </Row>
 
-          <Row label="Url Callback" hint="ScapePulse POSTs uid=<key>&voter_name=<player> here after each confirmed vote.">
-            <input type="url" name="callback_url" value={form.callback_url} onChange={set}
+          <Row label="Vote Callback URL" required hint="ScapePulse sends uid=<key> and voter_name=<player> here after each confirmed vote.">
+            <input type="url" name="callback_url" required value={form.callback_url} onChange={set}
               placeholder="https://yourserver.com/vote/callback.php"
               className={`w-full max-w-sm ${inputCls}`} />
           </Row>
