@@ -1,9 +1,24 @@
+import { useEffect, useState } from "react"
 import { MessageCircle, Play, Star } from "lucide-react"
 import { Link } from "react-router-dom"
-import { featuredToplistServer } from "@/lib/featured-toplist-server"
+import { toplistDataService, type ToplistServer } from "@/lib/toplist-data"
+
+function useFeaturedServer() {
+  const [server, setServer] = useState<ToplistServer | null>(null)
+
+  useEffect(() => {
+    toplistDataService.getServer(158).then(setServer).catch(() => setServer(null))
+  }, [])
+
+  return server
+}
 
 export function ServerOfTheDayWidget() {
-  const server = featuredToplistServer
+  const server = useFeaturedServer()
+
+  if (!server) {
+    return <section className="min-h-[248px] animate-pulse border border-border/70 bg-card/70" aria-label="Loading server of the day" />
+  }
 
   return (
     <section className="flex min-h-[248px] flex-col border border-border/70 bg-card/70 p-3 shadow-lg shadow-black/10">
@@ -32,7 +47,9 @@ export function ServerOfTheDayWidget() {
 }
 
 export function ServerOfTheMonth() {
-  const server = featuredToplistServer
+  const server = useFeaturedServer()
+
+  if (!server) return null
 
   return (
     <section className="w-full max-w-[728px] border border-slate-300/60 bg-slate-200/[0.06] p-2 shadow-[0_0_18px_rgba(203,213,225,0.2)]">

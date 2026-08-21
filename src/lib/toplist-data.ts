@@ -1,5 +1,4 @@
 import { supabase } from "./supabase"
-import { featuredToplistServer } from "./featured-toplist-server"
 
 export interface ToplistServer {
   id: number
@@ -86,18 +85,13 @@ export const toplistDataService = {
     const page = filters?.page || 1
     const limit = filters?.limit || 35
     const offset = (page - 1) * limit
-    const featuredMatchesFilters =
-      (!filters?.search || `${featuredToplistServer.name} ${featuredToplistServer.description}`.toLowerCase().includes(filters.search.toLowerCase())) &&
-      (!filters?.revision || featuredToplistServer.revision === filters.revision) &&
-      (!filters?.serverType || featuredToplistServer.server_type === filters.serverType)
-    const databaseOffset = page === 1 || !featuredMatchesFilters ? offset : offset - 1
 
     let query = supabase
       .from("toplist_servers")
       .select("*", { count: "exact" })
       .eq("is_active", true)
       .order("votes", { ascending: false })
-      .range(databaseOffset, databaseOffset + limit - 1)
+      .range(offset, offset + limit - 1)
 
     if (filters?.search) {
       query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
@@ -112,14 +106,8 @@ export const toplistDataService = {
     const { data, error, count } = await query
     if (error) throw error
 
-    const databaseServers = (data || []) as ToplistServer[]
-    // Mythos remains the first actual toplist entry until its database record
-    // is present, rather than being shown in a separate Top 1 panel.
-    const databaseAlreadyContainsFeatured = databaseServers.some((server) => server.id === featuredToplistServer.id)
-    const servers = page === 1 && featuredMatchesFilters
-      ? [featuredToplistServer, ...databaseServers.filter((server) => server.id !== featuredToplistServer.id)].slice(0, limit)
-      : databaseServers.filter((server) => server.id !== featuredToplistServer.id)
-    const totalCount = Math.max((count || 0) + (!databaseAlreadyContainsFeatured && featuredMatchesFilters ? 1 : 0), servers.length)
+    const servers = (data || []) as ToplistServer[]
+    const totalCount = count || 0
 
     return {
       servers,
@@ -140,10 +128,7 @@ export const toplistDataService = {
       .eq("is_top10", true)
       .order("votes", { ascending: false })
       .limit(10)
-    // Keep the first ScapePulse listing visible even before the remote database
-    // is seeded, and do not duplicate it after it is added there.
-    const databaseServers = error ? [] : (data || []) as ToplistServer[]
-    return [featuredToplistServer, ...databaseServers.filter((server) => server.id !== featuredToplistServer.id)].slice(0, 10)
+    return error ? [] : (data || []) as ToplistServer[]
   },
 
   async getMostVotedServers(limit = 5) {
@@ -154,10 +139,7 @@ export const toplistDataService = {
       .order("votes", { ascending: false })
       .limit(limit)
 
-    const databaseServers = error ? [] : (data || []) as ToplistServer[]
-    return [featuredToplistServer, ...databaseServers.filter((server) => server.id !== featuredToplistServer.id)]
-      .sort((a, b) => b.votes - a.votes)
-      .slice(0, limit)
+    return error ? [] : (data || []) as ToplistServer[]
   },
 
   async getNewestServers(limit = 5) {
@@ -168,19 +150,15 @@ export const toplistDataService = {
       .order("created_at", { ascending: false })
       .limit(limit)
 
-    const databaseServers = error ? [] : (data || []) as ToplistServer[]
-    return [featuredToplistServer, ...databaseServers.filter((server) => server.id !== featuredToplistServer.id)]
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, limit)
+    return error ? [] : (data || []) as ToplistServer[]
   },
 
   async getServer(id: number) {
-    if (id === featuredToplistServer.id) return featuredToplistServer
     const { data, error } = await supabase
       .from("toplist_servers")
       .select("*")
       .eq("id", id)
-      .single()
+      .maybeSingle()
     if (error) return null
     return data as ToplistServer
   },
@@ -329,7 +307,6 @@ export const toplistDataService = {
       .eq("is_active", true)
       .eq("sponsored", true)
       .limit(10)
-    const databaseServers = (data as ToplistServer[]) || []
-    return [featuredToplistServer, ...databaseServers.filter((server) => server.id !== featuredToplistServer.id)]
+    return (data as ToplistServer[]) || []
   },
 }

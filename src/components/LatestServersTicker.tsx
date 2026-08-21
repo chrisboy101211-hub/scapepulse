@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { LoaderCircle } from "lucide-react"
-import { featuredToplistServer } from "@/lib/featured-toplist-server"
 import { toplistDataService, type ToplistServer } from "@/lib/toplist-data"
 
 export function LatestServersTicker() {
-  const [servers, setServers] = useState<ToplistServer[]>([featuredToplistServer])
+  const [servers, setServers] = useState<ToplistServer[]>([])
 
   useEffect(() => {
     let mounted = true
