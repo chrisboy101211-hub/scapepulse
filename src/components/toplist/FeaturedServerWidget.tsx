@@ -6,7 +6,7 @@ export function ServerOfTheDayWidget() {
   const server = featuredToplistServer
 
   return (
-    <section className="border border-border/70 bg-card/70 p-3 shadow-lg shadow-black/10">
+    <section className="flex min-h-[216px] flex-col border border-border/70 bg-card/70 p-3 shadow-lg shadow-black/10">
       <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-cyan-200">
         <Star className="h-3.5 w-3.5 fill-current" /> Server of the day
       </div>
@@ -19,7 +19,7 @@ export function ServerOfTheDayWidget() {
           <p className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-muted-foreground">{server.short_description || server.description}</p>
         </div>
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-1.5">
+      <div className="mt-auto grid grid-cols-2 gap-1.5 pt-3">
         <Link to={`/toplist/servers/${server.id}`} className="inline-flex items-center justify-center gap-1 border border-primary/40 bg-primary/10 px-2 py-1.5 text-[10px] font-bold text-primary transition-colors hover:bg-primary/20">
           <Play className="h-3 w-3 fill-current" /> Play now
         </Link>

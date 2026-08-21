@@ -1,15 +1,13 @@
 import { Link, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Logo } from "@/components/Logo"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "@/lib/auth"
-import { BarChart3 } from "lucide-react"
 
 const DashboardNavBar = () => {
   const location = useLocation()
   const { user } = useAuth()
   const [activePill, setActivePill] = useState("/toplist")
-  const pillRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setActivePill(location.pathname)
@@ -46,21 +44,6 @@ const DashboardNavBar = () => {
             </svg>
             Discord
           </a>
-
-          {/* Storefronts - Purple */}
-          <Link
-            to="/storefront"
-            className="relative flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium text-purple-500 hover:bg-purple-500/10 transition-all"
-          >
-            <BarChart3 className="w-3.5 h-3.5" />
-            Storefronts
-            {activePill.startsWith("/storefront") && (
-              <div
-                ref={pillRef}
-                className="absolute inset-0 rounded-full bg-purple-500/20 border border-purple-500/30 -z-10"
-              />
-            )}
-          </Link>
 
           {/* Video Hub - Red */}
           <Link

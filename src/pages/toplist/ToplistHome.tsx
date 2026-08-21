@@ -10,6 +10,7 @@ import { Logo } from "@/components/Logo"
 import { AdvertisementSlot } from "@/components/toplist/AdvertisementSlot"
 import { ToplistSidePanel } from "@/components/toplist/ToplistSidePanel"
 import { ServerOfTheDayWidget, ServerOfTheMonth } from "@/components/toplist/FeaturedServerWidget"
+import { ToplistStatsWidget } from "@/components/toplist/ToplistStatsWidget"
 import { slotsForPlacement } from "@/lib/advertising"
 
 export default function ToplistHome() {
@@ -65,12 +66,15 @@ export default function ToplistHome() {
 
         {/* Server discovery panels fill the space alongside sponsored placements. */}
         <div className="mb-8 grid items-center gap-6 xl:grid-cols-[200px_minmax(0,1fr)_200px]">
-          <ToplistSidePanel kind="votes" />
+          <div className="space-y-3 xl:border-r xl:border-primary/25 xl:pr-6">
+            <ToplistSidePanel kind="votes" />
+            <ToplistStatsWidget />
+          </div>
           <div className="space-y-3">
             <h2 className="font-display text-lg font-bold">Top 5 Sponsored</h2>
             {slotsForPlacement("sponsored").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} variant="sponsored" className="mx-auto h-auto w-full max-w-[728px] aspect-[728/90]" />)}
           </div>
-          <div className="space-y-3">
+          <div className="space-y-3 xl:border-l xl:border-primary/25 xl:pl-6">
             <ToplistSidePanel kind="newest" />
             <ServerOfTheDayWidget />
           </div>
@@ -80,7 +84,6 @@ export default function ToplistHome() {
           <div className="h-px flex-1 bg-gradient-to-r from-transparent to-primary/45" />
           <div className="flex items-center gap-2 border border-primary/35 bg-primary/10 px-4 py-2 text-sm font-bold uppercase tracking-[0.16em] text-primary">
             <ListOrdered className="h-4 w-4" /> Toplist
-            <span className="text-[10px] font-medium tracking-[0.1em] text-muted-foreground">Rankings begin</span>
           </div>
           <div className="h-px flex-1 bg-gradient-to-l from-transparent to-primary/45" />
         </div>
