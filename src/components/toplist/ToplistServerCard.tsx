@@ -16,6 +16,11 @@ export function ToplistServerCard({ server, rank, onVote }: ToplistServerCardPro
 
   const isPremium = server.is_premium
   const isSponsored = server.is_sponsor
+  const bannerFrameClass = isSponsored
+    ? "border-violet-400/85 shadow-[0_0_16px_rgba(167,139,250,0.45)]"
+    : isPremium
+    ? "border-amber-400/85 shadow-[0_0_16px_rgba(251,191,36,0.4)]"
+    : "border-black bg-black shadow-none"
 
   const handleVote = () => {
     window.location.href = `/toplist/vote/${server.id}`
@@ -97,9 +102,9 @@ export function ToplistServerCard({ server, rank, onVote }: ToplistServerCardPro
             </p>
 
             {server.banner_url && (
-              <div className="mb-2 w-full max-w-[600px] h-[80px] rounded-lg border border-border/30 overflow-hidden bg-muted/20">
+              <div className={`mb-2 w-full max-w-[600px] h-[80px] overflow-hidden rounded-lg border-2 ${bannerFrameClass}`}>
                 <img src={server.banner_url} alt={`${server.name} banner`}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform"
+                  className="h-full w-full object-cover"
                   onError={(e) => { e.currentTarget.style.display = "none" }} />
               </div>
             )}
