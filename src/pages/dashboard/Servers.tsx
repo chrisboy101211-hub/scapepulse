@@ -13,13 +13,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { Plus, ExternalLink, Globe, Users, Loader2, Eye, EyeOff, RefreshCw, Gamepad2, Trash2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
@@ -43,7 +36,6 @@ const Servers = () => {
   const [regenerating, setRegenerating] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: "",
-    game_type: "rsps" as "rsps" | "minecraft",
     description: "",
   })
   const navigate = useNavigate()
@@ -85,7 +77,7 @@ const Servers = () => {
       await dataService.createServer({
         name: formData.name,
         slug: slug,
-        game_type: formData.game_type,
+        game_type: "rsps",
         description: formData.description,
         subdomain: subdomain,
         api_key: `sk_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 5)}`,
@@ -95,7 +87,7 @@ const Servers = () => {
       })
       toast.success("Server created!")
       setDialogOpen(false)
-      setFormData({ name: "", game_type: "rsps", description: "" })
+      setFormData({ name: "", description: "" })
       loadServers()
     } catch (error: any) {
       toast.error(error.message || "Failed to create server")
@@ -184,17 +176,8 @@ const Servers = () => {
                   </div>
                 </div>
               )}
-              <div className="space-y-2">
-                <Label>Game Type</Label>
-                <Select value={formData.game_type} onValueChange={(v: "rsps" | "minecraft") => setFormData({ ...formData, game_type: v })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="rsps">RuneScape</SelectItem>
-                    <SelectItem value="minecraft">Minecraft</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-muted-foreground">
+                Platform: <span className="font-medium text-foreground">RuneScape Private Server</span>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
@@ -238,7 +221,7 @@ const Servers = () => {
                         <h3 className="font-display text-lg font-semibold">{server.name}</h3>
                         <span className="rounded-md bg-secondary px-2 py-0.5 text-xs uppercase text-secondary-foreground flex items-center gap-1">
                           <Gamepad2 className="h-3 w-3" />
-                          {server.game_type === "rsps" ? "RuneScape" : "Minecraft"}
+                          RuneScape
                         </span>
                       </div>
                       <Button 

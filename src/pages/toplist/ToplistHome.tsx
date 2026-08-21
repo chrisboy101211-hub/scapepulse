@@ -1,4 +1,6 @@
 import { useState } from "react"
+import { Link } from "react-router-dom"
+import { ListOrdered, ShoppingBag } from "lucide-react"
 import { ToplistHeader } from "@/components/toplist/ToplistHeader"
 import { ToplistFooter } from "@/components/toplist/ToplistFooter"
 import { ServerList } from "@/components/toplist/ServerList"
@@ -27,6 +29,26 @@ export default function ToplistHome() {
             The premier RuneScape Private Server community toplist
           </p>
         </div>
+
+        <section className="mb-8 overflow-hidden rounded-2xl border border-border/60 bg-card/55 shadow-lg shadow-black/10 backdrop-blur-sm">
+          <div className="grid gap-6 px-6 py-7 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:px-9">
+            <div className="max-w-3xl">
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.2em] text-primary">Welcome to ScapePulse</p>
+              <h1 className="font-display text-2xl font-bold text-foreground md:text-3xl">What is ScapePulse?</h1>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground md:text-base">
+                ScapePulse is all-in-one RSPS software for discovering servers through the Toplist, sharing content in the Video Hub, and running server storefronts.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 md:flex-col md:items-stretch">
+              <Link to="/storefront" className="inline-flex items-center justify-center gap-2 rounded-lg border border-violet-400/30 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-200 transition-colors hover:bg-violet-500/20">
+                <ShoppingBag className="h-4 w-4" /> Marketplace
+              </Link>
+              <Link to="/toplist" className="inline-flex items-center justify-center gap-2 rounded-lg border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20">
+                <ListOrdered className="h-4 w-4" /> Toplist
+              </Link>
+            </div>
+          </div>
+        </section>
 
         {/* Three monthly banner placements above the toplist. */}
         <div className="mb-8 grid justify-items-center gap-3 md:grid-cols-3">
