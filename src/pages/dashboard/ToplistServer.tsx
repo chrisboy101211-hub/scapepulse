@@ -1,21 +1,10 @@
 import { useState, useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import { toplistDataService, type ToplistServer } from "@/lib/toplist-data"
-import { supabase } from "@/lib/supabase"
+import { uploadToplistImage } from "@/lib/toplist-storage"
 import { useAuth } from "@/lib/auth"
 import { RichTextEditor } from "@/components/RichTextEditor"
 import { ExternalLink, Trophy } from "lucide-react"
-
-const BUCKET = "server-banners"
-
-async function uploadToStorage(file: File, userId: string, slot: "icon" | "banner"): Promise<string> {
-  const ext = file.name.split(".").pop() ?? "png"
-  const path = `${userId}/${slot}-${Date.now()}.${ext}`
-  const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true })
-  if (error) throw new Error(error.message)
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
-  return data.publicUrl
-}
 
 const REVISION_OPTIONS = ["OSRS", "RS2", "RS3 (EOC)", "Custom/Modified", "Pre-EOC", "Legacy"]
 const SERVER_TYPE_OPTIONS = ["Economy", "PvP", "PvM", "Skilling", "Custom", "Hardcore", "Ironman", "HCIM", "Spawn", "Hybrid", "Pure", "Max", "Completionist"]
@@ -387,7 +376,7 @@ export default function DashboardToplistServer() {
               preview={form.image_url}
               onUpload={async (file) => {
                 if (!user) throw new Error("Not logged in")
-                const url = await uploadToStorage(file, user.id, "icon")
+                const url = await uploadToplistImage(file, user.id, "icon")
                 setForm((p) => ({ ...p, image_url: url }))
               }}
               onClear={() => setForm((p) => ({ ...p, image_url: "" }))}
@@ -400,7 +389,7 @@ export default function DashboardToplistServer() {
               preview={form.banner_url}
               onUpload={async (file) => {
                 if (!user) throw new Error("Not logged in")
-                const url = await uploadToStorage(file, user.id, "banner")
+                const url = await uploadToplistImage(file, user.id, "banner")
                 setForm((p) => ({ ...p, banner_url: url }))
               }}
               onClear={() => setForm((p) => ({ ...p, banner_url: "" }))}

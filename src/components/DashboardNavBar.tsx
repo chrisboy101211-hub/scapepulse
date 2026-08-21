@@ -16,7 +16,7 @@ const DashboardNavBar = () => {
   }, [location.pathname])
 
   return (
-    <nav className="h-16 border-b border-border/50 bg-background/95 backdrop-blur-sm">
+    <nav className="sticky top-0 z-[100] h-16 border-b border-border/50 bg-background/95 backdrop-blur-sm">
       <div className="container mx-auto flex h-full items-center justify-between px-6">
         <Link to="/" className="flex items-center gap-2">
           <Logo size="sm" />
