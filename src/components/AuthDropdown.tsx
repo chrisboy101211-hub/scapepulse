@@ -105,7 +105,7 @@ function LoginForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess: (
           <Input
             id="dd-username"
             autoComplete="username"
-            placeholder="your_username"
+            placeholder="your username"
             value={username}
             onChange={(e) => setUsername(e.target.value.toLowerCase())}
             className="bg-background border-border h-9 text-sm"
@@ -246,7 +246,7 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
           <Input
             id="dd-reg-username"
             autoComplete="username"
-            placeholder="your_username"
+            placeholder="your username"
             value={username}
             onChange={(e) => setUsername(e.target.value.toLowerCase())}
             className="bg-background border-border h-9 text-sm"

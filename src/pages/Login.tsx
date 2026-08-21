@@ -54,7 +54,7 @@ const Login = () => {
             <Input
               id="username"
               autoComplete="username"
-              placeholder="your_username"
+              placeholder="your username"
               value={username}
               onChange={(e) => setUsername(e.target.value.toLowerCase())}
               className="bg-card border-border"

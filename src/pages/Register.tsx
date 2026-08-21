@@ -135,7 +135,7 @@ const Register = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="username">Username</Label>
-            <Input id="username" autoComplete="username" placeholder="your_username" value={username} onChange={(e) => setUsername(e.target.value.toLowerCase())} className="bg-card border-border" />
+            <Input id="username" autoComplete="username" placeholder="your username" value={username} onChange={(e) => setUsername(e.target.value.toLowerCase())} className="bg-card border-border" />
             <p className="text-xs text-muted-foreground">Used to sign in and shown on your ScapePulse profile.</p>
           </div>
           <div className="space-y-2">
