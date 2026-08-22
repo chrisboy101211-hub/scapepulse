@@ -254,6 +254,8 @@ export const videoHubService = {
   },
 
   async likeVideo(videoId: string, userId: string, type: "LIKE" | "DISLIKE") {
+    if (!userId) throw new Error("Sign in to react to videos")
+
     // Check existing vote
     const { data: existing } = await supabase
       .from("video_likes")
@@ -271,31 +273,25 @@ export const videoHubService = {
 
     if (!video) throw new Error("Video not found")
 
-    let likes = video.likes
-    let dislikes = video.dislikes
-    let newVote: "LIKE" | "DISLIKE" | null = type
-
+    // A member gets one permanent reaction per video. This also prevents a
+    // second click from toggling a reaction off or changing it to the other type.
     if (existing) {
-      if (existing.type === type) {
-        // Toggle off
-        await supabase.from("video_likes").delete().eq("id", existing.id)
-        if (type === "LIKE") likes = Math.max(0, likes - 1)
-        else dislikes = Math.max(0, dislikes - 1)
-        newVote = null
-      } else {
-        // Switch vote
-        await supabase.from("video_likes").update({ type }).eq("id", existing.id)
-        if (type === "LIKE") { likes++; dislikes = Math.max(0, dislikes - 1) }
-        else { dislikes++; likes = Math.max(0, likes - 1) }
-      }
-    } else {
-      await supabase.from("video_likes").insert({ user_id: userId, video_id: videoId, type })
-      if (type === "LIKE") likes++
-      else dislikes++
+      return { likes: video.likes, dislikes: video.dislikes, userVote: existing.type as "LIKE" | "DISLIKE" }
     }
 
-    await supabase.from("videos").update({ likes, dislikes }).eq("id", videoId)
+    let likes = video.likes
+    let dislikes = video.dislikes
+    const { error: reactionError } = await supabase
+      .from("video_likes")
+      .insert({ user_id: userId, video_id: videoId, type })
+    if (reactionError) throw reactionError
 
-    return { likes, dislikes, userVote: newVote }
+    if (type === "LIKE") likes++
+    else dislikes++
+
+    const { error: countError } = await supabase.from("videos").update({ likes, dislikes }).eq("id", videoId)
+    if (countError) throw countError
+
+    return { likes, dislikes, userVote: type }
   },
 }
