@@ -1,18 +1,12 @@
-import { useState } from "react"
 import { Link } from "react-router-dom"
-import { useAuth } from "@/lib/auth"
-import { toplistDataService, type ToplistServer } from "@/lib/toplist-data"
+import { type ToplistServer } from "@/lib/toplist-data"
 
 interface ToplistServerCardProps {
   server: ToplistServer
   rank: number
-  onVote: () => void
 }
 
-export function ToplistServerCard({ server, rank, onVote }: ToplistServerCardProps) {
-  const { user } = useAuth()
-  const [bumpLoading, setBumpLoading] = useState(false)
-  const [bumpMessage, setBumpMessage] = useState("")
+export function ToplistServerCard({ server, rank }: ToplistServerCardProps) {
 
   const isPremium = server.is_premium
   const isSponsored = server.is_sponsor
@@ -24,21 +18,6 @@ export function ToplistServerCard({ server, rank, onVote }: ToplistServerCardPro
 
   const handleVote = () => {
     window.location.href = `/toplist/vote/${server.id}`
-  }
-
-  const handleBump = async () => {
-    setBumpLoading(true)
-    setBumpMessage("")
-    try {
-      await toplistDataService.bumpServer(server.id, user?.id)
-      setBumpMessage("Server bumped!")
-      onVote()
-    } catch {
-      setBumpMessage("Could not bump server")
-    } finally {
-      setBumpLoading(false)
-      setTimeout(() => setBumpMessage(""), 3000)
-    }
   }
 
   const parseTags = (tags: string[] | string): string[] => {
@@ -114,7 +93,7 @@ export function ToplistServerCard({ server, rank, onVote }: ToplistServerCardPro
           <div className="flex-shrink-0 flex flex-col items-end space-y-2 ml-4">
             <div className="flex items-center space-x-2">
               <Link to={`/toplist/servers/${server.id}`}
-                className="px-3 py-1.5 text-sm border border-border/50 rounded-md hover:bg-muted/50 transition-colors text-foreground">
+                className="px-3 py-1.5 text-sm bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 rounded-md transition-colors">
                 ℹ️ Info
               </Link>
               {server.discord_invite && (
@@ -123,22 +102,12 @@ export function ToplistServerCard({ server, rank, onVote }: ToplistServerCardPro
                   💬 Discord
                 </a>
               )}
-              <button onClick={handleBump} disabled={bumpLoading}
-                className="px-3 py-1.5 text-sm bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 border border-orange-500/30 rounded-md transition-colors disabled:opacity-50">
-                {bumpLoading ? "..." : "Bump"}
-              </button>
             </div>
 
             <button onClick={handleVote}
-              className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold px-8 py-3 text-lg min-w-[140px] rounded-md shadow-lg shadow-green-500/20 border border-green-500/30 transition-all">
+              className="bg-gradient-to-r from-violet-800 to-purple-950 hover:from-violet-700 hover:to-purple-900 text-white font-bold px-8 py-3 text-lg min-w-[140px] rounded-md shadow-lg shadow-violet-950/40 border border-violet-500/35 transition-all">
               🗳️ {server.votes.toLocaleString()} Votes
             </button>
-
-            {bumpMessage && (
-              <div className="text-xs text-center px-2 py-1 rounded bg-muted/80 border border-border/50">
-                {bumpMessage}
-              </div>
-            )}
           </div>
         </div>
       </div>

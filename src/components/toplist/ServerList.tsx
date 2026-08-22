@@ -79,7 +79,6 @@ export function ServerList({ filters }: ServerListProps) {
             key={server.id}
             server={server}
             rank={index + 1 + (pagination.page - 1) * pagination.limit}
-            onVote={() => fetchServers(pagination.page)}
           />
         ))}
       </div>
