@@ -3,20 +3,11 @@ import {
   LayoutDashboard,
   Server,
   ShoppingCart,
-  FolderOpen,
-  Receipt,
-  Vote,
   Key,
-  Settings,
   LogOut,
   Trophy,
   ChevronDown,
   ChevronRight,
-  CreditCard,
-  ArrowLeftRight,
-  Users,
-  Tag,
-  Crown,
   BarChart3,
   ThumbsUp,
   Clapperboard,
@@ -47,27 +38,6 @@ import { Button } from "@/components/ui/button";
 const mainItems = [
   { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
   { title: "Servers", url: "/dashboard/servers", icon: Server },
-];
-
-const webstoreItems = [
-  { title: "Products", url: "/dashboard/products", icon: ShoppingCart },
-  { title: "Categories", url: "/dashboard/categories", icon: FolderOpen },
-  { title: "Discounts", url: "/dashboard/discounts", icon: Tag, comingSoon: true },
-  { title: "Loyalty Points", url: "/dashboard/loyalty", icon: Crown, comingSoon: true },
-  { title: "Transactions", url: "/dashboard/transactions", icon: ArrowLeftRight },
-  { title: "Payment Methods", url: "/dashboard/payment-methods", icon: CreditCard },
-  { title: "Customers", url: "/dashboard/customers", icon: Users, comingSoon: true },
-  { title: "Orders", url: "/dashboard/orders", icon: Receipt },
-  { title: "Settings", url: "/dashboard/settings", icon: Settings },
-];
-
-const voteItems = [
-  { title: "Votes", url: "/dashboard/votes", icon: Vote },
-  { title: "Settings", url: "/dashboard/vote-settings", icon: Settings, comingSoon: true },
-];
-
-const hiscoresItems = [
-  { title: "Manage Hiscores", url: "/dashboard/hiscores-settings", icon: BarChart3 },
 ];
 
 const toplistItems = [
@@ -156,6 +126,26 @@ function CollapsibleSection({ label, icon: Icon, items, collapsed, defaultOpen =
   );
 }
 
+function ComingSoonSection({ label, icon: Icon, collapsed }: { label: string; icon: React.ElementType; collapsed: boolean }) {
+  return (
+    <SidebarGroup className="p-0">
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton disabled className="w-full cursor-not-allowed rounded-none px-4 py-2 text-sm font-medium text-muted-foreground/60 opacity-100">
+            <Icon className="h-4 w-4 shrink-0" />
+            {!collapsed && (
+              <>
+                <span className="flex-1 text-left">{label}</span>
+                <span className="border border-border/60 bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Coming soon</span>
+              </>
+            )}
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarGroup>
+  )
+}
+
 export function DashboardSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -208,31 +198,22 @@ export function DashboardSidebar() {
           </div>
         )}
 
-        {/* AUTO WEBSTORE */}
-        <CollapsibleSection
+        <ComingSoonSection
           label="Auto Webstore"
           icon={ShoppingCart}
-          items={webstoreItems}
           collapsed={collapsed}
-          defaultOpen={webstoreItems.some((i) => location.pathname === i.url)}
         />
 
-        {/* AUTO VOTE */}
-        <CollapsibleSection
+        <ComingSoonSection
           label="Auto Vote"
           icon={ThumbsUp}
-          items={voteItems}
           collapsed={collapsed}
-          defaultOpen={voteItems.some((i) => location.pathname === i.url)}
         />
 
-        {/* AUTO HISCORES */}
-        <CollapsibleSection
+        <ComingSoonSection
           label="Auto Hiscores"
           icon={Trophy}
-          items={hiscoresItems}
           collapsed={collapsed}
-          defaultOpen={hiscoresItems.some((i) => location.pathname === i.url)}
         />
 
         {/* TOPLIST */}

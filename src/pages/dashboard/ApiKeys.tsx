@@ -93,19 +93,6 @@ private static final String SECRET_KEY = "${selectedServer.api_key}";`}
         </div>
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-6">
-        <h3 className="font-display font-semibold mb-4">API Endpoints</h3>
-        <div className="space-y-3 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Base URL:</span>
-            <code className="text-primary">https://your-project.supabase.co/functions/v1/</code>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Claim endpoint:</span>
-            <code className="text-primary">store-transaction-v3</code>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
