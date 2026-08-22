@@ -23,14 +23,14 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
-.env
-.env.*
+.env*
+guides/
+sql/
 *.sql
-!sql/
+supabase/.temp/
 ./memories
 ./images
 api/
 
 # Java plugin
 java-code/
-.env*
