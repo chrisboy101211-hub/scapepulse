@@ -44,6 +44,7 @@ export default function CallbackSetup() {
   const [testing, setTesting] = useState(false)
   const [result, setResult] = useState<{ delivered: boolean; status?: number; message: string } | null>(null)
   const [copied, setCopied] = useState<"php" | "supabase" | null>(null)
+  const [testUsername, setTestUsername] = useState("")
 
   useEffect(() => {
     if (!user) return
@@ -58,10 +59,15 @@ export default function CallbackSetup() {
 
   const test = async () => {
     if (!server) return
+    const username = testUsername.trim()
+    if (username && !/^[a-zA-Z0-9_ -]{1,64}$/.test(username)) {
+      setResult({ delivered: false, message: "Test username may only contain letters, numbers, spaces, underscores, and hyphens." })
+      return
+    }
     setTesting(true)
     setResult(null)
     try {
-      setResult(await toplistDataService.testCallback(server.id))
+      setResult(await toplistDataService.testCallback(server.id, username))
     } catch (err: any) {
       setResult({ delivered: false, message: err?.message || "The callback test could not be completed." })
     } finally {
@@ -91,7 +97,7 @@ export default function CallbackSetup() {
           <p className="text-sm text-muted-foreground">ScapePulse calls your saved callback URL with <code className="text-foreground">uid</code> and <code className="text-foreground">voter_name</code>. URLs with parameters are supported, such as <code className="break-all text-foreground">https://example.com/api/vote/callback?postback=</code>.</p>
           <details className="group rounded border border-border/50 bg-secondary/10"><summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium text-foreground">PHP callback example <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" /></summary><CodeExample value={phpCallbackExample} copied={copied === "php"} onCopy={() => copy("php", phpCallbackExample)} /></details>
           <details className="group rounded border border-border/50 bg-secondary/10"><summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium text-foreground">Supabase Edge Function example <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" /></summary><CodeExample value={supabaseCallbackExample} copied={copied === "supabase"} onCopy={() => copy("supabase", supabaseCallbackExample)} /></details>
-          <div className="rounded border border-primary/20 bg-primary/5 p-4"><h3 className="text-sm font-semibold text-foreground">Test your saved callback URL</h3><p className="mt-1 text-xs text-muted-foreground">This sends a GET request containing a temporary <code>uid</code> and <code>test=1</code>. It never creates a vote or grants a reward.</p>{!server.callback_url?.trim() ? <p className="mt-3 text-sm text-amber-300">Add a callback URL in <Link className="underline" to="/dashboard/toplist">My Listing</Link>, then save it before testing.</p> : <div className="mt-3 flex flex-wrap items-center gap-3"><button type="button" onClick={test} disabled={testing} className="inline-flex items-center gap-2 rounded bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">{testing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}{testing ? "Testing…" : "Send Test Callback"}</button>{result && <p className={`flex items-center gap-1.5 text-xs ${result.delivered ? "text-emerald-400" : "text-red-300"}`}>{result.delivered ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}{result.message}{result.status ? ` (HTTP ${result.status})` : ""}</p>}</div>}</div>
+          <div className="rounded border border-primary/20 bg-primary/5 p-4"><h3 className="text-sm font-semibold text-foreground">Test your saved callback URL</h3><p className="mt-1 text-xs text-muted-foreground">This sends a GET request containing a temporary <code>uid</code> and <code>test=1</code>. It never creates a vote or grants a reward.</p>{!server.callback_url?.trim() ? <p className="mt-3 text-sm text-amber-300">Add a callback URL in <Link className="underline" to="/dashboard/toplist">My Listing</Link>, then save it before testing.</p> : <div className="mt-3 space-y-3"><div><label htmlFor="test-username" className="mb-1.5 block text-xs font-medium text-foreground">Test username <span className="font-normal text-muted-foreground">(optional)</span></label><input id="test-username" value={testUsername} onChange={(event) => setTestUsername(event.target.value)} maxLength={64} placeholder="PlayerOne" className="w-full max-w-sm rounded border border-border/60 bg-background/70 px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/50 focus:border-primary/70" /><p className="mt-1 text-xs text-muted-foreground">Sent as <code>voter_name</code>. Leave blank to use ScapePulse_Test.</p></div><div className="flex flex-wrap items-center gap-3"><button type="button" onClick={test} disabled={testing} className="inline-flex items-center gap-2 rounded bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50">{testing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}{testing ? "Testing…" : "Send Test Callback"}</button>{result && <p className={`flex items-center gap-1.5 text-xs ${result.delivered ? "text-emerald-400" : "text-red-300"}`}>{result.delivered ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}{result.message}{result.status ? ` (HTTP ${result.status})` : ""}</p>}</div></div>}</div>
         </div>
       </section>
     </div>

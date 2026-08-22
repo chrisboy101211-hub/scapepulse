@@ -46,6 +46,10 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const serverId = Number(body?.server_id);
     if (!Number.isInteger(serverId) || serverId <= 0) return json({ delivered: false, message: "Invalid listing." }, 400);
+    const username = typeof body?.username === "string" ? body.username.trim() : "";
+    if (username && !/^[a-zA-Z0-9_ -]{1,64}$/.test(username)) {
+      return json({ delivered: false, message: "Test username may only contain letters, numbers, spaces, underscores, and hyphens." }, 400);
+    }
 
     const { data: server } = await supabase
       .from("toplist_servers")
@@ -59,7 +63,7 @@ Deno.serve(async (req) => {
 
     const url = new URL(callbackUrl);
     url.searchParams.set("uid", `scapepulse_test_${crypto.randomUUID().replaceAll("-", "")}`);
-    url.searchParams.set("voter_name", "ScapePulse_Test");
+    url.searchParams.set("voter_name", username || "ScapePulse_Test");
     url.searchParams.set("test", "1");
 
     try {

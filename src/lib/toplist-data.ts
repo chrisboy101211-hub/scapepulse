@@ -315,9 +315,9 @@ export const toplistDataService = {
   },
 
   /** Send a harmless, clearly marked test request to the saved listing callback. */
-  async testCallback(serverId: number): Promise<CallbackTestResult> {
+  async testCallback(serverId: number, username?: string): Promise<CallbackTestResult> {
     const { data, error } = await supabase.functions.invoke("sp-toplist-test-callback", {
-      body: { server_id: serverId },
+      body: { server_id: serverId, ...(username?.trim() ? { username: username.trim() } : {}) },
     })
     if (error) throw new Error(error.message || "Unable to test callback")
     if (!data) throw new Error("Unable to test callback")
