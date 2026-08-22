@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useParams, Link } from "react-router-dom"
 import { useNavigate } from "react-router-dom"
 import { ToplistHeader } from "@/components/toplist/ToplistHeader"
@@ -46,6 +46,79 @@ function formatTimeAgo(dateStr: string) {
   const hours = Math.floor(diff / 3600000)
   if (hours > 0) return `${hours}h ago`
   return "Just now"
+}
+
+function isSafeHttpUrl(value: string) {
+  try {
+    const url = new URL(value)
+    return url.protocol === "https:" || url.protocol === "http:"
+  } catch {
+    return false
+  }
+}
+
+function formatListingDescription(html: string) {
+  if (typeof document === "undefined") return html
+
+  const documentPreview = new DOMParser().parseFromString(html, "text/html")
+  documentPreview.querySelectorAll("script, style, iframe, object, embed").forEach((element) => element.remove())
+
+  documentPreview.querySelectorAll<HTMLElement>("*").forEach((element) => {
+    Array.from(element.attributes).forEach((attribute) => {
+      if (attribute.name.startsWith("on") || attribute.name === "srcdoc") element.removeAttribute(attribute.name)
+    })
+  })
+
+  documentPreview.querySelectorAll<HTMLAnchorElement>("a").forEach((anchor) => {
+    const href = anchor.getAttribute("href") || ""
+    const hostname = (() => {
+      try { return new URL(href).hostname } catch { return "" }
+    })()
+    const hasCompleteDomainEnding = /\.(com|net|org|gg|io|co|dev|app|tv|me|info|biz|uk|ca|au)$/i.test(hostname)
+    const nextNode = anchor.nextSibling
+    const continuation = nextNode?.nodeType === Node.TEXT_NODE
+      ? (nextNode.textContent || "").match(/^[A-Za-z0-9._~:/?#[\]@!$&'()*+,;=%-]+/)?.[0]
+      : undefined
+
+    // Some pasted rich text splits a URL into an anchor plus an adjacent text
+    // node (for example, https://www.you + tube.com). Rejoin that URL.
+    if (!hasCompleteDomainEnding && continuation && isSafeHttpUrl(`${href}${continuation}`)) {
+      const fullUrl = `${href}${continuation}`
+      anchor.setAttribute("href", fullUrl)
+      anchor.textContent = fullUrl
+      nextNode!.textContent = (nextNode!.textContent || "").slice(continuation.length)
+    }
+
+    const resolvedHref = anchor.getAttribute("href") || ""
+    if (!isSafeHttpUrl(resolvedHref)) {
+      anchor.removeAttribute("href")
+      return
+    }
+
+    anchor.setAttribute("target", "_blank")
+    anchor.setAttribute("rel", "noopener noreferrer")
+
+    const url = new URL(resolvedHref)
+    const imgurMatch = /^(?:www\.)?imgur\.com$/i.test(url.hostname)
+      ? url.pathname.match(/^\/([A-Za-z0-9]+)\/?$/)
+      : null
+
+    if (imgurMatch) {
+      const image = documentPreview.createElement("img")
+      image.src = `https://i.imgur.com/${imgurMatch[1]}.jpg`
+      image.alt = "Imgur media"
+      image.loading = "lazy"
+      image.className = "listing-imgur-image"
+      anchor.textContent = ""
+      anchor.append(image)
+    }
+  })
+
+  documentPreview.querySelectorAll<HTMLImageElement>("img").forEach((image) => {
+    if (!isSafeHttpUrl(image.getAttribute("src") || "")) image.remove()
+  })
+
+  return documentPreview.body.innerHTML
 }
 
 export default function ToplistServerDetail() {
@@ -102,6 +175,8 @@ export default function ToplistServerDetail() {
     if (Array.isArray(tags)) return tags
     try { return JSON.parse(tags) } catch { return [] }
   }
+
+  const formattedDescription = useMemo(() => formatListingDescription(server?.description || ""), [server?.description])
 
   if (loading) {
     return (
@@ -240,8 +315,8 @@ export default function ToplistServerDetail() {
                 [&_code]:bg-white/10 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:font-mono [&_code]:text-xs
                 [&_pre]:bg-[#1e1e2e] [&_pre]:border [&_pre]:border-white/10 [&_pre]:rounded-lg [&_pre]:p-4 [&_pre]:overflow-x-auto
                 [&_a]:text-primary [&_a]:underline [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5
-                [&_img]:max-w-full [&_img]:rounded [&_img]:my-2"
-              dangerouslySetInnerHTML={{ __html: server.description }}
+                [&_img]:max-w-full [&_img]:rounded [&_img]:my-2 [&_img.listing-imgur-image]:max-h-[500px] [&_img.listing-imgur-image]:max-w-[500px] [&_img.listing-imgur-image]:h-auto [&_img.listing-imgur-image]:w-auto"
+              dangerouslySetInnerHTML={{ __html: formattedDescription }}
             />
             {parseTags(server.tags).length > 0 && (
               <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border/30">
