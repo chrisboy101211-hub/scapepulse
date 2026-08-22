@@ -32,8 +32,8 @@ export function ToplistStatsWidget() {
   const rows = [
     { label: "Servers", value: stats.servers, icon: Server },
     { label: "Votes this month", value: stats.votesThisMonth, icon: CalendarDays },
-    { label: "Total Members", value: stats.members, icon: Users },
     { label: "Overall votes", value: stats.overallVotes, icon: Vote },
+    { label: "Total Members", value: stats.members, icon: Users },
   ]
 
   return (

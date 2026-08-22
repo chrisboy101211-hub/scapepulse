@@ -19,16 +19,10 @@ function SponsoredToplistSlot({ server }: { server: ToplistServer }) {
   return (
     <Link
       to={`/toplist/servers/${server.id}`}
-      className="group relative block aspect-[728/90] w-full max-w-[728px] overflow-hidden border border-violet-400/65 bg-violet-950/25 shadow-[0_0_16px_rgba(167,139,250,0.2)]"
+      className="group relative mx-auto block aspect-[728/90] w-full max-w-[728px] overflow-hidden border border-violet-400/65 bg-violet-950/25 shadow-[0_0_16px_rgba(167,139,250,0.2)]"
       aria-label={`View sponsored server ${server.name}`}
     >
-      {bannerUrl && <img src={bannerUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#100d1b]/85 via-[#100d1b]/35 to-transparent" />
-      <div className="relative flex h-full items-center gap-3 px-4">
-        <span className="border border-violet-300/60 bg-violet-500/25 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-violet-100">Sponsored</span>
-        <span className="truncate font-display text-sm font-bold text-white sm:text-base">{server.name}</span>
-        <span className="ml-auto border border-white/35 bg-black/45 px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-white transition-colors group-hover:bg-black/70">View server</span>
-      </div>
+      <img src={bannerUrl || "/images/ad-slot-placeholder-bg.png"} alt={`${server.name} banner`} className="h-full w-full object-cover" />
     </Link>
   )
 }
