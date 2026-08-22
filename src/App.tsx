@@ -20,6 +20,7 @@ import Settings from "./pages/dashboard/Settings.tsx";
 import HiscoresSettings from "./pages/dashboard/HiscoresSettings.tsx";
 import Transactions from "./pages/dashboard/Transactions.tsx";
 import DashboardToplistServer from "./pages/dashboard/ToplistServer.tsx";
+import CallbackSetup from "./pages/dashboard/CallbackSetup.tsx";
 import VideoHubAnalytics from "./pages/dashboard/VideoHubAnalytics.tsx";
 import StoreFront from "./pages/StoreFront.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -93,6 +94,7 @@ const App = () => (
               <Route path="hiscores-settings" element={<HiscoresSettings />} />
               <Route path="transactions" element={<Transactions />} />
               <Route path="toplist" element={<DashboardToplistServer />} />
+              <Route path="callback-setup" element={<CallbackSetup />} />
               <Route path="video-hub" element={<VideoHubAnalytics />} />
               <Route path="profile" element={<ProfileSettings />} />
               <Route path="payment-methods" element={<PaymentMethods />} />

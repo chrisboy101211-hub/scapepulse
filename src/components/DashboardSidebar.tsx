@@ -13,6 +13,7 @@ import {
   Clapperboard,
   User,
   Palette,
+  Send,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Logo } from "@/components/Logo";
@@ -42,6 +43,7 @@ const mainItems = [
 
 const toplistItems = [
   { title: "My Listing", url: "/dashboard/toplist", icon: Trophy },
+  { title: "Callback Setup", url: "/dashboard/callback-setup", icon: Send },
 ];
 
 const videoHubItems = [
