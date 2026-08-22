@@ -1,6 +1,8 @@
 /**
  * Sends a harmless delivery check to the callback URL saved on the caller's
- * listing. Deploy with: supabase functions deploy sp-toplist-test-callback
+ * listing. Deploy with: supabase functions deploy sp-toplist-test-callback --no-verify-jwt
+ * The handler validates the signed-in caller itself, while allowing CORS
+ * preflight requests to reach the handler.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
