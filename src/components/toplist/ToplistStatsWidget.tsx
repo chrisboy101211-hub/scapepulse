@@ -1,28 +1,28 @@
 import { useEffect, useState } from "react"
-import { CalendarDays, History, Server, Vote } from "lucide-react"
+import { CalendarDays, Server, Users, Vote } from "lucide-react"
 import { toplistDataService } from "@/lib/toplist-data"
 
 type ToplistStats = {
   servers: number
+  members: number
   votesThisMonth: number
-  votesLastMonth: number
   overallVotes: number
 }
 
-const emptyStats: ToplistStats = { servers: 0, votesThisMonth: 0, votesLastMonth: 0, overallVotes: 0 }
+const emptyStats: ToplistStats = { servers: 0, members: 0, votesThisMonth: 0, overallVotes: 0 }
 
 export function ToplistStatsWidget() {
   const [stats, setStats] = useState<ToplistStats>(emptyStats)
 
   useEffect(() => {
-    toplistDataService.getServers({ limit: 100 })
-      .then(({ servers, pagination }) => {
+    Promise.all([toplistDataService.getServers({ limit: 100 }), toplistDataService.getMemberCount()])
+      .then(([{ servers, pagination }, members]) => {
         const votesThisMonth = servers.reduce((total, server) => total + server.monthly_votes, 0)
         const overallVotes = servers.reduce((total, server) => total + server.votes, 0)
         setStats({
           servers: pagination.totalCount,
+          members,
           votesThisMonth,
-          votesLastMonth: Math.max(overallVotes - votesThisMonth, 0),
           overallVotes,
         })
       })
@@ -32,7 +32,7 @@ export function ToplistStatsWidget() {
   const rows = [
     { label: "Servers", value: stats.servers, icon: Server },
     { label: "Votes this month", value: stats.votesThisMonth, icon: CalendarDays },
-    { label: "Votes last month", value: stats.votesLastMonth, icon: History },
+    { label: "Total Members", value: stats.members, icon: Users },
     { label: "Overall votes", value: stats.overallVotes, icon: Vote },
   ]
 

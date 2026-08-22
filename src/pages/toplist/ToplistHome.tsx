@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { ListOrdered, MessageCircle, ShoppingBag } from "lucide-react"
 import { ToplistHeader } from "@/components/toplist/ToplistHeader"
@@ -11,9 +11,35 @@ import { ToplistSidePanel } from "@/components/toplist/ToplistSidePanel"
 import { ServerOfTheDayWidget, ServerOfTheMonth } from "@/components/toplist/FeaturedServerWidget"
 import { ToplistStatsWidget } from "@/components/toplist/ToplistStatsWidget"
 import { slotsForPlacement } from "@/lib/advertising"
+import { toplistDataService, type ToplistServer } from "@/lib/toplist-data"
+
+function SponsoredToplistSlot({ server }: { server: ToplistServer }) {
+  const bannerUrl = server.sponsor_banner_url || server.banner_url
+
+  return (
+    <Link
+      to={`/toplist/servers/${server.id}`}
+      className="group relative block aspect-[728/90] w-full max-w-[728px] overflow-hidden border border-violet-400/65 bg-violet-950/25 shadow-[0_0_16px_rgba(167,139,250,0.2)]"
+      aria-label={`View sponsored server ${server.name}`}
+    >
+      {bannerUrl && <img src={bannerUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#100d1b]/85 via-[#100d1b]/35 to-transparent" />
+      <div className="relative flex h-full items-center gap-3 px-4">
+        <span className="border border-violet-300/60 bg-violet-500/25 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-violet-100">Sponsored</span>
+        <span className="truncate font-display text-sm font-bold text-white sm:text-base">{server.name}</span>
+        <span className="ml-auto border border-white/35 bg-black/45 px-2 py-1 text-[9px] font-bold uppercase tracking-wide text-white transition-colors group-hover:bg-black/70">View server</span>
+      </div>
+    </Link>
+  )
+}
 
 export default function ToplistHome() {
   const [filters, setFilters] = useState({ search: "", revision: "", serverType: "" })
+  const [sponsoredServers, setSponsoredServers] = useState<ToplistServer[]>([])
+
+  useEffect(() => {
+    toplistDataService.getSponsoredServers().then(setSponsoredServers).catch(() => setSponsoredServers([]))
+  }, [])
 
   return (
     <div className="min-h-screen bg-background">
@@ -70,7 +96,12 @@ export default function ToplistHome() {
           </div>
           <div className="space-y-3">
             <h2 className="font-display text-lg font-bold">Top 5 Sponsored</h2>
-            {slotsForPlacement("sponsored").map((slot) => <AdvertisementSlot key={slot.id} slot={slot} variant="sponsored" className="mx-auto h-auto w-full max-w-[728px] aspect-[728/90]" />)}
+            {slotsForPlacement("sponsored").map((slot, index) => {
+              const server = sponsoredServers[index]
+              return server
+                ? <SponsoredToplistSlot key={slot.id} server={server} />
+                : <AdvertisementSlot key={slot.id} slot={slot} variant="sponsored" className="mx-auto h-auto w-full max-w-[728px] aspect-[728/90]" />
+            })}
           </div>
           <div className="space-y-3 xl:border-l xl:border-violet-400/55 xl:pl-6 xl:shadow-[-14px_0_22px_-20px_rgba(167,139,250,0.9)]">
             <ToplistSidePanel kind="newest" />

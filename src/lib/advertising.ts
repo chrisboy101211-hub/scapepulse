@@ -38,9 +38,8 @@ export const advertisementSlots: AdvertisementSlot[] = [
     placement: "sponsored" as const,
     priceUsd: ADVERTISEMENT_PRICES_USD.sponsored,
     cadence: "Monthly" as const,
-    status: position === 1 ? "reserved" as const : "available" as const,
-    availableOn: position === 1 ? "Renews 1 Sep 2026" : "Available now",
-    ...(position === 1 ? { bannerUrl: MYTHOS_BANNER_URL, serverName: "Mythos - OSRS 50 Online !" } : {}),
+    status: "available" as const,
+    availableOn: "Available now",
   })),
   {
     id: "side-left-1",

@@ -153,6 +153,14 @@ export const toplistDataService = {
     return error ? [] : (data || []) as ToplistServer[]
   },
 
+  async getMemberCount() {
+    const { count, error } = await supabase
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+
+    return error ? 0 : count || 0
+  },
+
   async getServer(id: number) {
     const { data, error } = await supabase
       .from("toplist_servers")
@@ -305,8 +313,9 @@ export const toplistDataService = {
       .from("toplist_servers")
       .select("*")
       .eq("is_active", true)
-      .eq("sponsored", true)
-      .limit(10)
+      .or("is_sponsor.eq.true,sponsored.eq.true")
+      .order("votes", { ascending: false })
+      .limit(5)
     return (data as ToplistServer[]) || []
   },
 }
