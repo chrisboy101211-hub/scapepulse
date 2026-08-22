@@ -46,6 +46,12 @@ export interface ToplistVote {
   created_at: string
 }
 
+export interface CallbackTestResult {
+  delivered: boolean
+  status?: number
+  message: string
+}
+
 export interface ToplistReview {
   id: number
   server_id: number
@@ -306,6 +312,16 @@ export const toplistDataService = {
     const data = await res.json()
     if (!res.ok) throw new Error(data?.error || "Vote failed")
     return { newVoteCount: data.newVoteCount }
+  },
+
+  /** Send a harmless, clearly marked test request to the saved listing callback. */
+  async testCallback(serverId: number): Promise<CallbackTestResult> {
+    const { data, error } = await supabase.functions.invoke("sp-toplist-test-callback", {
+      body: { server_id: serverId },
+    })
+    if (error) throw new Error(error.message || "Unable to test callback")
+    if (!data) throw new Error("Unable to test callback")
+    return data as CallbackTestResult
   },
 
   async getSponsoredServers(): Promise<ToplistServer[]> {
